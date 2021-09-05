@@ -1,13 +1,6 @@
 # emvQr
 This repo is for reading and generating EMV QR Code for Singapore, Malaysia, Indonesia, and Thailand.
 
-## Version
-
-| Date       | Version | Details                          |
-|------------|---------|----------------------------------|
-| 2021-09-05 | 1.0     | Launch of the code for decoder.  |
-|            | 1.1     | Planned launch of the generator. |
-
 ## How to use
 
 ### Decoder
