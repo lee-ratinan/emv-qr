@@ -17,7 +17,7 @@ if ( ! empty($str))
   <body>
     <div class="container">
       <div class="row">
-        <div class="col col-md-8 col-lg-6">
+        <div class="col col-lg-8">
           <h1>Test QR Code Decoder</h1>
           <hr>
           <form method="POST">
