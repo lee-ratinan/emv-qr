@@ -40,6 +40,16 @@ class EmvMerchant {
 	const POINT_OF_INITIATION_DYNAMIC = '12';
 	const POINT_OF_INITIATION_DYNAMIC_VALUE = 'DYNAMIC';
 	const MERCHANT_CATEGORY_CODE_GENERIC = '0000';
+	const CURRENCY_IDR = 'IDR';
+	const CURRENCY_MYR = 'MYR';
+	const CURRENCY_SGD = 'SGD';
+	const CURRENCY_THB = 'THB';
+	const COUNTRY_ID = 'ID';
+	const COUNTRY_MY = 'MY';
+	const COUNTRY_SG = 'SG';
+	const COUNTRY_TH = 'TH';
+	const MERCHANT_CITY_SG = 'SINGAPORE';
+	const CRC_LENGTH = '04';
 
 	/* | --------------------------------------------------------------------------------------------------------
 	   | PAYNOW (26)
@@ -699,7 +709,7 @@ class EmvMerchant {
 	}
 
 	/* | --------------------------------------------------------------------------------------------------------
-	   | DECODE PART
+	   | DECODER PART
 	   | -------------------------------------------------------------------------------------------------------- */
 
 	/**
@@ -1225,6 +1235,77 @@ class EmvMerchant {
 			$account[$this->airpay_keys[$id]] = $val;
 		}
 		return $account;
+	}
+
+	/* | --------------------------------------------------------------------------------------------------------
+	   | GENERATOR PART
+	   | -------------------------------------------------------------------------------------------------------- */
+
+	private function generate()
+	{
+		$string = self::ID_PAYLOAD_FORMAT_INDICATOR . sprintf('%02d', strlen($this->payload_format_indicator)) . $this->payload_format_indicator;
+		$string .= self::ID_POINT_OF_INITIATION . sprintf('%02d', strlen($this->point_of_initiation)) . $this->point_of_initiation;
+		// todo: accounts
+
+		$string .= self::ID_CRC . self::CRC_LENGTH;
+		$string .= $this->CRC16HexDigest($string);
+		$this->qr_string = $string;
+		return $string;
+	}
+
+	public function create_code_sg($accounts = [], $merchant_category_code = self::MERCHANT_CATEGORY_CODE_GENERIC, $merchant_name = null, $postal_code = null, $transaction_amount = null)
+	{
+		$this->mode = self::MODE_GENERATE;
+		$this->payload_format_indicator = self::PAYLOAD_FORMAT_INDICATOR_VALUE;
+		$this->point_of_initiation = (isset($transaction_amount) ? self::POINT_OF_INITIATION_STATIC : self::POINT_OF_INITIATION_DYNAMIC);
+		if (empty($accounts))
+		{
+			return false;
+		}
+		$this->accounts = $accounts;
+		if (4 != strlen($merchant_category_code))
+		{
+			return false;
+		}
+		$this->merchant_category_code = $merchant_category_code;
+		$this->transaction_currency = self::CURRENCY_SGD;
+		$transaction_amount = number_format($transaction_amount, 2, '.', '');
+		if (13 < strlen($transaction_amount))
+		{
+			return false;
+		}
+		$this->transaction_amount = $transaction_amount;
+		$this->country_code = self::COUNTRY_SG;
+		$merchant_name = filter_var($merchant_name, FILTER_SANITIZE_STRING); // todo: must be only 'ans', check valid character set
+		if (25 < strlen($merchant_name))
+		{
+			return false;
+		}
+		$this->merchant_name = $merchant_name;
+		$this->merchant_city = self::MERCHANT_CITY_SG;
+		if (!preg_match('/\d{6}/', $postal_code))
+		{
+			$postal_code = null;
+		}
+		$this->merchant_postal_code = $postal_code;
+		//$this->additional_fields = [];
+		$this->qr_string = '';
+		return $this->generate();
+	}
+
+	public function create_code_th($accounts = [], $merchant_category_code = self::MERCHANT_CATEGORY_CODE_GENERIC, $merchant_name = null, $postal_code = null, $transaction_amount = null)
+	{
+
+	}
+
+	public function create_code_my($accounts = [], $merchant_category_code = self::MERCHANT_CATEGORY_CODE_GENERIC, $merchant_name = null, $postal_code = null, $transaction_amount = null)
+	{
+
+	}
+
+	public function create_code_id($accounts = [], $merchant_category_code = self::MERCHANT_CATEGORY_CODE_GENERIC, $merchant_name = null, $postal_code = null, $transaction_amount = null)
+	{
+
 	}
 
 }
