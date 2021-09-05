@@ -39,29 +39,30 @@ class EmvMerchant {
 	const POINT_OF_INITIATION_STATIC_VALUE = 'STATIC';
 	const POINT_OF_INITIATION_DYNAMIC = '12';
 	const POINT_OF_INITIATION_DYNAMIC_VALUE = 'DYNAMIC';
+	const MERCHANT_CATEGORY_CODE_GENERIC = '0000';
 
 	/* | --------------------------------------------------------------------------------------------------------
 	   | PAYNOW (26)
 	   | -------------------------------------------------------------------------------------------------------- */
 	const PAYNOW_CHANNEL = 'SG.PAYNOW';
 	const PAYNOW_ID_CHANNEL = '00';
-	const PAYNOW_ID_PAYLOAD_TYPE = '01';
-	const PAYNOW_ID_PAYLOAD_VALUE = '02';
+	const PAYNOW_ID_PROXY_TYPE = '01';
+	const PAYNOW_ID_PROXY_VALUE = '02';
 	const PAYNOW_ID_AMOUNT_EDITABLE = '03';
 	const PAYNOW_ID_EXPIRY_DATE = '04';
-	const PAYNOW_PAYLOAD_MOBILE = '0';
-	const PAYNOW_PAYLOAD_UEN = '2';
+	const PAYNOW_PROXY_MOBILE = '0';
+	const PAYNOW_PROXY_UEN = '2';
 	const PAYNOW_AMOUNT_EDITABLE_TRUE = '1';
 	const PAYNOW_AMOUNT_EDITABLE_FALSE = '0';
 	private $paynow_keys = [
 		'00' => 'channel',
-		'01' => 'payload_type',
-		'02' => 'payload_value',
+		'01' => 'proxy_type',
+		'02' => 'proxy_value',
 		'03' => 'amount_editable',
 		'04' => 'expiry_date',
 		'05' => '??'
 	];
-	private $paynow_payload_type = [
+	private $paynow_proxy_type = [
 		'0' => 'mobile',
 		'2' => 'uen'
 	];
@@ -79,13 +80,13 @@ class EmvMerchant {
 	const PROMPTPAY_ID_MOBILE = '01';
 	const PROMPTPAY_ID_TAX_ID = '02';
 	const PROMPTPAY_ID_EWALLET_ID = '03';
-	const PROMPTPAY_PAYLOAD_MOBILE = 'mobile';
-	const PROMPTPAY_PAYLOAD_TAX_ID = 'tax_id';
-	const PROMPTPAY_PAYLOAD_EWALLET_ID = 'ewallet_Id';
+	const PROMPTPAY_PROXY_MOBILE = 'mobile';
+	const PROMPTPAY_PROXY_TAX_ID = 'tax_id';
+	const PROMPTPAY_PROXY_EWALLET_ID = 'ewallet_Id';
 	private $promptpay_keys = [
 		'00' => 'app_id',
-		'97' => 'payload_type',
-		'98' => 'payload_value',
+		'97' => 'proxy_type',
+		'98' => 'proxy_value',
 		'99' => 'channel_name'
 	];
 
@@ -1008,8 +1009,8 @@ class EmvMerchant {
 		{
 			switch ($id)
 			{
-				case self::PAYNOW_ID_PAYLOAD_TYPE:
-					$account[$this->paynow_keys[$id]] = $this->paynow_payload_type[$val];
+				case self::PAYNOW_ID_PROXY_TYPE:
+					$account[$this->paynow_keys[$id]] = $this->paynow_proxy_type[$val];
 					break;
 				case self::PAYNOW_ID_AMOUNT_EDITABLE:
 					$account[$this->paynow_keys[$id]] = $this->paynow_amount_editable[$val];
@@ -1040,15 +1041,15 @@ class EmvMerchant {
 					$account[$this->promptpay_keys[$id]] = $val;
 					break;
 				case self::PROMPTPAY_ID_MOBILE:
-					$account[$this->promptpay_keys[97]] = self::PROMPTPAY_PAYLOAD_MOBILE;
+					$account[$this->promptpay_keys[97]] = self::PROMPTPAY_PROXY_MOBILE;
 					$account[$this->promptpay_keys[98]] = $val;
 					break;
 				case self::PROMPTPAY_ID_TAX_ID:
-					$account[$this->promptpay_keys[97]] = self::PROMPTPAY_PAYLOAD_TAX_ID;
+					$account[$this->promptpay_keys[97]] = self::PROMPTPAY_PROXY_TAX_ID;
 					$account[$this->promptpay_keys[98]] = $val;
 					break;
 				case self::PROMPTPAY_ID_EWALLET_ID:
-					$account[$this->promptpay_keys[97]] = self::PROMPTPAY_PAYLOAD_EWALLET_ID;
+					$account[$this->promptpay_keys[97]] = self::PROMPTPAY_PROXY_EWALLET_ID;
 					$account[$this->promptpay_keys[98]] = $val;
 					break;
 			}
