@@ -1,7 +1,10 @@
 <?php
-
 namespace EMVQR;
 
+/**
+ * Class EmvMerchant
+ * @package EMVQR
+ */
 class EmvMerchant {
 
 	const MODE_GENERATE = 'GENERATE';
@@ -21,6 +24,8 @@ class EmvMerchant {
 	const ID_MERCHANT_POSTAL_CODE = '61';
 	const ID_ADDITIONAL_DATA_FIELDS = '62';
 	const ID_CRC = '63';
+	const ID_ACCOUNT_LOWER_BOUNDARY = 2;
+	const ID_ACCOUNT_UPPER_BOUNDARY = 51;
 
 	const ID_ADDITIONAL_DATA_BILL_NUMBER = '01';
 	const ID_ADDITIONAL_DATA_MOBILE_NUMBER = '02';
@@ -40,6 +45,7 @@ class EmvMerchant {
 	const POINT_OF_INITIATION_DYNAMIC = '12';
 	const POINT_OF_INITIATION_DYNAMIC_VALUE = 'DYNAMIC';
 	const MERCHANT_CATEGORY_CODE_GENERIC = '0000';
+	const MERCHANT_CATEGORY_UNKNOWN = 'UNKNOWN';
 	const CURRENCY_IDR = 'IDR';
 	const CURRENCY_MYR = 'MYR';
 	const CURRENCY_SGD = 'SGD';
@@ -51,6 +57,20 @@ class EmvMerchant {
 	const MERCHANT_CITY_SG = 'SINGAPORE';
 	const CRC_LENGTH = '04';
 
+	const POS_ZERO = 0;
+	const POS_TWO = 2;
+	const POS_FOUR = 4;
+	const POS_SIX = 6;
+	const POS_EIGHT = 8;
+	const POS_TEN = 10;
+	const POS_TWELVE = 12;
+	const POS_MINUS_FOUR = -4;
+	const LENGTH_ONE = 1;
+	const LENGTH_TWO = 2;
+	const LENGTH_THREE = 3;
+	const LENGTH_FOUR = 4;
+
+	const TIMEZONE_SINGAPORE = 'Asia/Singapore';
 	/* | --------------------------------------------------------------------------------------------------------
 	   | PAYNOW (26)
 	   | -------------------------------------------------------------------------------------------------------- */
@@ -64,21 +84,20 @@ class EmvMerchant {
 	const PAYNOW_PROXY_UEN = '2';
 	const PAYNOW_AMOUNT_EDITABLE_TRUE = '1';
 	const PAYNOW_AMOUNT_EDITABLE_FALSE = '0';
-	private $paynow_keys = [
+	protected $paynow_keys = [
 		'00' => 'channel',
 		'01' => 'proxy_type',
 		'02' => 'proxy_value',
 		'03' => 'amount_editable',
-		'04' => 'expiry_date',
-		'05' => '??'
+		'04' => 'expiry_date'
 	];
-	private $paynow_proxy_type = [
-		'0' => 'mobile',
-		'2' => 'uen'
+	protected $paynow_proxy_type = [
+		'0' => 'MOBILE',
+		'2' => 'UEN'
 	];
-	private $paynow_amount_editable = [
-		'1' => 'true',
-		'0' => 'false'
+	protected $paynow_amount_editable = [
+		'1' => true,
+		'0' => false
 	];
 
 	/* | --------------------------------------------------------------------------------------------------------
@@ -93,7 +112,7 @@ class EmvMerchant {
 	const PROMPTPAY_PROXY_MOBILE = 'mobile';
 	const PROMPTPAY_PROXY_TAX_ID = 'tax_id';
 	const PROMPTPAY_PROXY_EWALLET_ID = 'ewallet_Id';
-	private $promptpay_keys = [
+	protected $promptpay_keys = [
 		'00' => 'app_id',
 		'97' => 'proxy_type',
 		'98' => 'proxy_value',
@@ -104,7 +123,7 @@ class EmvMerchant {
 	   | SGQR (51)
 	   | -------------------------------------------------------------------------------------------------------- */
 	const SGQR_CHANNEL = 'SG.SGQR';
-	private $sgqr_keys = [
+	protected $sgqr_keys = [
 		'00' => 'channel',
 		'01' => 'sgqr_id_number',
 		'02' => 'version',
@@ -120,7 +139,7 @@ class EmvMerchant {
 	   | -------------------------------------------------------------------------------------------------------- */
 	const FAVE_CHANNEL = 'COM.MYFAVE';
 	const FAVE_CHANNEL_NAME = 'FavePay';
-	private $favepay_keys = [
+	protected $favepay_keys = [
 		'00' => 'channel',
 		'01' => 'url'
 	];
@@ -130,7 +149,7 @@ class EmvMerchant {
 	   | -------------------------------------------------------------------------------------------------------- */
 	const DASH_CHANNEL = 'SG.COM.DASH.WWW';
 	const DASH_CHANNEL_NAME = 'Singtel Dash';
-	private $dash_keys = [
+	protected $dash_keys = [
 		'00' => 'channel',
 		'01' => 'merchant_account'
 	];
@@ -141,7 +160,7 @@ class EmvMerchant {
 	const LIQUIDPAY_CHANNEL = 'A0000007620001';
 	const LIQUIDPAY_CHANNEL_NAME = 'LiquidPay';
 	const LIQUIDPAY_REVERSE_URL = 'COM.LQDPALLIANCE.WWW';
-	private $liquidpay_keys = [
+	protected $liquidpay_keys = [
 		'00' => 'app_id',
 		'01' => 'reverse_url',
 		'02' => 'payee_id',
@@ -153,7 +172,7 @@ class EmvMerchant {
 	   | -------------------------------------------------------------------------------------------------------- */
 	const EZLINK_CHANNEL = 'SG.COM.EZLINK';
 	const EZLINK_CHANNEL_NAME = 'EZ-Link';
-	private $ezlink_keys = [
+	protected $ezlink_keys = [
 		'00' => 'channel',
 		'01' => 'merchant_id',
 		'02' => 'sgqr_indicator',
@@ -166,7 +185,7 @@ class EmvMerchant {
 	   | -------------------------------------------------------------------------------------------------------- */
 	const GRAB_CHANNEL = 'COM.GRAB';
 	const GRAB_CHANNEL_NAME = 'GrabPay';
-	private $grab_keys = [
+	protected $grab_keys = [
 		'00' => 'channel',
 		'01' => 'merchant_id'
 	];
@@ -176,7 +195,7 @@ class EmvMerchant {
 	   | -------------------------------------------------------------------------------------------------------- */
 	const PAYLAH_CHANNEL = 'COM.DBS';
 	const PAYLAH_CHANNEL_NAME = 'DBS PayLah!';
-	private $paylah_keys = [
+	protected $paylah_keys = [
 		'00' => 'channel',
 		'01' => 'qr_transaction_ref_id',
 		'02' => 'qr_id'
@@ -187,7 +206,7 @@ class EmvMerchant {
 	   | -------------------------------------------------------------------------------------------------------- */
 	const WECHAT_CHANNEL = 'COM.QQ.WEIXIN.PAY';
 	const WECHAT_CHANNEL_NAME = 'WeChat Pay';
-	private $wechat_keys = [
+	protected $wechat_keys = [
 		'00' => 'channel',
 		'01' => 'merchant_account',
 		'02' => 'terminal_id',
@@ -201,7 +220,7 @@ class EmvMerchant {
 	   | -------------------------------------------------------------------------------------------------------- */
 	const UOB_CHANNEL = 'SG.COM.UOB';
 	const UOB_CHANNEL_NAME = 'UOB';
-	private $uob_keys = [
+	protected $uob_keys = [
 		'00' => 'channel',
 		'01' => 'merchant_account'
 	];
@@ -211,7 +230,7 @@ class EmvMerchant {
 	   | -------------------------------------------------------------------------------------------------------- */
 	const AIRPAY_CHANNEL = 'SG.AIRPAY';
 	const AIRPAY_CHANNEL_NAME = 'ShopeePay/AirPay';
-	private $airpay_keys = [
+	protected $airpay_keys = [
 		'00' => 'channel',
 		'01' => 'merchant_account_information'
 	];
@@ -220,7 +239,7 @@ class EmvMerchant {
 	 * @var string[] Merchant category codes ISO18245;
 	 * Src: https://docs.checkout.com/resources/codes/merchant-category-codes
 	 */
-	private $merchant_category_codes = [
+	protected $merchant_category_codes = [
 		'0000' => 'Generic',
 		'0742' => 'Veterinary services',
 		'0763' => 'Agricultural co-operative',
@@ -592,7 +611,7 @@ class EmvMerchant {
 	/**
 	 * @var string[] ISO4217
 	 */
-	private $currency_codes = [
+	protected $currency_codes = [
 		'360' => 'IDR',
 		'458' => 'MYR',
 		'702' => 'SGD',
@@ -602,7 +621,7 @@ class EmvMerchant {
 	/**
 	 * @var string[] ISO3166
 	 */
-	private $country_codes = [
+	protected $country_codes = [
 		'ID',
 		'MY',
 		'SG',
@@ -627,6 +646,14 @@ class EmvMerchant {
 	public $additional_fields = [];
 	public $crc;
 	public $errors = [];
+	public $warnings = [];
+
+	/**
+	 * EmvMerchant constructor.
+	 */
+	public function __construct()
+	{
+	}
 
 	/* | --------------------------------------------------------------------------------------------------------
 	   | phpCrc16 v1.1 -- CRC16/CCITT implementation
@@ -649,7 +676,7 @@ class EmvMerchant {
 	 * @param $str
 	 * @return string
 	 */
-	function CRC16($str)
+	protected function CRC16($str)
 	{
 		static $CRC16_Lookup = array(
 			0x0000, 0x1021, 0x2042, 0x3063, 0x4084, 0x50A5, 0x60C6, 0x70E7,
@@ -703,609 +730,32 @@ class EmvMerchant {
 	 * @param $str
 	 * @return string
 	 */
-	function CRC16HexDigest($str)
+	protected function CRC16HexDigest($str)
 	{
 		return sprintf('%04X', $this->CRC16($str));
 	}
 
 	/* | --------------------------------------------------------------------------------------------------------
-	   | DECODER PART
+	   | MISC.
 	   | -------------------------------------------------------------------------------------------------------- */
 
 	/**
-	 * Read and decode the EMV QR string
-	 * @param $string string Input string read from the QR Code
-	 * @return EmvMerchant
-	 */
-	public function decode($string)
-	{
-		$this->mode = self::MODE_DECODE;
-		$string = str_replace(chr(194) . chr(160), ' ', $string);
-		$this->qr_string = $string;
-		while ( ! empty($string))
-		{
-			$strId = substr($string, 0, 2);
-			$intId = intval($strId);
-			$intLength = intval(substr($string, 2, 2));
-			$strValue = substr($string, 4, $intLength);
-			switch ($strId)
-			{
-				case self::ID_PAYLOAD_FORMAT_INDICATOR:
-					$this->process_payload_format_indicator($strValue);
-					break;
-				case self::ID_POINT_OF_INITIATION:
-					$this->process_point_of_initiation($strValue);
-					break;
-				case self::ID_MERCHANT_CATEGORY_CODE:
-					$this->process_merchant_category_code($strValue);
-					break;
-				case self::ID_TRANSACTION_CURRENCY:
-					$this->process_currency($strValue);
-					break;
-				case self::ID_TRANSACTION_AMOUNT:
-					$this->process_amount($strValue);
-					break;
-				case self::ID_COUNTRY_CODE:
-					$this->process_country_code($strValue);
-					break;
-				case self::ID_MERCHANT_NAME:
-					$this->merchant_name = $strValue;
-					break;
-				case self::ID_MERCHANT_CITY:
-					$this->merchant_city = $strValue;
-					break;
-				case self::ID_MERCHANT_POSTAL_CODE:
-					$this->merchant_postal_code = $strValue;
-					break;
-				case self::ID_ADDITIONAL_DATA_FIELDS:
-					$this->process_additional_data($strValue);
-					break;
-				case self::ID_CRC:
-					$this->process_crc($strValue);
-					break;
-				default:
-					$this->process_accounts($intId, $strValue);
-			}
-			$string = substr($string, 4 + $intLength);
-		}
-		return $this;
-	}
-
-	/**
-	 * Add error to the error field
+	 * Add error to the errors field
 	 * @param $field_id
-	 * @param $strValue
+	 * @param $error
 	 */
-	private function process_error($field_id, $strValue)
+	protected function process_error($field_id, $error)
 	{
-		$this->errors[$field_id] = "VALUE: $strValue";
+		$this->errors[$field_id] = $error;
 	}
 
 	/**
-	 * Validate and assign payload format indicator to the class
-	 * @param $strValue
+	 * Add warning to the warnings field
+	 * @param $field_id
+	 * @param $warning
 	 */
-	private function process_payload_format_indicator($strValue)
+	protected function process_warning($field_id, $warning)
 	{
-		if (self::PAYLOAD_FORMAT_INDICATOR_VALUE == $strValue)
-		{
-			$this->payload_format_indicator = $strValue;
-		} else
-		{
-			$this->process_error(self::ID_PAYLOAD_FORMAT_INDICATOR, $strValue);
-		}
+		$this->warnings[$field_id] = $warning;
 	}
-
-	/**
-	 * Validate and assign point of initiation to the class
-	 * @param $strValue
-	 */
-	private function process_point_of_initiation($strValue)
-	{
-		switch ($strValue)
-		{
-			case self::POINT_OF_INITIATION_STATIC:
-				$this->point_of_initiation = self::POINT_OF_INITIATION_STATIC_VALUE;
-				break;
-			case self::POINT_OF_INITIATION_DYNAMIC:
-				$this->point_of_initiation = self::POINT_OF_INITIATION_DYNAMIC_VALUE;
-				break;
-			default:
-				$this->process_error(self::ID_POINT_OF_INITIATION, $strValue);
-		}
-	}
-
-	/**
-	 * Assign merchant category code and its value (according to ISO18245) to the class
-	 * @param $strValue
-	 */
-	private function process_merchant_category_code($strValue)
-	{
-		$this->merchant_category_code['code'] = $strValue;
-		if (isset($this->merchant_category_codes[$strValue]))
-		{
-			$this->merchant_category_code['value'] = $this->merchant_category_codes[$strValue];
-		}
-	}
-
-	/**
-	 * Validate and assign currency to the class
-	 * @param $strValue
-	 */
-	private function process_currency($strValue)
-	{
-		if (isset($this->currency_codes[$strValue]))
-		{
-			$this->transaction_currency = $this->currency_codes[$strValue];
-		} else
-		{
-			$this->process_error(self::ID_TRANSACTION_CURRENCY, $strValue);
-		}
-	}
-
-	/**
-	 * Validate and assign ammount to the class
-	 * @param $strValue
-	 */
-	private function process_amount($strValue)
-	{
-		$val = floatval($strValue);
-		if (0.0 < $val)
-		{
-			$this->transaction_amount = number_format($val, 2, '.', '');
-		} else
-		{
-			$this->process_error(self::ID_TRANSACTION_AMOUNT, $strValue);
-		}
-	}
-
-	/**
-	 * Validate and assign country code to the class
-	 * @param $strValue
-	 */
-	private function process_country_code($strValue)
-	{
-		if (in_array($strValue, $this->country_codes))
-		{
-			$this->country_code = $strValue;
-		} else
-		{
-			$this->process_error(self::ID_COUNTRY_CODE, $strValue);
-		}
-	}
-
-	/**
-	 * Process additional data fields
-	 * @param $string
-	 */
-	private function process_additional_data($string)
-	{
-		while ( ! empty($string))
-		{
-			$strId = substr($string, 0, 2);
-			$intLength = intval(substr($string, 2, 2));
-			$strValue = substr($string, 4, $intLength);
-			switch ($strId)
-			{
-				case self::ID_ADDITIONAL_DATA_BILL_NUMBER:
-					$this->additional_fields['bill_number'] = $strValue;
-					break;
-				case self::ID_ADDITIONAL_DATA_MOBILE_NUMBER:
-					$this->additional_fields['mobile_number'] = $strValue;
-					break;
-				case self::ID_ADDITIONAL_DATA_STORE_LABEL:
-					$this->additional_fields['store_label'] = $strValue;
-					break;
-				case self::ID_ADDITIONAL_DATA_LOYALTY_NUMBER:
-					$this->additional_fields['loyalty_number'] = $strValue;
-					break;
-				case self::ID_ADDITIONAL_DATA_REFERENCE_LABEL:
-					$this->additional_fields['reference_label'] = $strValue;
-					break;
-				case self::ID_ADDITIONAL_DATA_CUSTOMER_LABEL:
-					$this->additional_fields['customer_label'] = $strValue;
-					break;
-				case self::ID_ADDITIONAL_DATA_TERMINAL_LABEL:
-					$this->additional_fields['terminal_label'] = $strValue;
-					break;
-				case self::ID_ADDITIONAL_DATA_PURPOSE_OF_TRANSACTION:
-					$this->additional_fields['purpose_of_transaction'] = $strValue;
-					break;
-				case self::ID_ADDITIONAL_DATA_ADDITIONAL_CUSTOMER_DATA_REQUEST:
-					$this->additional_fields['customer_data_request'] = $strValue;
-					break;
-				case self::ID_ADDITIONAL_DATA_MERCHANT_TAX_ID:
-					$this->additional_fields['merchant_tax_id'] = $strValue;
-					break;
-				case self::ID_ADDITIONAL_DATA_MERCHANT_CHANNEL:
-					$this->additional_fields['merchant_channel'] = $strValue;
-					break;
-			}
-			$string = substr($string, 4 + $intLength);
-		}
-	}
-
-	/**
-	 * Process and verify the CRC field
-	 * @param $strValue
-	 */
-	private function process_crc($strValue)
-	{
-		$this->crc = $strValue;
-		$checkData = substr($this->qr_string, 0, -4);
-		$newCrc = $this->CRC16HexDigest($checkData);
-		if ($strValue != $newCrc)
-		{
-			$this->process_error(self::ID_CRC, $strValue . ' != ' . $newCrc);
-		}
-	}
-
-	/**
-	 * Process account
-	 * @param $intId
-	 * @param $strValue
-	 */
-	private function process_accounts($intId, $strValue)
-	{
-		if (2 > $intId || 51 < $intId)
-		{
-			$this->process_error($intId, $strValue);
-			return;
-		}
-		$account_raw = [];
-		while ( ! empty($strValue))
-		{
-			$strId = substr($strValue, 0, 2);
-			$intLength = intval(substr($strValue, 2, 2));
-			$thisValue = substr($strValue, 4, $intLength);
-			$account_raw[$strId] = $thisValue;
-			$strValue = substr($strValue, 4 + $intLength);
-		}
-		$account_raw['00'] = strtoupper($account_raw['00']);
-		switch ($account_raw['00'])
-		{
-			case self::PAYNOW_CHANNEL:
-				$this->accounts[] = $this->process_paynow($account_raw, $intId);
-				break;
-			case self::PROMPTPAY_CHANNEL:
-				$this->accounts[] = $this->process_promptpay($account_raw, $intId);
-				break;
-			case self::SGQR_CHANNEL:
-				$this->accounts[] = $this->process_sgqr($account_raw, $intId);
-				break;
-			case self::FAVE_CHANNEL:
-				$this->accounts[] = $this->process_favepay($account_raw, $intId);
-				break;
-			case self::DASH_CHANNEL:
-				$this->accounts[] = $this->process_dash($account_raw, $intId);
-				break;
-			case self::LIQUIDPAY_CHANNEL:
-				$this->accounts[] = $this->process_liquidpay($account_raw, $intId);
-				break;
-			case self::EZLINK_CHANNEL:
-				$this->accounts[] = $this->process_ezlink($account_raw, $intId);
-				break;
-			case self::GRAB_CHANNEL:
-				$this->accounts[] = $this->process_grab($account_raw, $intId);
-				break;
-			case self::PAYLAH_CHANNEL:
-				$this->accounts[] = $this->process_paylah($account_raw, $intId);
-				break;
-			case self::WECHAT_CHANNEL:
-				$this->accounts[] = $this->process_wechat($account_raw, $intId);
-				break;
-			case self::UOB_CHANNEL:
-				$this->accounts[] = $this->process_uob($account_raw, $intId);
-				break;
-			case self::AIRPAY_CHANNEL:
-				$this->accounts[] = $this->process_airpay($account_raw, $intId);
-				break;
-			default:
-				$this->accounts[] = array_merge(['original_id' => $intId], $account_raw);
-		}
-	}
-
-	/**
-	 * Process PayNow account
-	 * @param $account_raw
-	 * @param $intId
-	 * @return array
-	 */
-	private function process_paynow($account_raw, $intId)
-	{
-		// MOSTLY 26
-		$account['original_id'] = $intId;
-		foreach ($account_raw as $id => $val)
-		{
-			switch ($id)
-			{
-				case self::PAYNOW_ID_PROXY_TYPE:
-					$account[$this->paynow_keys[$id]] = $this->paynow_proxy_type[$val];
-					break;
-				case self::PAYNOW_ID_AMOUNT_EDITABLE:
-					$account[$this->paynow_keys[$id]] = $this->paynow_amount_editable[$val];
-					break;
-				default:
-					$account[$this->paynow_keys[$id]] = $val;
-			}
-		}
-		return $account;
-	}
-
-	/**
-	 * Process PromptPay account
-	 * @param $account_raw
-	 * @param $intId
-	 * @return array
-	 */
-	private function process_promptpay($account_raw, $intId)
-	{
-		// MOSTLY 29
-		$account['original_id'] = $intId;
-		$account[$this->promptpay_keys[99]] = self::PROMPTPAY_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
-		{
-			switch ($id)
-			{
-				case self::PROMPTPAY_ID_APP_ID:
-					$account[$this->promptpay_keys[$id]] = $val;
-					break;
-				case self::PROMPTPAY_ID_MOBILE:
-					$account[$this->promptpay_keys[97]] = self::PROMPTPAY_PROXY_MOBILE;
-					$account[$this->promptpay_keys[98]] = $val;
-					break;
-				case self::PROMPTPAY_ID_TAX_ID:
-					$account[$this->promptpay_keys[97]] = self::PROMPTPAY_PROXY_TAX_ID;
-					$account[$this->promptpay_keys[98]] = $val;
-					break;
-				case self::PROMPTPAY_ID_EWALLET_ID:
-					$account[$this->promptpay_keys[97]] = self::PROMPTPAY_PROXY_EWALLET_ID;
-					$account[$this->promptpay_keys[98]] = $val;
-					break;
-			}
-		}
-		return $account;
-	}
-
-	/**
-	 * Process SGQR information - not an account but required
-	 * @param $account_raw
-	 * @param $intId
-	 * @return array
-	 */
-	private function process_sgqr($account_raw, $intId)
-	{
-		// FIXED 51
-		$account['original_id'] = $intId;
-		foreach ($account_raw as $id => $val)
-		{
-			$account[$this->sgqr_keys[$id]] = $val;
-		}
-		return $account;
-	}
-
-	/**
-	 * Process FavePay
-	 * @param $account_raw
-	 * @param $intId
-	 * @return array
-	 */
-	private function process_favepay($account_raw, $intId)
-	{
-		$account['original_id'] = $intId;
-		$account['channel_name'] = self::FAVE_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
-		{
-			$account[$this->favepay_keys[$id]] = $val;
-		}
-		return $account;
-	}
-
-	/**
-	 * Process Dash
-	 * @param $account_raw
-	 * @param $intId
-	 * @return array
-	 */
-	private function process_dash($account_raw, $intId)
-	{
-		$account['original_id'] = $intId;
-		$account['channel_name'] = self::DASH_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
-		{
-			$account[$this->dash_keys[$id]] = $val;
-		}
-		return $account;
-	}
-
-	/**
-	 * Process LiquidPay
-	 * @param $account_raw
-	 * @param $intId
-	 * @return array
-	 */
-	private function process_liquidpay($account_raw, $intId)
-	{
-		$account['original_id'] = $intId;
-		$account['channel_name'] = self::LIQUIDPAY_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
-		{
-			$account[$this->liquidpay_keys[$id]] = $val;
-		}
-		return $account;
-	}
-
-	/**
-	 * Process EZ-Link
-	 * @param $account_raw
-	 * @param $intId
-	 * @return array
-	 */
-	private function process_ezlink($account_raw, $intId)
-	{
-		$account['original_id'] = $intId;
-		$account['channel_name'] = self::EZLINK_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
-		{
-			$account[$this->ezlink_keys[$id]] = $val;
-		}
-		return $account;
-	}
-
-	/**
-	 * Process GrabPay
-	 * @param $account_raw
-	 * @param $intId
-	 * @return array
-	 */
-	private function process_grab($account_raw, $intId)
-	{
-		$account['original_id'] = $intId;
-		$account['channel_name'] = self::GRAB_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
-		{
-			$account[$this->grab_keys[$id]] = $val;
-		}
-		return $account;
-	}
-
-	/**
-	 * Process DBS PayLah!
-	 * @param $account_raw
-	 * @param $intId
-	 * @return array
-	 */
-	private function process_paylah($account_raw, $intId)
-	{
-		$account['original_id'] = $intId;
-		$account['channel_name'] = self::PAYLAH_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
-		{
-			$account[$this->paylah_keys[$id]] = $val;
-		}
-		return $account;
-	}
-
-	/**
-	 * Process WeChat Pay
-	 * @param $account_raw
-	 * @param $intId
-	 * @return array
-	 */
-	private function process_wechat($account_raw, $intId)
-	{
-		$account['original_id'] = $intId;
-		$account['channel_name'] = self::WECHAT_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
-		{
-			$account[$this->wechat_keys[$id]] = $val;
-		}
-		return $account;
-	}
-
-	/**
-	 * Process UOB
-	 * @param $account_raw
-	 * @param $intId
-	 * @return array
-	 */
-	private function process_uob($account_raw, $intId)
-	{
-		$account['original_id'] = $intId;
-		$account['channel_name'] = self::UOB_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
-		{
-			$account[$this->uob_keys[$id]] = $val;
-		}
-		return $account;
-	}
-
-	/**
-	 * Process AirPay / ShopeePay
-	 * @param $account_raw
-	 * @param $intId
-	 * @return array
-	 */
-	private function process_airpay($account_raw, $intId)
-	{
-		$account['original_id'] = $intId;
-		$account['channel_name'] = self::AIRPAY_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
-		{
-			$account[$this->airpay_keys[$id]] = $val;
-		}
-		return $account;
-	}
-
-	/* | --------------------------------------------------------------------------------------------------------
-	   | GENERATOR PART
-	   | -------------------------------------------------------------------------------------------------------- */
-
-	private function generate()
-	{
-		$string = self::ID_PAYLOAD_FORMAT_INDICATOR . sprintf('%02d', strlen($this->payload_format_indicator)) . $this->payload_format_indicator;
-		$string .= self::ID_POINT_OF_INITIATION . sprintf('%02d', strlen($this->point_of_initiation)) . $this->point_of_initiation;
-		// todo: accounts
-
-		$string .= self::ID_CRC . self::CRC_LENGTH;
-		$string .= $this->CRC16HexDigest($string);
-		$this->qr_string = $string;
-		return $string;
-	}
-
-	public function create_code_sg($accounts = [], $merchant_category_code = self::MERCHANT_CATEGORY_CODE_GENERIC, $merchant_name = null, $postal_code = null, $transaction_amount = null)
-	{
-		$this->mode = self::MODE_GENERATE;
-		$this->payload_format_indicator = self::PAYLOAD_FORMAT_INDICATOR_VALUE;
-		$this->point_of_initiation = (isset($transaction_amount) ? self::POINT_OF_INITIATION_STATIC : self::POINT_OF_INITIATION_DYNAMIC);
-		if (empty($accounts))
-		{
-			return false;
-		}
-		$this->accounts = $accounts;
-		if (4 != strlen($merchant_category_code))
-		{
-			return false;
-		}
-		$this->merchant_category_code = $merchant_category_code;
-		$this->transaction_currency = self::CURRENCY_SGD;
-		$transaction_amount = number_format($transaction_amount, 2, '.', '');
-		if (13 < strlen($transaction_amount))
-		{
-			return false;
-		}
-		$this->transaction_amount = $transaction_amount;
-		$this->country_code = self::COUNTRY_SG;
-		$merchant_name = filter_var($merchant_name, FILTER_SANITIZE_STRING); // todo: must be only 'ans', check valid character set
-		if (25 < strlen($merchant_name))
-		{
-			return false;
-		}
-		$this->merchant_name = $merchant_name;
-		$this->merchant_city = self::MERCHANT_CITY_SG;
-		if (!preg_match('/\d{6}/', $postal_code))
-		{
-			$postal_code = null;
-		}
-		$this->merchant_postal_code = $postal_code;
-		//$this->additional_fields = [];
-		$this->qr_string = '';
-		return $this->generate();
-	}
-
-	public function create_code_th($accounts = [], $merchant_category_code = self::MERCHANT_CATEGORY_CODE_GENERIC, $merchant_name = null, $postal_code = null, $transaction_amount = null)
-	{
-
-	}
-
-	public function create_code_my($accounts = [], $merchant_category_code = self::MERCHANT_CATEGORY_CODE_GENERIC, $merchant_name = null, $postal_code = null, $transaction_amount = null)
-	{
-
-	}
-
-	public function create_code_id($accounts = [], $merchant_category_code = self::MERCHANT_CATEGORY_CODE_GENERIC, $merchant_name = null, $postal_code = null, $transaction_amount = null)
-	{
-
-	}
-
 }
