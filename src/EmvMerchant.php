@@ -4,14 +4,8 @@ namespace EMVQR;
 
 class EmvMerchant {
 
-	const MODE_GENERATE = 'GENERATE';
-	const MODE_DECODE = 'DECODE';
-
 	const ID_PAYLOAD_FORMAT_INDICATOR = '00';
 	const ID_POINT_OF_INITIATION = '01';
-	const ID_ACCOUNT_PAYNOW = '26';
-	const ID_ACCOUNT_PROMPTPAY = '29';
-	const ID_ACCOUNT_SGQR = '51';
 	const ID_MERCHANT_CATEGORY_CODE = '52';
 	const ID_TRANSACTION_CURRENCY = '53';
 	const ID_TRANSACTION_AMOUNT = '54';
@@ -39,7 +33,6 @@ class EmvMerchant {
 	const POINT_OF_INITIATION_STATIC_VALUE = 'STATIC';
 	const POINT_OF_INITIATION_DYNAMIC = '12';
 	const POINT_OF_INITIATION_DYNAMIC_VALUE = 'DYNAMIC';
-	const MERCHANT_CATEGORY_CODE_GENERIC = '0000';
 
 	/* | --------------------------------------------------------------------------------------------------------
 	   | PAYNOW (26)
@@ -72,25 +65,6 @@ class EmvMerchant {
 	];
 
 	/* | --------------------------------------------------------------------------------------------------------
-	   | PROMPTPAY (29)
-	   | -------------------------------------------------------------------------------------------------------- */
-	const PROMPTPAY_CHANNEL = 'A000000677010111';
-	const PROMPTPAY_CHANNEL_NAME = 'TH.PROMPTPAY';
-	const PROMPTPAY_ID_APP_ID = '00';
-	const PROMPTPAY_ID_MOBILE = '01';
-	const PROMPTPAY_ID_TAX_ID = '02';
-	const PROMPTPAY_ID_EWALLET_ID = '03';
-	const PROMPTPAY_PROXY_MOBILE = 'mobile';
-	const PROMPTPAY_PROXY_TAX_ID = 'tax_id';
-	const PROMPTPAY_PROXY_EWALLET_ID = 'ewallet_Id';
-	private $promptpay_keys = [
-		'00' => 'app_id',
-		'97' => 'proxy_type',
-		'98' => 'proxy_value',
-		'99' => 'channel_name'
-	];
-
-	/* | --------------------------------------------------------------------------------------------------------
 	   | SGQR (51)
 	   | -------------------------------------------------------------------------------------------------------- */
 	const SGQR_CHANNEL = 'SG.SGQR';
@@ -103,107 +77,6 @@ class EmvMerchant {
 		'05' => 'unit_number',
 		'06' => 'miscellaneous',
 		'07' => 'new_version_date'
-	];
-
-	/* | --------------------------------------------------------------------------------------------------------
-	   | FAVEPAY
-	   | -------------------------------------------------------------------------------------------------------- */
-	const FAVE_CHANNEL = 'COM.MYFAVE';
-	const FAVE_CHANNEL_NAME = 'FavePay';
-	private $favepay_keys = [
-		'00' => 'channel',
-		'01' => 'url'
-	];
-
-	/* | --------------------------------------------------------------------------------------------------------
-	   | DASH
-	   | -------------------------------------------------------------------------------------------------------- */
-	const DASH_CHANNEL = 'SG.COM.DASH.WWW';
-	const DASH_CHANNEL_NAME = 'Singtel Dash';
-	private $dash_keys = [
-		'00' => 'channel',
-		'01' => 'merchant_account'
-	];
-
-	/* | --------------------------------------------------------------------------------------------------------
-	   | LIQUIDPAY
-	   | -------------------------------------------------------------------------------------------------------- */
-	const LIQUIDPAY_CHANNEL = 'A0000007620001';
-	const LIQUIDPAY_CHANNEL_NAME = 'LiquidPay';
-	const LIQUIDPAY_REVERSE_URL = 'COM.LQDPALLIANCE.WWW';
-	private $liquidpay_keys = [
-		'00' => 'app_id',
-		'01' => 'reverse_url',
-		'02' => 'payee_id',
-		'03' => 'service_code'
-	];
-
-	/* | --------------------------------------------------------------------------------------------------------
-	   | EZ-LINK
-	   | -------------------------------------------------------------------------------------------------------- */
-	const EZLINK_CHANNEL = 'SG.COM.EZLINK';
-	const EZLINK_CHANNEL_NAME = 'EZ-Link';
-	private $ezlink_keys = [
-		'00' => 'channel',
-		'01' => 'merchant_id',
-		'02' => 'sgqr_indicator',
-		'03' => 'offline_usage',
-		'04' => 'verification_code'
-	];
-
-	/* | --------------------------------------------------------------------------------------------------------
-	   | GRABPAY
-	   | -------------------------------------------------------------------------------------------------------- */
-	const GRAB_CHANNEL = 'COM.GRAB';
-	const GRAB_CHANNEL_NAME = 'GrabPay';
-	private $grab_keys = [
-		'00' => 'channel',
-		'01' => 'merchant_id'
-	];
-
-	/* | --------------------------------------------------------------------------------------------------------
-	   | DBS PAYLAH!
-	   | -------------------------------------------------------------------------------------------------------- */
-	const PAYLAH_CHANNEL = 'COM.DBS';
-	const PAYLAH_CHANNEL_NAME = 'DBS PayLah!';
-	private $paylah_keys = [
-		'00' => 'channel',
-		'01' => 'qr_transaction_ref_id',
-		'02' => 'qr_id'
-	];
-
-	/* | --------------------------------------------------------------------------------------------------------
-	   | WECHAT PAY
-	   | -------------------------------------------------------------------------------------------------------- */
-	const WECHAT_CHANNEL = 'COM.QQ.WEIXIN.PAY';
-	const WECHAT_CHANNEL_NAME = 'WeChat Pay';
-	private $wechat_keys = [
-		'00' => 'channel',
-		'01' => 'merchant_account',
-		'02' => 'terminal_id',
-		'03' => '??03??',
-		'04' => '??04??',
-		'99' => '??99??',
-	];
-
-	/* | --------------------------------------------------------------------------------------------------------
-	   | UOB
-	   | -------------------------------------------------------------------------------------------------------- */
-	const UOB_CHANNEL = 'SG.COM.UOB';
-	const UOB_CHANNEL_NAME = 'UOB';
-	private $uob_keys = [
-		'00' => 'channel',
-		'01' => 'merchant_account'
-	];
-
-	/* | --------------------------------------------------------------------------------------------------------
-	   | SHOPEEPAY
-	   | -------------------------------------------------------------------------------------------------------- */
-	const AIRPAY_CHANNEL = 'SG.AIRPAY';
-	const AIRPAY_CHANNEL_NAME = 'ShopeePay/AirPay';
-	private $airpay_keys = [
-		'00' => 'channel',
-		'01' => 'merchant_account_information'
 	];
 
 	/**
@@ -602,7 +475,6 @@ class EmvMerchant {
 	/* | --------------------------------------------------------------------------------------------------------
 	   | PUBLIC PROPERTIES
 	   | -------------------------------------------------------------------------------------------------------- */
-	public $mode;
 	public $qr_string;
 	public $payload_format_indicator;
 	public $point_of_initiation;
@@ -675,10 +547,8 @@ class EmvMerchant {
 			0xEF1F, 0xFF3E, 0xCF5D, 0xDF7C, 0xAF9B, 0xBFBA, 0x8FD9, 0x9FF8,
 			0x6E17, 0x7E36, 0x4E55, 0x5E74, 0x2E93, 0x3EB2, 0x0ED1, 0x1EF0
 		);
-
 		$crc16 = 0xFFFF; // the CRC
 		$len = strlen($str);
-
 		for($i = 0; $i < $len; $i++ )
 		{
 			$t = ($crc16 >> 8) ^ ord($str[$i]); // High byte Xor Message Byte to get index
@@ -709,7 +579,6 @@ class EmvMerchant {
 	 */
 	public function decode($string)
 	{
-		$this->mode = self::MODE_DECODE;
 		$string = str_replace(chr(194) . chr(160), ' ', $string);
 		$this->qr_string = $string;
 		while ( ! empty($string))
@@ -957,38 +826,8 @@ class EmvMerchant {
 			case self::PAYNOW_CHANNEL:
 				$this->accounts[] = $this->process_paynow($account_raw, $intId);
 				break;
-			case self::PROMPTPAY_CHANNEL:
-				$this->accounts[] = $this->process_promptpay($account_raw, $intId);
-				break;
 			case self::SGQR_CHANNEL:
 				$this->accounts[] = $this->process_sgqr($account_raw, $intId);
-				break;
-			case self::FAVE_CHANNEL:
-				$this->accounts[] = $this->process_favepay($account_raw, $intId);
-				break;
-			case self::DASH_CHANNEL:
-				$this->accounts[] = $this->process_dash($account_raw, $intId);
-				break;
-			case self::LIQUIDPAY_CHANNEL:
-				$this->accounts[] = $this->process_liquidpay($account_raw, $intId);
-				break;
-			case self::EZLINK_CHANNEL:
-				$this->accounts[] = $this->process_ezlink($account_raw, $intId);
-				break;
-			case self::GRAB_CHANNEL:
-				$this->accounts[] = $this->process_grab($account_raw, $intId);
-				break;
-			case self::PAYLAH_CHANNEL:
-				$this->accounts[] = $this->process_paylah($account_raw, $intId);
-				break;
-			case self::WECHAT_CHANNEL:
-				$this->accounts[] = $this->process_wechat($account_raw, $intId);
-				break;
-			case self::UOB_CHANNEL:
-				$this->accounts[] = $this->process_uob($account_raw, $intId);
-				break;
-			case self::AIRPAY_CHANNEL:
-				$this->accounts[] = $this->process_airpay($account_raw, $intId);
 				break;
 			default:
 				$this->accounts[] = array_merge(['original_id' => $intId], $account_raw);
@@ -1023,41 +862,6 @@ class EmvMerchant {
 	}
 
 	/**
-	 * Process PromptPay account
-	 * @param $account_raw
-	 * @param $intId
-	 * @return array
-	 */
-	private function process_promptpay($account_raw, $intId)
-	{
-		// MOSTLY 29
-		$account['original_id'] = $intId;
-		$account[$this->promptpay_keys[99]] = self::PROMPTPAY_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
-		{
-			switch ($id)
-			{
-				case self::PROMPTPAY_ID_APP_ID:
-					$account[$this->promptpay_keys[$id]] = $val;
-					break;
-				case self::PROMPTPAY_ID_MOBILE:
-					$account[$this->promptpay_keys[97]] = self::PROMPTPAY_PROXY_MOBILE;
-					$account[$this->promptpay_keys[98]] = $val;
-					break;
-				case self::PROMPTPAY_ID_TAX_ID:
-					$account[$this->promptpay_keys[97]] = self::PROMPTPAY_PROXY_TAX_ID;
-					$account[$this->promptpay_keys[98]] = $val;
-					break;
-				case self::PROMPTPAY_ID_EWALLET_ID:
-					$account[$this->promptpay_keys[97]] = self::PROMPTPAY_PROXY_EWALLET_ID;
-					$account[$this->promptpay_keys[98]] = $val;
-					break;
-			}
-		}
-		return $account;
-	}
-
-	/**
 	 * Process SGQR information - not an account but required
 	 * @param $account_raw
 	 * @param $intId
@@ -1070,159 +874,6 @@ class EmvMerchant {
 		foreach ($account_raw as $id => $val)
 		{
 			$account[$this->sgqr_keys[$id]] = $val;
-		}
-		return $account;
-	}
-
-	/**
-	 * Process FavePay
-	 * @param $account_raw
-	 * @param $intId
-	 * @return array
-	 */
-	private function process_favepay($account_raw, $intId)
-	{
-		$account['original_id'] = $intId;
-		$account['channel_name'] = self::FAVE_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
-		{
-			$account[$this->favepay_keys[$id]] = $val;
-		}
-		return $account;
-	}
-
-	/**
-	 * Process Dash
-	 * @param $account_raw
-	 * @param $intId
-	 * @return array
-	 */
-	private function process_dash($account_raw, $intId)
-	{
-		$account['original_id'] = $intId;
-		$account['channel_name'] = self::DASH_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
-		{
-			$account[$this->dash_keys[$id]] = $val;
-		}
-		return $account;
-	}
-
-	/**
-	 * Process LiquidPay
-	 * @param $account_raw
-	 * @param $intId
-	 * @return array
-	 */
-	private function process_liquidpay($account_raw, $intId)
-	{
-		$account['original_id'] = $intId;
-		$account['channel_name'] = self::LIQUIDPAY_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
-		{
-			$account[$this->liquidpay_keys[$id]] = $val;
-		}
-		return $account;
-	}
-
-	/**
-	 * Process EZ-Link
-	 * @param $account_raw
-	 * @param $intId
-	 * @return array
-	 */
-	private function process_ezlink($account_raw, $intId)
-	{
-		$account['original_id'] = $intId;
-		$account['channel_name'] = self::EZLINK_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
-		{
-			$account[$this->ezlink_keys[$id]] = $val;
-		}
-		return $account;
-	}
-
-	/**
-	 * Process GrabPay
-	 * @param $account_raw
-	 * @param $intId
-	 * @return array
-	 */
-	private function process_grab($account_raw, $intId)
-	{
-		$account['original_id'] = $intId;
-		$account['channel_name'] = self::GRAB_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
-		{
-			$account[$this->grab_keys[$id]] = $val;
-		}
-		return $account;
-	}
-
-	/**
-	 * Process DBS PayLah!
-	 * @param $account_raw
-	 * @param $intId
-	 * @return array
-	 */
-	private function process_paylah($account_raw, $intId)
-	{
-		$account['original_id'] = $intId;
-		$account['channel_name'] = self::PAYLAH_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
-		{
-			$account[$this->paylah_keys[$id]] = $val;
-		}
-		return $account;
-	}
-
-	/**
-	 * Process WeChat Pay
-	 * @param $account_raw
-	 * @param $intId
-	 * @return array
-	 */
-	private function process_wechat($account_raw, $intId)
-	{
-		$account['original_id'] = $intId;
-		$account['channel_name'] = self::WECHAT_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
-		{
-			$account[$this->wechat_keys[$id]] = $val;
-		}
-		return $account;
-	}
-
-	/**
-	 * Process UOB
-	 * @param $account_raw
-	 * @param $intId
-	 * @return array
-	 */
-	private function process_uob($account_raw, $intId)
-	{
-		$account['original_id'] = $intId;
-		$account['channel_name'] = self::UOB_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
-		{
-			$account[$this->uob_keys[$id]] = $val;
-		}
-		return $account;
-	}
-
-	/**
-	 * Process AirPay / ShopeePay
-	 * @param $account_raw
-	 * @param $intId
-	 * @return array
-	 */
-	private function process_airpay($account_raw, $intId)
-	{
-		$account['original_id'] = $intId;
-		$account['channel_name'] = self::AIRPAY_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
-		{
-			$account[$this->airpay_keys[$id]] = $val;
 		}
 		return $account;
 	}
