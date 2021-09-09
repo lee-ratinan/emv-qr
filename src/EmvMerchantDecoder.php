@@ -20,7 +20,7 @@ class EmvMerchantDecoder extends EmvMerchant {
 	/**
 	 * Read and decode the EMV QR string
 	 * @param $string string Input string read from the QR Code
-	 * @return EmvMerchant
+	 * @return EmvMerchantDecoder
 	 */
 	public function decode($string)
 	{
@@ -157,7 +157,7 @@ class EmvMerchantDecoder extends EmvMerchant {
 			$val = floatval($strValue);
 			if (0 < $val)
 			{
-				$this->transaction_amount = number_format($val, 2, '.', '');
+				$this->transaction_amount = (float) number_format($val, 2, '.', '');
 				if (parent::POINT_OF_INITIATION_STATIC == $this->point_of_initiation)
 				{
 					$this->process_warning(parent::ID_TRANSACTION_AMOUNT, "Point of initiation is static ('{$this->point_of_initiation}'), but the transaction amount is set ('{$strValue}').");
