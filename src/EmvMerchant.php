@@ -758,4 +758,14 @@ class EmvMerchant {
 	{
 		$this->warnings[$field_id] = $warning;
 	}
+
+	/**
+	 * Validate characters for those in ANS format
+	 * @param $string string The string to validate
+	 * @return false|int
+	 */
+	protected function validate_ans_charset($string)
+	{
+		return preg_match('/[\x20-\x7E]+/', $string);
+	}
 }
