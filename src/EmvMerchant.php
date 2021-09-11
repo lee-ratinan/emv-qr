@@ -7,234 +7,42 @@ namespace EMVQR;
  */
 class EmvMerchant {
 
+	/**
+	 * MODES
+	 */
 	const MODE_GENERATE = 'GENERATE';
 	const MODE_DECODE = 'DECODE';
 
+	/**
+	 * PAYLOAD FORMAT INDICATOR (00)
+	 */
 	const ID_PAYLOAD_FORMAT_INDICATOR = '00';
-	const ID_POINT_OF_INITIATION = '01';
-	const ID_ACCOUNT_PAYNOW = '26';
-	const ID_ACCOUNT_PROMPTPAY = '29';
-	const ID_ACCOUNT_SGQR = '51';
-	const ID_MERCHANT_CATEGORY_CODE = '52';
-	const ID_TRANSACTION_CURRENCY = '53';
-	const ID_TRANSACTION_AMOUNT = '54';
-	const ID_COUNTRY_CODE = '58';
-	const ID_MERCHANT_NAME = '59';
-	const ID_MERCHANT_CITY = '60';
-	const ID_MERCHANT_POSTAL_CODE = '61';
-	const ID_ADDITIONAL_DATA_FIELDS = '62';
-	const ID_CRC = '63';
-	const ID_ACCOUNT_LOWER_BOUNDARY = 2;
-	const ID_ACCOUNT_UPPER_BOUNDARY = 51;
-
-	const ID_ADDITIONAL_DATA_BILL_NUMBER = '01';
-	const ID_ADDITIONAL_DATA_MOBILE_NUMBER = '02';
-	const ID_ADDITIONAL_DATA_STORE_LABEL = '03';
-	const ID_ADDITIONAL_DATA_LOYALTY_NUMBER = '04';
-	const ID_ADDITIONAL_DATA_REFERENCE_LABEL = '05';
-	const ID_ADDITIONAL_DATA_CUSTOMER_LABEL = '06';
-	const ID_ADDITIONAL_DATA_TERMINAL_LABEL = '07';
-	const ID_ADDITIONAL_DATA_PURPOSE_OF_TRANSACTION = '08';
-	const ID_ADDITIONAL_DATA_ADDITIONAL_CUSTOMER_DATA_REQUEST = '09';
-	const ID_ADDITIONAL_DATA_MERCHANT_TAX_ID = '10';
-	const ID_ADDITIONAL_DATA_MERCHANT_CHANNEL = '11';
-
 	const PAYLOAD_FORMAT_INDICATOR_VALUE = '01';
+
+	/**
+	 * POINT OF INITIATION (01)
+	 */
+	const ID_POINT_OF_INITIATION = '01';
 	const POINT_OF_INITIATION_STATIC = '11';
 	const POINT_OF_INITIATION_STATIC_VALUE = 'STATIC';
 	const POINT_OF_INITIATION_DYNAMIC = '12';
 	const POINT_OF_INITIATION_DYNAMIC_VALUE = 'DYNAMIC';
+
+	/**
+	 * ACCOUNTS (02-51)
+	 */
+	const ID_ACCOUNT_LOWER_BOUNDARY = 2;
+	const ID_ACCOUNT_UPPER_BOUNDARY = 51;
+	const ID_ACCOUNT_PAYNOW = '26';
+	const ID_ACCOUNT_PROMPTPAY = '29';
+	const ID_ACCOUNT_SGQR = '51';
+
+	/**
+	 * MERCHANT CATEGORY CODE (52)
+	 */
+	const ID_MERCHANT_CATEGORY_CODE = '52';
 	const MERCHANT_CATEGORY_CODE_GENERIC = '0000';
 	const MERCHANT_CATEGORY_UNKNOWN = 'UNKNOWN';
-	const CURRENCY_IDR = 'IDR';
-	const CURRENCY_MYR = 'MYR';
-	const CURRENCY_SGD = 'SGD';
-	const CURRENCY_THB = 'THB';
-	const COUNTRY_ID = 'ID';
-	const COUNTRY_MY = 'MY';
-	const COUNTRY_SG = 'SG';
-	const COUNTRY_TH = 'TH';
-	const MERCHANT_CITY_SG = 'SINGAPORE';
-	const CRC_LENGTH = '04';
-
-	const POS_ZERO = 0;
-	const POS_TWO = 2;
-	const POS_FOUR = 4;
-	const POS_SIX = 6;
-	const POS_EIGHT = 8;
-	const POS_TEN = 10;
-	const POS_TWELVE = 12;
-	const POS_MINUS_FOUR = -4;
-	const LENGTH_ONE = 1;
-	const LENGTH_TWO = 2;
-	const LENGTH_THREE = 3;
-	const LENGTH_FOUR = 4;
-
-	const TIMEZONE_SINGAPORE = 'Asia/Singapore';
-	/* | --------------------------------------------------------------------------------------------------------
-	   | PAYNOW (26)
-	   | -------------------------------------------------------------------------------------------------------- */
-	const PAYNOW_CHANNEL = 'SG.PAYNOW';
-	const PAYNOW_ID_CHANNEL = '00';
-	const PAYNOW_ID_PROXY_TYPE = '01';
-	const PAYNOW_ID_PROXY_VALUE = '02';
-	const PAYNOW_ID_AMOUNT_EDITABLE = '03';
-	const PAYNOW_ID_EXPIRY_DATE = '04';
-	const PAYNOW_PROXY_MOBILE = '0';
-	const PAYNOW_PROXY_UEN = '2';
-	const PAYNOW_AMOUNT_EDITABLE_TRUE = '1';
-	const PAYNOW_AMOUNT_EDITABLE_FALSE = '0';
-	protected $paynow_keys = [
-		'00' => 'channel',
-		'01' => 'proxy_type',
-		'02' => 'proxy_value',
-		'03' => 'amount_editable',
-		'04' => 'expiry_date'
-	];
-	protected $paynow_proxy_type = [
-		'0' => 'MOBILE',
-		'2' => 'UEN'
-	];
-	protected $paynow_amount_editable = [
-		'1' => true,
-		'0' => false
-	];
-
-	/* | --------------------------------------------------------------------------------------------------------
-	   | PROMPTPAY (29)
-	   | -------------------------------------------------------------------------------------------------------- */
-	const PROMPTPAY_CHANNEL = 'A000000677010111';
-	const PROMPTPAY_CHANNEL_NAME = 'TH.PROMPTPAY';
-	const PROMPTPAY_ID_APP_ID = '00';
-	const PROMPTPAY_ID_MOBILE = '01';
-	const PROMPTPAY_ID_TAX_ID = '02';
-	const PROMPTPAY_ID_EWALLET_ID = '03';
-	const PROMPTPAY_PROXY_MOBILE = 'mobile';
-	const PROMPTPAY_PROXY_TAX_ID = 'tax_id';
-	const PROMPTPAY_PROXY_EWALLET_ID = 'ewallet_Id';
-	protected $promptpay_keys = [
-		'00' => 'app_id',
-		'97' => 'proxy_type',
-		'98' => 'proxy_value',
-		'99' => 'channel_name'
-	];
-
-	/* | --------------------------------------------------------------------------------------------------------
-	   | SGQR (51)
-	   | -------------------------------------------------------------------------------------------------------- */
-	const SGQR_CHANNEL = 'SG.SGQR';
-	protected $sgqr_keys = [
-		'00' => 'channel',
-		'01' => 'sgqr_id_number',
-		'02' => 'version',
-		'03' => 'postal_code',
-		'04' => 'level',
-		'05' => 'unit_number',
-		'06' => 'miscellaneous',
-		'07' => 'new_version_date'
-	];
-
-	/* | --------------------------------------------------------------------------------------------------------
-	   | FAVEPAY
-	   | -------------------------------------------------------------------------------------------------------- */
-	const FAVE_CHANNEL = 'COM.MYFAVE';
-	const FAVE_CHANNEL_NAME = 'FavePay';
-	protected $favepay_keys = [
-		'00' => 'channel',
-		'01' => 'url'
-	];
-
-	/* | --------------------------------------------------------------------------------------------------------
-	   | DASH
-	   | -------------------------------------------------------------------------------------------------------- */
-	const DASH_CHANNEL = 'SG.COM.DASH.WWW';
-	const DASH_CHANNEL_NAME = 'Singtel Dash';
-	protected $dash_keys = [
-		'00' => 'channel',
-		'01' => 'merchant_account'
-	];
-
-	/* | --------------------------------------------------------------------------------------------------------
-	   | LIQUIDPAY
-	   | -------------------------------------------------------------------------------------------------------- */
-	const LIQUIDPAY_CHANNEL = 'A0000007620001';
-	const LIQUIDPAY_CHANNEL_NAME = 'LiquidPay';
-	const LIQUIDPAY_REVERSE_URL = 'COM.LQDPALLIANCE.WWW';
-	protected $liquidpay_keys = [
-		'00' => 'app_id',
-		'01' => 'reverse_url',
-		'02' => 'payee_id',
-		'03' => 'service_code'
-	];
-
-	/* | --------------------------------------------------------------------------------------------------------
-	   | EZ-LINK
-	   | -------------------------------------------------------------------------------------------------------- */
-	const EZLINK_CHANNEL = 'SG.COM.EZLINK';
-	const EZLINK_CHANNEL_NAME = 'EZ-Link';
-	protected $ezlink_keys = [
-		'00' => 'channel',
-		'01' => 'merchant_id',
-		'02' => 'sgqr_indicator',
-		'03' => 'offline_usage',
-		'04' => 'verification_code'
-	];
-
-	/* | --------------------------------------------------------------------------------------------------------
-	   | GRABPAY
-	   | -------------------------------------------------------------------------------------------------------- */
-	const GRAB_CHANNEL = 'COM.GRAB';
-	const GRAB_CHANNEL_NAME = 'GrabPay';
-	protected $grab_keys = [
-		'00' => 'channel',
-		'01' => 'merchant_id'
-	];
-
-	/* | --------------------------------------------------------------------------------------------------------
-	   | DBS PAYLAH!
-	   | -------------------------------------------------------------------------------------------------------- */
-	const PAYLAH_CHANNEL = 'COM.DBS';
-	const PAYLAH_CHANNEL_NAME = 'DBS PayLah!';
-	protected $paylah_keys = [
-		'00' => 'channel',
-		'01' => 'qr_transaction_ref_id',
-		'02' => 'qr_id'
-	];
-
-	/* | --------------------------------------------------------------------------------------------------------
-	   | WECHAT PAY
-	   | -------------------------------------------------------------------------------------------------------- */
-	const WECHAT_CHANNEL = 'COM.QQ.WEIXIN.PAY';
-	const WECHAT_CHANNEL_NAME = 'WeChat Pay';
-	protected $wechat_keys = [
-		'00' => 'channel',
-		'01' => 'merchant_account',
-		'02' => 'terminal_id',
-		'03' => '??03??',
-		'04' => '??04??',
-		'99' => '??99??',
-	];
-
-	/* | --------------------------------------------------------------------------------------------------------
-	   | UOB
-	   | -------------------------------------------------------------------------------------------------------- */
-	const UOB_CHANNEL = 'SG.COM.UOB';
-	const UOB_CHANNEL_NAME = 'UOB';
-	protected $uob_keys = [
-		'00' => 'channel',
-		'01' => 'merchant_account'
-	];
-
-	/* | --------------------------------------------------------------------------------------------------------
-	   | SHOPEEPAY
-	   | -------------------------------------------------------------------------------------------------------- */
-	const AIRPAY_CHANNEL = 'SG.AIRPAY';
-	const AIRPAY_CHANNEL_NAME = 'ShopeePay/AirPay';
-	protected $airpay_keys = [
-		'00' => 'channel',
-		'01' => 'merchant_account_information'
-	];
-
 	/**
 	 * @var string[] Merchant category codes ISO18245;
 	 * Src: https://docs.checkout.com/resources/codes/merchant-category-codes
@@ -609,24 +417,332 @@ class EmvMerchant {
 	];
 
 	/**
+	 * CURRENCY (53)
+	 */
+	const ID_TRANSACTION_CURRENCY = '53';
+	const CURRENCY_HKD = 'HKD';
+	const CURRENCY_HKD_NUMERIC = '344';
+	const CURRENCY_IDR = 'IDR';
+	const CURRENCY_IDR_NUMERIC = '360';
+	const CURRENCY_MYR = 'MYR';
+	const CURRENCY_MYR_NUMERIC = '458';
+	const CURRENCY_SGD = 'SGD';
+	const CURRENCY_SGD_NUMERIC = '702';
+	const CURRENCY_THB = 'THB';
+	const CURRENCY_THB_NUMERIC = '764';
+	/**
 	 * @var string[] ISO4217
 	 */
 	protected $currency_codes = [
-		'360' => 'IDR',
-		'458' => 'MYR',
-		'702' => 'SGD',
-		'764' => 'THB'
+		self::CURRENCY_HKD_NUMERIC => self::CURRENCY_HKD,
+		self::CURRENCY_IDR_NUMERIC => self::CURRENCY_IDR,
+		self::CURRENCY_MYR_NUMERIC => self::CURRENCY_MYR,
+		self::CURRENCY_SGD_NUMERIC => self::CURRENCY_SGD,
+		self::CURRENCY_THB_NUMERIC => self::CURRENCY_THB
 	];
 
+	/**
+	 * TRANSACTION AMOUNT (54)
+	 */
+	const ID_TRANSACTION_AMOUNT = '54';
+
+	/**
+	 * TIP OR CONVENIENCE FEE (55-57)
+	 */
+	const ID_TIP_OR_CONVENIENCE_FEE_INDICATOR = '55';
+	const ID_VALUE_OF_FEE_FIXED = '56';
+	const ID_VALUE_OF_FEE_PERCENTAGE = '57';
+	const FEE_INDICATOR_TIP = '01';
+	const FEE_INDICATOR_TIP_VALUE = 'tip';
+	const FEE_INDICATOR_CONVENIENCE_FEE_FIXED = '02';
+	const FEE_INDICATOR_CONVENIENCE_FEE_FIXED_VALUE = 'convenience_fee_fixed';
+	const FEE_INDICATOR_CONVENIENCE_FEE_PERCENTAGE = '03';
+	const FEE_INDICATOR_CONVENIENCE_FEE_PERCENTAGE_VALUE = 'convenience_fee_percentage';
+	protected $tip_or_convenience_fee_indicators = [
+		self::FEE_INDICATOR_TIP                        => self::FEE_INDICATOR_TIP_VALUE,
+		self::FEE_INDICATOR_CONVENIENCE_FEE_FIXED      => self::FEE_INDICATOR_CONVENIENCE_FEE_FIXED_VALUE,
+		self::FEE_INDICATOR_CONVENIENCE_FEE_PERCENTAGE => self::FEE_INDICATOR_CONVENIENCE_FEE_PERCENTAGE_VALUE
+	];
+
+	/**
+	 * COUNTRY (58)
+	 */
+	const ID_COUNTRY_CODE = '58';
+	const COUNTRY_HK = 'HK';
+	const COUNTRY_ID = 'ID';
+	const COUNTRY_MY = 'MY';
+	const COUNTRY_SG = 'SG';
+	const COUNTRY_TH = 'TH';
 	/**
 	 * @var string[] ISO3166
 	 */
 	protected $country_codes = [
-		'ID',
-		'MY',
-		'SG',
-		'TH'
+		self::COUNTRY_HK,
+		self::COUNTRY_ID,
+		self::COUNTRY_MY,
+		self::COUNTRY_SG,
+		self::COUNTRY_TH
 	];
+
+	/**
+	 * MERCHANT NAME (59)
+	 */
+	const ID_MERCHANT_NAME = '59';
+
+	/**
+	 * CITY (60)
+	 */
+	const ID_MERCHANT_CITY = '60';
+	const MERCHANT_CITY_SG = 'SINGAPORE';
+	const MERCHANT_CITY_BKK = 'BANGKOK';
+	const MERCHANT_CITY_JKT = 'JAKARTA';
+	const MERCHANT_CITY_KL = 'KUALA LUMPUR';
+	const MERCHANT_CITY_HK = 'HONG KONG';
+
+	/**
+	 * POSTAL CODE (61)
+	 */
+	const ID_MERCHANT_POSTAL_CODE = '61';
+
+	/**
+	 * ADDITIONAL DATA (62)
+	 */
+	const ID_ADDITIONAL_DATA_FIELDS = '62';
+	const ID_ADDITIONAL_DATA_BILL_NUMBER = '01';
+	const ID_ADDITIONAL_DATA_MOBILE_NUMBER = '02';
+	const ID_ADDITIONAL_DATA_STORE_LABEL = '03';
+	const ID_ADDITIONAL_DATA_LOYALTY_NUMBER = '04';
+	const ID_ADDITIONAL_DATA_REFERENCE_LABEL = '05';
+	const ID_ADDITIONAL_DATA_CUSTOMER_LABEL = '06';
+	const ID_ADDITIONAL_DATA_TERMINAL_LABEL = '07';
+	const ID_ADDITIONAL_DATA_PURPOSE_OF_TRANSACTION = '08';
+	const ID_ADDITIONAL_DATA_ADDITIONAL_CUSTOMER_DATA_REQUEST = '09';
+	const ID_ADDITIONAL_DATA_MERCHANT_TAX_ID = '10';
+	const ID_ADDITIONAL_DATA_MERCHANT_CHANNEL = '11';
+
+	/**
+	 * CRC (63)
+	 */
+	const ID_CRC = '63';
+	const CRC_LENGTH = '04';
+
+	/**
+	 * MERCHANT INFORMATION - LANGUAGE TEMPLATE (64)
+	 */
+	const ID_MERCHANT_INFORMATION_LANGUAGE_TEMPLATE = '64';
+
+	/**
+	 * Integers
+	 */
+	const POS_ZERO = 0;
+	const POS_TWO = 2;
+	const POS_FOUR = 4;
+	const POS_SIX = 6;
+	const POS_EIGHT = 8;
+	const POS_TEN = 10;
+	const POS_TWELVE = 12;
+	const POS_MINUS_FOUR = -4;
+	const LENGTH_ONE = 1;
+	const LENGTH_TWO = 2;
+	const LENGTH_THREE = 3;
+	const LENGTH_FOUR = 4;
+
+	/**
+	 * Others
+	 */
+	const TIMEZONE_SINGAPORE = 'Asia/Singapore';
+
+	/* | --------------------------------------------------------------------------------------------------------
+	   | PAYNOW (26)
+	   | -------------------------------------------------------------------------------------------------------- */
+	const PAYNOW_CHANNEL = 'SG.PAYNOW';
+	const PAYNOW_ID_CHANNEL = '00';
+	const PAYNOW_ID_PROXY_TYPE = '01';
+	const PAYNOW_ID_PROXY_VALUE = '02';
+	const PAYNOW_ID_AMOUNT_EDITABLE = '03';
+	const PAYNOW_ID_EXPIRY_DATE = '04';
+	const PAYNOW_PROXY_MOBILE = '0';
+	const PAYNOW_PROXY_UEN = '2';
+	const PAYNOW_AMOUNT_EDITABLE_TRUE = '1';
+	const PAYNOW_AMOUNT_EDITABLE_FALSE = '0';
+	protected $paynow_keys = [
+		'00' => 'channel',
+		'01' => 'proxy_type',
+		'02' => 'proxy_value',
+		'03' => 'amount_editable',
+		'04' => 'expiry_date'
+	];
+	protected $paynow_proxy_type = [
+		'0' => 'MOBILE',
+		'2' => 'UEN'
+	];
+	protected $paynow_amount_editable = [
+		'1' => true,
+		'0' => false
+	];
+
+	/* | --------------------------------------------------------------------------------------------------------
+	   | PROMPTPAY (29)
+	   | -------------------------------------------------------------------------------------------------------- */
+	const PROMPTPAY_CHANNEL = 'A000000677010111';
+	const PROMPTPAY_CHANNEL_NAME = 'TH.PROMPTPAY';
+	const PROMPTPAY_ID_APP_ID = '00';
+	const PROMPTPAY_ID_MOBILE = '01';
+	const PROMPTPAY_ID_TAX_ID = '02';
+	const PROMPTPAY_ID_EWALLET_ID = '03';
+	const PROMPTPAY_PROXY_MOBILE = 'mobile';
+	const PROMPTPAY_PROXY_TAX_ID = 'tax_id';
+	const PROMPTPAY_PROXY_EWALLET_ID = 'ewallet_Id';
+	protected $promptpay_keys = [
+		'00' => 'app_id',
+		'97' => 'proxy_type',
+		'98' => 'proxy_value',
+		'99' => 'channel_name'
+	];
+
+	/* | --------------------------------------------------------------------------------------------------------
+	   | SGQR (51)
+	   | -------------------------------------------------------------------------------------------------------- */
+	const SGQR_CHANNEL = 'SG.SGQR';
+	protected $sgqr_keys = [
+		'00' => 'channel',
+		'01' => 'sgqr_id_number',
+		'02' => 'version',
+		'03' => 'postal_code',
+		'04' => 'level',
+		'05' => 'unit_number',
+		'06' => 'miscellaneous',
+		'07' => 'new_version_date'
+	];
+
+	/* | --------------------------------------------------------------------------------------------------------
+	   | FAVEPAY
+	   | -------------------------------------------------------------------------------------------------------- */
+	const FAVE_CHANNEL = 'COM.MYFAVE';
+	const FAVE_CHANNEL_NAME = 'FavePay';
+	protected $favepay_keys = [
+		'00' => 'channel',
+		'01' => 'url'
+	];
+
+	/* | --------------------------------------------------------------------------------------------------------
+	   | DASH
+	   | -------------------------------------------------------------------------------------------------------- */
+	const DASH_CHANNEL = 'SG.COM.DASH.WWW';
+	const DASH_CHANNEL_NAME = 'Singtel Dash';
+	protected $dash_keys = [
+		'00' => 'channel',
+		'01' => 'merchant_account'
+	];
+
+	/* | --------------------------------------------------------------------------------------------------------
+	   | LIQUIDPAY
+	   | -------------------------------------------------------------------------------------------------------- */
+	const LIQUIDPAY_CHANNEL = 'A0000007620001';
+	const LIQUIDPAY_CHANNEL_NAME = 'LiquidPay';
+	const LIQUIDPAY_REVERSE_URL = 'COM.LQDPALLIANCE.WWW';
+	protected $liquidpay_keys = [
+		'00' => 'app_id',
+		'01' => 'reverse_url',
+		'02' => 'payee_id',
+		'03' => 'service_code'
+	];
+
+	/* | --------------------------------------------------------------------------------------------------------
+	   | EZ-LINK
+	   | -------------------------------------------------------------------------------------------------------- */
+	const EZLINK_CHANNEL = 'SG.COM.EZLINK';
+	const EZLINK_CHANNEL_NAME = 'EZ-Link';
+	protected $ezlink_keys = [
+		'00' => 'channel',
+		'01' => 'merchant_id',
+		'02' => 'sgqr_indicator',
+		'03' => 'offline_usage',
+		'04' => 'verification_code'
+	];
+
+	/* | --------------------------------------------------------------------------------------------------------
+	   | GRABPAY
+	   | -------------------------------------------------------------------------------------------------------- */
+	const GRAB_CHANNEL = 'COM.GRAB';
+	const GRAB_CHANNEL_NAME = 'GrabPay';
+	protected $grab_keys = [
+		'00' => 'channel',
+		'01' => 'merchant_id'
+	];
+
+	/* | --------------------------------------------------------------------------------------------------------
+	   | DBS PAYLAH!
+	   | -------------------------------------------------------------------------------------------------------- */
+	const PAYLAH_CHANNEL = 'COM.DBS';
+	const PAYLAH_CHANNEL_NAME = 'DBS PayLah!';
+	protected $paylah_keys = [
+		'00' => 'channel',
+		'01' => 'qr_transaction_ref_id',
+		'02' => 'qr_id'
+	];
+
+	/* | --------------------------------------------------------------------------------------------------------
+	   | WECHAT PAY
+	   | -------------------------------------------------------------------------------------------------------- */
+	const WECHAT_CHANNEL = 'COM.QQ.WEIXIN.PAY';
+	const WECHAT_CHANNEL_NAME = 'WeChat Pay';
+	protected $wechat_keys = [
+		'00' => 'channel',
+		'01' => 'merchant_account',
+		'02' => 'terminal_id',
+		'03' => '??03??',
+		'04' => '??04??',
+		'99' => '??99??',
+	];
+
+	/* | --------------------------------------------------------------------------------------------------------
+	   | UOB
+	   | -------------------------------------------------------------------------------------------------------- */
+	const UOB_CHANNEL = 'SG.COM.UOB';
+	const UOB_CHANNEL_NAME = 'UOB';
+	protected $uob_keys = [
+		'00' => 'channel',
+		'01' => 'merchant_account'
+	];
+
+	/* | --------------------------------------------------------------------------------------------------------
+	   | SHOPEEPAY
+	   | -------------------------------------------------------------------------------------------------------- */
+	const AIRPAY_CHANNEL = 'SG.AIRPAY';
+	const AIRPAY_CHANNEL_NAME = 'ShopeePay/AirPay';
+	protected $airpay_keys = [
+		'00' => 'channel',
+		'01' => 'merchant_account_information'
+	];
+
+	/* | --------------------------------------------------------------------------------------------------------
+	   | ERRORS/WARNINGS
+	   | -------------------------------------------------------------------------------------------------------- */
+	const MESSAGE_TYPE_ERROR = 'ERR';
+	const MESSAGE_TYPE_WARNING = 'WRN';
+	const ERROR_VALUE_PLACEHOLDER = 'XXX';
+	const ERROR_ID_NOT_FOUND = 'E00X';
+	const ERROR_ID_PAYLOAD_FORMAT_INDICATOR_INVALID = 'E001';
+	const ERROR_ID_TYPE_OF_INITIATION_INVALID = 'E002';
+	const ERROR_ID_CURRENCY_NOT_SUPPORTED = 'E003';
+	const WARNING_ID_MCC_INVALID = 'W001';
+	const WARNING_ID_MCC_UNKNOWN = 'W002';
+	protected $messages = [
+		self::ERROR_ID_NOT_FOUND => "Error ID not found.",
+		self::ERROR_ID_PAYLOAD_FORMAT_INDICATOR_INVALID => "Payload format indicator is invalid. Expected '01', found 'XXX'.",
+		self::ERROR_ID_TYPE_OF_INITIATION_INVALID => "Type of initiation is invalid. Expected '11' or '12', found 'XXX'.",
+		self::ERROR_ID_CURRENCY_NOT_SUPPORTED => "Currency is not supported. Found 'XXX' as the currency code. Please check the latest release documentation for supported currencies.",
+		self::WARNING_ID_MCC_INVALID => "Merchant category code is invalid. Expected 4-digit string, found 'XXX'.",
+		self::WARNING_ID_MCC_UNKNOWN => "Merchant category code is unknown or does not exist in the system. Found 'XXX'.",
+	];
+
+	/* | --------------------------------------------------------------------------------------------------------
+	   | VALIDATOR / SANITIZER
+	   | -------------------------------------------------------------------------------------------------------- */
+	const MODE_VALIDATOR = 'V';
+	const MODE_SANITIZER = 'S';
+	const MODE_PARSE_VALUE = 'P';
 
 	/* | --------------------------------------------------------------------------------------------------------
 	   | PUBLIC PROPERTIES
@@ -635,10 +751,13 @@ class EmvMerchant {
 	public $qr_string;
 	public $payload_format_indicator;
 	public $point_of_initiation;
-	public $accounts;
+	public $accounts = [];
 	public $merchant_category_code;
 	public $transaction_currency;
 	public $transaction_amount;
+	public $tip_or_convenience_fee_indicator;
+	public $convenience_fee_fixed;
+	public $convenience_fee_percentage;
 	public $country_code;
 	public $merchant_name;
 	public $merchant_city;
@@ -736,9 +855,47 @@ class EmvMerchant {
 	}
 
 	/* | --------------------------------------------------------------------------------------------------------
-	   | MISC.
+	   | ERRORS
 	   | -------------------------------------------------------------------------------------------------------- */
 
+	/**
+	 * Add error or warning message
+	 * @param string $field_id
+	 * @param string $message_type
+	 * @param string $message_id
+	 * @param string $value_found
+	 */
+	protected function add_message($field_id, $message_type, $message_id, $value_found = '')
+	{
+		if (isset($this->messages[$message_id]))
+		{
+			$message = $this->messages[$message_id];
+			if (!empty($value_found))
+			{
+				$message = str_replace(self::ERROR_VALUE_PLACEHOLDER, $value_found, $message);
+			}
+			switch ($message_type)
+			{
+				case self::MESSAGE_TYPE_ERROR:
+					$this->errors[] = [
+						'field_id' => $field_id,
+						'message' => $message
+					];
+					break;
+				case self::MESSAGE_TYPE_WARNING:
+					$this->warnings[] = [
+						'field_id' => $field_id,
+						'message' => $message
+					];
+					break;
+			}
+		} else {
+			$this->errors[] = [
+				'field_id' => $field_id,
+				'message' => $this->messages[self::ERROR_ID_NOT_FOUND]
+			];
+		}
+	}
 	/**
 	 * Add error to the errors field
 	 * @param $field_id
@@ -759,13 +916,52 @@ class EmvMerchant {
 		$this->warnings[$field_id] = $warning;
 	}
 
+	/* | --------------------------------------------------------------------------------------------------------
+	   | VALIDATORS
+	   | -------------------------------------------------------------------------------------------------------- */
 	/**
-	 * Validate characters for those in ANS format
+	 * Validate or clean characters for those in ANS format
 	 * @param $string string The string to validate
-	 * @return false|int
+	 * @param $mode string Either sanitizer or validator
+	 * @return false|int|string
 	 */
-	protected function validate_ans_charset($string)
+	protected function validate_ans_charset($string, $mode)
 	{
-		return preg_match('/[\x20-\x7E]+/', $string);
+		switch ($mode)
+		{
+			case self::MODE_VALIDATOR:
+				return preg_match('/[\x20-\x7E]+/', $string);
+			case self::MODE_SANITIZER:
+				return filter_var($string, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW);
+			default:
+				return false;
+		}
+	}
+
+	/**
+	 * Validate or clean characters for those in number format
+	 * @param $string string The string to validate
+	 * @param $mode string Either sanitizer or validator
+	 * @return false|int|string
+	 */
+	protected function validate_number($string, $mode)
+	{
+		switch ($mode)
+		{
+			case self::MODE_VALIDATOR:
+				return preg_match('/^(\d+|\d+\.\d+)$/', $string);
+			case self::MODE_SANITIZER:
+				return filter_var($string, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW);
+			case self::MODE_PARSE_VALUE:
+				if (is_float($string))
+				{
+					return $string;
+				} else
+				{
+					return floatval($string);
+				}
+			default:
+				return false;
+		}
 	}
 }

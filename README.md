@@ -39,18 +39,18 @@ Table 1:
 | 52 | 04      | N      | Merchant category code   | M |  ISO 18245 code for retail financial services, use '0000' if unknown or not required |
 | 53 | 03      | N      | Transaction currency     | N | ISO 4217 numeric currency code |
 | 54 | <=13    | ANS    | Transaction amount       | C | The amount to be transferred, required if the QR type is dynamic (the customers do not enter the amount themselves) |
-| 55 | 02      | N      | Tip or Convenience Indicator | O | * Not supported by this library |
-| 56 | <=13    | ANS    | Value of Convenience Fee Fixed | C | * Not supported by this library |
-| 57 | <=5     | ANS    | Value of Convenience Fee Percentage | C | * Not supported by this library |
+| 55 | 02      | N      | Tip or Convenience Indicator        | O |  |
+| 56 | <=13    | ANS    | Value of Convenience Fee Fixed      | C |  |
+| 57 | <=5     | ANS    | Value of Convenience Fee Percentage | C |  |
 | 58 | 02      | ANS    | Country code             | M | ISO 3166-1 alpha-2 country code |
-| 59 | <=25    | ANS    | Merchant name            | M |     |
-| 60 | <=15    | ANS    | Merchant city            | M |     |
-| 61 | <=10    | ANS    | Merchant postal code     | O |     |
-| 62 | <=99    | S      | Additional data template | O | Refer to Table 3 below |
+| 59 | <=25    | ANS    | Merchant name            | M |                                 |
+| 60 | <=15    | ANS    | Merchant city            | M |                                 |
+| 61 | <=10    | ANS    | Merchant postal code     | O |                                 |
+| 62 | <=99    | S      | Additional data template | O | Refer to Table 3 below          |
 | 64 | <=99    | S      | Merchant information template language | O | * Not supported by this library |
 | 65-79 | <=99 | S      | Reserved for future use  | O | * Not supported by this library |
 | 80-99 | <=99 | S      | Unreserved templates     | O | * Not supported by this library |
-| 63 | 04      | ANS    | CRC                      | M | Security code |
+| 63 | 04      | ANS    | CRC                      | M | Security code                   |
 
 The IDs 02-51 are for merchant account information, where the IDs 26-51 are open for private use. The length for each of the account is up to 99.
 
@@ -96,24 +96,29 @@ Table 3:
 
 #### 1.1 Class Public Properties
 
-| Property | Type | Notes |
-|----------|------|-------|
-| mode     | string | Always 'DECODE' or 'GENERATE' |
-| qr_string | string |  |
-| payload_format_indicator | string | A fixed value of '01' |
-| point_of_initiation | string | Always '11' or '12' |
-| accounts | array |  |
-| merchant_category_code | string | ISO 18245, 4-character in length |
-| transaction_currency | string | ISO 4217 alphabetic code (3-character) |
-| transaction_amount | float | optional | 
-| country_code | string | ISO 3166-1 alpha-2 code |
-| merchant_name | string |  |
-| merchant_city | string |  |
-| merchant_postal_code | string |  |
-| additional_fields | array |  |
-| crc | string | A CRC string, 4-character in length |
-| errors | array |  |
-| warnings | array |  |
+Table 4:
+
+| Property                   | Type   | Notes |
+|----------------------------|--------|-------|
+| mode                       | string | Always 'DECODE' or 'GENERATE' |
+| qr_string                  | string |  |
+| payload_format_indicator   | string | A fixed value of '01' |
+| point_of_initiation        | string | Always '11' or '12' |
+| accounts                   | array  |  |
+| merchant_category_code     | string | ISO 18245, 4-character in length |
+| transaction_currency       | string | ISO 4217 alphabetic code (3-character) |
+| transaction_amount         | float  | optional |
+| tip_or_convenience_fee_indicator | string | optional |
+| convenience_fee_fixed      | float  | optional |
+| convenience_fee_percentage | float  | optional  |
+| country_code               | string | ISO 3166-1 alpha-2 code |
+| merchant_name              | string |  |
+| merchant_city              | string |  |
+| merchant_postal_code       | string |  |
+| additional_fields          | array  |  |
+| crc                        | string | A CRC string, 4-character in length |
+| errors                     | array  |  |
+| warnings                   | array  |  |
 
 ### 2 EmvMerchantDecoder
 

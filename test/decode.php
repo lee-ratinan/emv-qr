@@ -3,9 +3,8 @@ require_once '../src/EmvMerchantDecoder.php';
 $str = $_POST['qrcode'];
 if ( ! empty($str))
 {
-	$emv = new \EMVQR\EmvMerchantDecoder();
-	$result = $emv->decode($str);
-	$json = json_encode($result, JSON_PRETTY_PRINT);
+	$emv = new \EMVQR\EmvMerchantDecoder($str);
+	$json = json_encode($emv, JSON_PRETTY_PRINT);
 }
 ?>
 <html>

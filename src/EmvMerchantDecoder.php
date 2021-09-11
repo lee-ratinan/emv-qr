@@ -10,11 +10,14 @@ require_once 'EmvMerchant.php';
 class EmvMerchantDecoder extends EmvMerchant {
 
 	/**
-	 * EmvMerchantDecoder constructor
+	 * EmvMerchantDecoder constructor.
+	 * @param $string string Input string read from the QR Code
 	 */
-	public function __construct()
+	public function __construct($string)
 	{
 		parent::__construct();
+		$this->mode = parent::MODE_DECODE;
+		$this->decode($string);
 	}
 
 	/**
@@ -22,9 +25,8 @@ class EmvMerchantDecoder extends EmvMerchant {
 	 * @param $string string Input string read from the QR Code
 	 * @return EmvMerchantDecoder
 	 */
-	public function decode($string)
+	protected function decode($string)
 	{
-		$this->mode = parent::MODE_DECODE;
 		$string = str_replace(chr(194) . chr(160), ' ', $string);
 		$this->qr_string = $string;
 		while ( ! empty($string))
@@ -48,26 +50,37 @@ class EmvMerchantDecoder extends EmvMerchant {
 					$this->process_currency($strValue);
 					break;
 				case parent::ID_TRANSACTION_AMOUNT:
-					$this->process_amount($strValue);
+					$this->process_amount($strValue); // @todo check
+					break;
+				case parent::ID_TIP_OR_CONVENIENCE_FEE_INDICATOR:
+					$this->process_fee_indicator($strValue); // @todo check
+					break;
+				case parent::ID_VALUE_OF_FEE_FIXED:
+					$this->process_fee_value_fixed($strValue); // @todo check
+					break;
+				case parent::ID_VALUE_OF_FEE_PERCENTAGE:
+					$this->process_fee_value_percentage($strValue); // @todo check
 					break;
 				case parent::ID_COUNTRY_CODE:
-					$this->process_country_code($strValue);
+					$this->process_country_code($strValue); // @todo check
 					break;
 				case parent::ID_MERCHANT_NAME:
-					$this->merchant_name = $strValue;
+					$this->merchant_name = $this->validate_ans_charset($strValue, parent::MODE_SANITIZER);
 					break;
 				case parent::ID_MERCHANT_CITY:
-					$this->merchant_city = $strValue;
+					$this->merchant_city = $this->validate_ans_charset($strValue, parent::MODE_SANITIZER);
 					break;
 				case parent::ID_MERCHANT_POSTAL_CODE:
-					$this->merchant_postal_code = $strValue;
+					$this->merchant_postal_code = $this->validate_ans_charset($strValue, parent::MODE_SANITIZER);;
 					break;
 				case parent::ID_ADDITIONAL_DATA_FIELDS:
-					$this->process_additional_data($strValue);
+					$this->process_additional_data($strValue); // @todo check
 					break;
 				case parent::ID_CRC:
 					$this->process_crc($strValue);
 					break;
+				case parent::ID_MERCHANT_INFORMATION_LANGUAGE_TEMPLATE:
+					$this->process_warning(parent::ID_MERCHANT_INFORMATION_LANGUAGE_TEMPLATE, "Merchant information - language template is not supported by this library. Value read from the input: {$strValue}.");
 				default:
 					$this->process_accounts($intId, $strValue);
 			}
@@ -87,7 +100,7 @@ class EmvMerchantDecoder extends EmvMerchant {
 			$this->payload_format_indicator = $strValue;
 		} else
 		{
-			$this->process_error(parent::ID_PAYLOAD_FORMAT_INDICATOR, "Payload format indicator is invalid. Expected '01', found '{$strValue}'.");
+			$this->add_message(parent::ID_PAYLOAD_FORMAT_INDICATOR, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYLOAD_FORMAT_INDICATOR_INVALID, $strValue);
 		}
 	}
 
@@ -106,12 +119,12 @@ class EmvMerchantDecoder extends EmvMerchant {
 				$this->point_of_initiation = parent::POINT_OF_INITIATION_DYNAMIC_VALUE;
 				break;
 			default:
-				$this->process_error(parent::ID_POINT_OF_INITIATION, "Point of initiation is invalid. Expected '11' or '12', found '{$strValue}'.");
+				$this->add_message(parent::ID_POINT_OF_INITIATION, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_TYPE_OF_INITIATION_INVALID, $strValue);
 		}
 	}
 
 	/**
-	 * Assign merchant category code and its value (according to ISO18245; if any) to the class
+	 * Assign merchant category code and its value (according to ISO 18245; if any) to the class
 	 * @param $strValue
 	 */
 	private function process_merchant_category_code($strValue)
@@ -123,7 +136,13 @@ class EmvMerchantDecoder extends EmvMerchant {
 		} else
 		{
 			$this->merchant_category_code['value'] = parent::MERCHANT_CATEGORY_UNKNOWN;
-			$this->process_warning(parent::ID_MERCHANT_CATEGORY_CODE, "Unknown merchant category code: '{$strValue}'.");
+			if (preg_match('/\d{4}/', $strValue))
+			{
+				$this->add_message(parent::ID_MERCHANT_CATEGORY_CODE, parent::MESSAGE_TYPE_WARNING, parent::WARNING_ID_MCC_INVALID, $strValue);
+			} else
+			{
+				$this->add_message(parent::ID_MERCHANT_CATEGORY_CODE, parent::MESSAGE_TYPE_WARNING, parent::WARNING_ID_MCC_UNKNOWN, $strValue);
+			}
 		}
 	}
 
@@ -138,7 +157,7 @@ class EmvMerchantDecoder extends EmvMerchant {
 			$this->transaction_currency = $this->currency_codes[$strValue];
 		} else
 		{
-			$this->process_error(parent::ID_TRANSACTION_CURRENCY, "Currency is not supported. Currently, this class only supports SGD, THB, MYR, IDR, found '{$strValue}'.");
+			$this->add_message(parent::ID_TRANSACTION_CURRENCY, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_CURRENCY_NOT_SUPPORTED, $strValue);
 		}
 	}
 
@@ -152,12 +171,27 @@ class EmvMerchantDecoder extends EmvMerchant {
 	 */
 	private function process_amount($strValue)
 	{
+		if ($this->validate_number($strValue, parent::MODE_VALIDATOR))
+		{
+			// validated
+			$value = $this->validate_number($strValue, parent::MODE_PARSE_VALUE);
+			if (0.0 < $value)
+			{
+				$this->transaction_amount = $value;
+			}
+		} else
+		{
+			// failed validation
+			$this->add_message(parent::ID_TRANSACTION_AMOUNT, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_AMOUNT_INVALID, $strValue);
+		}
+
+
 		if (preg_match('/^(\d+|\d+\.\d+)$/', $strValue))
 		{
 			$val = floatval($strValue);
 			if (0 < $val)
 			{
-				$this->transaction_amount = (float) number_format($val, 2, '.', '');
+				$this->transaction_amount = (float)number_format($val, 2, '.', '');
 				if (parent::POINT_OF_INITIATION_STATIC == $this->point_of_initiation)
 				{
 					$this->process_warning(parent::ID_TRANSACTION_AMOUNT, "Point of initiation is static ('{$this->point_of_initiation}'), but the transaction amount is set ('{$strValue}').");
@@ -170,6 +204,42 @@ class EmvMerchantDecoder extends EmvMerchant {
 		} else
 		{
 			$this->process_error(parent::ID_TRANSACTION_AMOUNT, "Transaction amount is not a number. Expected a positive number, found '{$strValue}'.");
+		}
+	}
+
+	/**
+	 * @param $strValue
+	 */
+	private function process_fee_indicator($strValue)
+	{
+		if (isset($this->tip_or_convenience_fee_indicators[$strValue]))
+		{
+			$this->tip_or_convenience_fee_indicator = $this->tip_or_convenience_fee_indicators[$strValue];
+		} else
+		{
+			$this->process_error(parent::ID_TIP_OR_CONVENIENCE_FEE_INDICATOR, "Tip or convenience fee indicator is invalid. Expected '01', '02', or '03', found '{$strValue}'.");
+		}
+	}
+
+	private function process_fee_value_fixed($strValue)
+	{
+		if (self::FEE_INDICATOR_CONVENIENCE_FEE_FIXED == $this->tip_or_convenience_fee_indicator)
+		{
+			$this->convenience_fee_fixed = $strValue;
+		} else
+		{
+			$this->process_error(parent::ID_VALUE_OF_FEE_FIXED, "Tip or convenience fee indicator is invalid. Expected '01', '02', or '03', found '{$strValue}'.");
+		}
+	}
+
+	private function process_fee_value_percentage($strValue)
+	{
+		if (self::FEE_INDICATOR_CONVENIENCE_FEE_PERCENTAGE == $this->tip_or_convenience_fee_indicator)
+		{
+			$this->convenience_fee_fixed = $strValue;
+		} else
+		{
+			$this->process_error(parent::ID_VALUE_OF_FEE_PERCENTAGE, "Tip or convenience fee indicator is invalid. Expected '01', '02', or '03', found '{$strValue}'.");
 		}
 	}
 
@@ -234,6 +304,8 @@ class EmvMerchantDecoder extends EmvMerchant {
 				case parent::ID_ADDITIONAL_DATA_MERCHANT_CHANNEL:
 					$this->additional_fields['merchant_channel'] = $strValue;
 					break;
+				default:
+					$this->additional_fields['ID-' . $strId] = $strValue;
 			}
 			$string = substr($string, parent::LENGTH_FOUR + $intLength);
 		}
@@ -357,9 +429,9 @@ class EmvMerchantDecoder extends EmvMerchant {
 			$this->process_error($intId, "[PayNow] Mobile number, as a proxy value, is invalid. Found '{$account['proxy_value']}'.");
 		} else if (isset($account['amount_editable']))
 		{
-			if (false == $account['amount_editable'] && empty($this->transaction_amount))
+			if (FALSE == $account['amount_editable'] && empty($this->transaction_amount))
 			{
-				$account['amount_editable'] = true;
+				$account['amount_editable'] = TRUE;
 				$this->process_warning($intId, "[PayNow] Amount editable flag was false while the transaction amount is not set. The field amount editable is now changed to true.");
 			}
 		} else if (isset($account['expiry_date']))
