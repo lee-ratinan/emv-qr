@@ -453,11 +453,11 @@ class EmvMerchant {
 	const ID_VALUE_OF_FEE_FIXED = '56';
 	const ID_VALUE_OF_FEE_PERCENTAGE = '57';
 	const FEE_INDICATOR_TIP = '01';
-	const FEE_INDICATOR_TIP_VALUE = 'tip';
+	const FEE_INDICATOR_TIP_VALUE = 'TIP';
 	const FEE_INDICATOR_CONVENIENCE_FEE_FIXED = '02';
-	const FEE_INDICATOR_CONVENIENCE_FEE_FIXED_VALUE = 'convenience_fee_fixed';
+	const FEE_INDICATOR_CONVENIENCE_FEE_FIXED_VALUE = 'CONVENIENCE_FEE_FIXED';
 	const FEE_INDICATOR_CONVENIENCE_FEE_PERCENTAGE = '03';
-	const FEE_INDICATOR_CONVENIENCE_FEE_PERCENTAGE_VALUE = 'convenience_fee_percentage';
+	const FEE_INDICATOR_CONVENIENCE_FEE_PERCENTAGE_VALUE = 'CONVENIENCE_FEE_PERCENTAGE';
 	protected $tip_or_convenience_fee_indicators = [
 		self::FEE_INDICATOR_TIP                        => self::FEE_INDICATOR_TIP_VALUE,
 		self::FEE_INDICATOR_CONVENIENCE_FEE_FIXED      => self::FEE_INDICATOR_CONVENIENCE_FEE_FIXED_VALUE,
@@ -509,16 +509,58 @@ class EmvMerchant {
 	 */
 	const ID_ADDITIONAL_DATA_FIELDS = '62';
 	const ID_ADDITIONAL_DATA_BILL_NUMBER = '01';
+	const ID_ADDITIONAL_DATA_BILL_NUMBER_KEY = 'bill_number';
 	const ID_ADDITIONAL_DATA_MOBILE_NUMBER = '02';
+	const ID_ADDITIONAL_DATA_MOBILE_NUMBER_KEY = 'mobile_number';
 	const ID_ADDITIONAL_DATA_STORE_LABEL = '03';
+	const ID_ADDITIONAL_DATA_STORE_LABEL_KEY = 'store_label';
 	const ID_ADDITIONAL_DATA_LOYALTY_NUMBER = '04';
+	const ID_ADDITIONAL_DATA_LOYALTY_NUMBER_KEY = 'loyalty_number';
 	const ID_ADDITIONAL_DATA_REFERENCE_LABEL = '05';
+	const ID_ADDITIONAL_DATA_REFERENCE_LABEL_KEY = 'reference_label';
 	const ID_ADDITIONAL_DATA_CUSTOMER_LABEL = '06';
+	const ID_ADDITIONAL_DATA_CUSTOMER_LABEL_KEY = 'customer_label';
 	const ID_ADDITIONAL_DATA_TERMINAL_LABEL = '07';
+	const ID_ADDITIONAL_DATA_TERMINAL_LABEL_KEY = 'terminal_label';
 	const ID_ADDITIONAL_DATA_PURPOSE_OF_TRANSACTION = '08';
+	const ID_ADDITIONAL_DATA_PURPOSE_OF_TRANSACTION_KEY = 'purpose_of_transaction';
 	const ID_ADDITIONAL_DATA_ADDITIONAL_CUSTOMER_DATA_REQUEST = '09';
+	const ID_ADDITIONAL_DATA_ADDITIONAL_CUSTOMER_DATA_REQUEST_KEY = 'additional_customer_data_request';
+	const ID_ADDITIONAL_DATA_CUSTOMER_DATA_REQUEST_MOBILE_ID = 'M';
+	const ID_ADDITIONAL_DATA_CUSTOMER_DATA_REQUEST_MOBILE_LABEL = 'MOBILE';
+	const ID_ADDITIONAL_DATA_CUSTOMER_DATA_REQUEST_ADDRESS_ID = 'A';
+	const ID_ADDITIONAL_DATA_CUSTOMER_DATA_REQUEST_ADDRESS_LABEL = 'ADDRESS';
+	const ID_ADDITIONAL_DATA_CUSTOMER_DATA_REQUEST_EMAIL_ID = 'E';
+	const ID_ADDITIONAL_DATA_CUSTOMER_DATA_REQUEST_EMAIL_LABEL = 'EMAIL';
 	const ID_ADDITIONAL_DATA_MERCHANT_TAX_ID = '10';
+	const ID_ADDITIONAL_DATA_MERCHANT_TAX_ID_KEY = 'merchant_tax_id';
 	const ID_ADDITIONAL_DATA_MERCHANT_CHANNEL = '11';
+	const ID_ADDITIONAL_DATA_MERCHANT_CHANNEL_KEY = 'merchant_channel';
+	const MERCHANT_CHANNEL_CHAR_MEDIA_KEY = 'media';
+	const MERCHANT_CHANNEL_CHAR_LOCATION_KEY = 'transaction_location';
+	const MERCHANT_CHANNEL_CHAR_PRESENCE_KEY = 'merchant_presence';
+	protected $merchant_channel_medias = [
+		'0' => 'Print - Merchant sticker',
+		'1' => 'Print - Bill/Invoice',
+		'2' => 'Print - Magazine/Poster',
+		'3' => 'Print - Other',
+		'4' => 'Screen/Electronic - Merchant POS/POI',
+		'5' => 'Screen/Electronic - Website',
+		'6' => 'Screen/Electronic - App',
+		'7' => 'Screen/Electronic - Other',
+	];
+	protected $merchant_channel_locations = [
+		'0' => 'At Merchant premises/registered address',
+		'1' => 'Not at Merchant premises/registered address',
+		'2' => 'Remote Commerce',
+		'3' => 'Other',
+	];
+	protected $merchant_channel_presences = [
+		'0' => 'Attended POI',
+		'1' => 'Unattended',
+		'2' => 'Semi-attended (self-checkout)',
+		'3' => 'Other',
+	];
 
 	/**
 	 * CRC (63)
@@ -535,6 +577,7 @@ class EmvMerchant {
 	 * Integers
 	 */
 	const POS_ZERO = 0;
+	const POS_ONE = 1;
 	const POS_TWO = 2;
 	const POS_FOUR = 4;
 	const POS_SIX = 6;
@@ -546,6 +589,8 @@ class EmvMerchant {
 	const LENGTH_TWO = 2;
 	const LENGTH_THREE = 3;
 	const LENGTH_FOUR = 4;
+	const LENGTH_TWENTY = 20;
+	const LENGTH_TWENTY_FIVE = 25;
 
 	/**
 	 * Others
@@ -721,20 +766,50 @@ class EmvMerchant {
 	   | -------------------------------------------------------------------------------------------------------- */
 	const MESSAGE_TYPE_ERROR = 'ERR';
 	const MESSAGE_TYPE_WARNING = 'WRN';
-	const ERROR_VALUE_PLACEHOLDER = 'XXX';
+	const ERROR_VALUE_PLACEHOLDER = '???';
+	// ERROR CODES
 	const ERROR_ID_NOT_FOUND = 'E00X';
 	const ERROR_ID_PAYLOAD_FORMAT_INDICATOR_INVALID = 'E001';
 	const ERROR_ID_TYPE_OF_INITIATION_INVALID = 'E002';
 	const ERROR_ID_CURRENCY_NOT_SUPPORTED = 'E003';
+	const ERROR_ID_AMOUNT_INVALID = 'E004';
+	const ERROR_ID_FEE_INDICATOR_INVALID = 'E005';
+	const ERROR_ID_FEE2_EXIST_BUT_INDICATOR_INVALID = 'E006';
+	const ERROR_ID_FEE3_EXIST_BUT_INDICATOR_INVALID = 'E007';
+	const ERROR_ID_CONVENIENT_FEE_INVALID = 'E008';
+	const ERROR_ID_COUNTRY_CODE_INVALID = 'E009';
+	const ERROR_ID_CRC_INVALID = 'E010';
+	const ERROR_ID_AMOUNT_MISSING = 'E011';
+	// WARNING CODES
 	const WARNING_ID_MCC_INVALID = 'W001';
 	const WARNING_ID_MCC_UNKNOWN = 'W002';
+	const WARNING_ID_POINT_OF_INITIATION_STATIC_WITH_AMOUNT = 'W003';
+	const WARNING_ID_LANGUAGE_TEMPLATE_NOT_SUPPORTED = 'W004';
+	const WARNING_ID_ADDITIONAL_DATA_INVALID = 'W005';
+	const WARNING_ID_INVALID_CUSTOMER_REQUEST_TYPE = 'W006';
+	const WARNING_ID_INVALID_MERCHANT_CHANNEL = 'W007';
 	protected $messages = [
+		// ERROR
 		self::ERROR_ID_NOT_FOUND => "Error ID not found.",
-		self::ERROR_ID_PAYLOAD_FORMAT_INDICATOR_INVALID => "Payload format indicator is invalid. Expected '01', found 'XXX'.",
-		self::ERROR_ID_TYPE_OF_INITIATION_INVALID => "Type of initiation is invalid. Expected '11' or '12', found 'XXX'.",
-		self::ERROR_ID_CURRENCY_NOT_SUPPORTED => "Currency is not supported. Found 'XXX' as the currency code. Please check the latest release documentation for supported currencies.",
-		self::WARNING_ID_MCC_INVALID => "Merchant category code is invalid. Expected 4-digit string, found 'XXX'.",
-		self::WARNING_ID_MCC_UNKNOWN => "Merchant category code is unknown or does not exist in the system. Found 'XXX'.",
+		self::ERROR_ID_PAYLOAD_FORMAT_INDICATOR_INVALID => "Payload format indicator is invalid. Expected '01', found '???'.",
+		self::ERROR_ID_TYPE_OF_INITIATION_INVALID => "Type of initiation is invalid. Expected '11' or '12', found '???'.",
+		self::ERROR_ID_CURRENCY_NOT_SUPPORTED => "Currency is not supported. Found '???' as the currency code. Please check the latest release documentation for supported currencies.",
+		self::ERROR_ID_AMOUNT_INVALID => "Transaction amount is invalid. Expected positive floating point number, found '???'.",
+		self::ERROR_ID_FEE_INDICATOR_INVALID => "Tip or convenience fee indicator is invalid. Expected '01', '02', or '03', found '???'.",
+		self::ERROR_ID_FEE2_EXIST_BUT_INDICATOR_INVALID => "Convenience fee (fixed) was set but the indicator is invalid. Expected '02', found '???'.",
+		self::ERROR_ID_FEE3_EXIST_BUT_INDICATOR_INVALID => "Convenience fee (percentage) was set but the indicator is invalid. Expected '03', found '???'.",
+		self::ERROR_ID_CONVENIENT_FEE_INVALID => "Convenience fee is invalid. Expected a fixed or percentage value, found '???'.",
+		self::ERROR_ID_COUNTRY_CODE_INVALID => "Country code is not supported. Currently, this class only supports SG, TH, MY, ID, found '???'.",
+		self::ERROR_ID_CRC_INVALID => "CRC found in the QR Code is incorrect. Expected '???1', found '???2'.",
+		self::ERROR_ID_AMOUNT_MISSING => "The type of initiation of this QR Code requires the transaction amount but such amount does not exist.",
+		// WARNING
+		self::WARNING_ID_MCC_INVALID => "Merchant category code is invalid. Expected 4-digit string, found '???'.",
+		self::WARNING_ID_MCC_UNKNOWN => "Merchant category code is unknown or does not exist in the system. Found '???'.",
+		self::WARNING_ID_POINT_OF_INITIATION_STATIC_WITH_AMOUNT => "Point of initiation was set to STATIC (01) but found that transaction amount is set. Point of initiation was updated to DYNAMIC (02).",
+		self::WARNING_ID_LANGUAGE_TEMPLATE_NOT_SUPPORTED => "Merchant information language template (64) is currently not supported. Please check documentation for newer releases.",
+		self::WARNING_ID_ADDITIONAL_DATA_INVALID => "Additional data field (ID ???1) is invalid. Found '???2'.",
+		self::WARNING_ID_INVALID_CUSTOMER_REQUEST_TYPE => "Customer data request type is invalid. Expected either 'A', 'E', or 'M', found '???'.",
+		self::WARNING_ID_INVALID_MERCHANT_CHANNEL => "Merchant channel value contains invalid character in (???1) position, found '???2'.",
 	];
 
 	/* | --------------------------------------------------------------------------------------------------------
@@ -742,7 +817,6 @@ class EmvMerchant {
 	   | -------------------------------------------------------------------------------------------------------- */
 	const MODE_VALIDATOR = 'V';
 	const MODE_SANITIZER = 'S';
-	const MODE_PARSE_VALUE = 'P';
 
 	/* | --------------------------------------------------------------------------------------------------------
 	   | PUBLIC PROPERTIES
@@ -863,7 +937,7 @@ class EmvMerchant {
 	 * @param string $field_id
 	 * @param string $message_type
 	 * @param string $message_id
-	 * @param string $value_found
+	 * @param string|array $value_found
 	 */
 	protected function add_message($field_id, $message_type, $message_id, $value_found = '')
 	{
@@ -872,31 +946,45 @@ class EmvMerchant {
 			$message = $this->messages[$message_id];
 			if (!empty($value_found))
 			{
-				$message = str_replace(self::ERROR_VALUE_PLACEHOLDER, $value_found, $message);
+				if (is_array($value_found))
+				{
+					$intCount = count($value_found);
+					$search_array = [];
+					for ($i = 1; $i <= $intCount; $i++)
+					{
+						$search_array[] = self::ERROR_VALUE_PLACEHOLDER . $i;
+					}
+					$message = str_replace($search_array, $value_found, $message);
+				} else
+				{
+					$message = str_replace(self::ERROR_VALUE_PLACEHOLDER, $value_found, $message);
+				}
 			}
+			$array = [
+				'field_id' => $field_id,
+				'code' => $message_id,
+				'message' => $message
+			];
 			switch ($message_type)
 			{
 				case self::MESSAGE_TYPE_ERROR:
-					$this->errors[] = [
-						'field_id' => $field_id,
-						'message' => $message
-					];
+					$this->errors[] = $array;
 					break;
 				case self::MESSAGE_TYPE_WARNING:
-					$this->warnings[] = [
-						'field_id' => $field_id,
-						'message' => $message
-					];
+					$this->warnings[] = $array;
 					break;
 			}
 		} else {
 			$this->errors[] = [
 				'field_id' => $field_id,
+				'code' => self::ERROR_ID_NOT_FOUND,
 				'message' => $this->messages[self::ERROR_ID_NOT_FOUND]
 			];
 		}
 	}
+
 	/**
+	 * @deprecated
 	 * Add error to the errors field
 	 * @param $field_id
 	 * @param $error
@@ -907,6 +995,7 @@ class EmvMerchant {
 	}
 
 	/**
+	 * @deprecated
 	 * Add warning to the warnings field
 	 * @param $field_id
 	 * @param $warning
@@ -939,29 +1028,45 @@ class EmvMerchant {
 	}
 
 	/**
-	 * Validate or clean characters for those in number format
-	 * @param $string string The string to validate
-	 * @param $mode string Either sanitizer or validator
-	 * @return false|int|string
+	 * @param $string
+	 * @param $length
+	 * @return bool
 	 */
-	protected function validate_number($string, $mode)
+	protected function validate_ans_charset_len($string, $length)
 	{
-		switch ($mode)
+		return (preg_match('/[\x20-\x7E]+/', $string) && strlen($string) <= $length);
+	}
+
+	/**
+	 * Validate and get transaction amount value
+	 * @param string $amount
+	 * @return false|float
+	 */
+	protected function parse_money_amount($amount)
+	{
+		if (preg_match('/^(\d+|\d+\.|\d+\.\d+)$/', $amount))
 		{
-			case self::MODE_VALIDATOR:
-				return preg_match('/^(\d+|\d+\.\d+)$/', $string);
-			case self::MODE_SANITIZER:
-				return filter_var($string, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW);
-			case self::MODE_PARSE_VALUE:
-				if (is_float($string))
-				{
-					return $string;
-				} else
-				{
-					return floatval($string);
-				}
-			default:
-				return false;
+			return floatval($amount);
+		} else
+		{
+			return false;
 		}
 	}
+
+	/**
+	 * Validate and get percentage amount from 00.01 to 99.99
+	 * @param string $amount
+	 * @return false|float
+	 */
+	protected function parse_percentage_amount($amount)
+	{
+		if (preg_match('/^\d{1,2}(\.\d{0,2}){0,1}$/', $amount) && 0.00 < floatval(($amount)))
+		{
+			return floatval($amount);
+		} else
+		{
+			return false;
+		}
+	}
+
 }

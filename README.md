@@ -92,7 +92,7 @@ Table 3:
 
 ## How to use
 
-### 1 EmvMerchant
+### 1 `EmvMerchant`
 
 #### 1.1 Class Public Properties
 
@@ -120,31 +120,28 @@ Table 4:
 | errors                     | array  |  |
 | warnings                   | array  |  |
 
-### 2 EmvMerchantDecoder
+### 2 `EmvMerchantDecoder`
 
-#### 2.1 Decode
+`__construct(string $string): EmvMerchantDecoder`
 
-Read the QR code from QR reader and pass the string to `decode()` to get the breakdown data in the QR in an object format.
+#### 2.1 Description
 
-##### 2.1.1 Description
+Receive the string read from the QR code and structure it in the object format as seen in Table 4.
 
-`decode(string $string): EmvMerchantDecoder`
-
-##### 2.1.2 Parameters
+#### 2.2 Parameters
 
 `$string` The string read from the QR code.
 
-##### 2.1.3 Return Values
+#### 2.3 Return Values
 
 An object of type `EmvMerchantDecoder` containing all values read from the QR code along with the arrays of warning and error messages.
 
-##### 2.1.4 Example
+#### 2.4 Example
 
 ```PHP
 $str = '00020101021126490009SG.PAYNOW010120210202012345X0301104082021123151820007SG.SGQR0113202012345X123020701.000103068286710402010503123060400000708201912315204000053037025802SG5911RATINAN LEE6009SINGAPORE610682876162140110987654321X630429FD';
-$emv = new \EMVQR\EmvMerchantDecoder();
-$result = $emv->decode($str);
-echo json_encode($result);
+$emv = new \EMVQR\EmvMerchantDecoder($str);
+$json = json_encode($emv, JSON_PRETTY_PRINT);
 ```
 
 Result:
@@ -195,26 +192,20 @@ Result:
 }
 ```
 
-### 2 `EmvMerchantGenerator()`
+### 3 `EmvMerchantGenerator`
 
-In Progress
+#### 3.1 Description
 
-### 3 Account Information
+Under construction.
 
-#### 3.1 Singapore
+#### 3.2 Functions and Parameters
 
-##### 3.1.1 PayNow
+Under construction.
 
-##### 3.1.2 SGQR
+#### 3.3 Return Values
 
-#### 3.2 Thailand (ประเทศไทย)
+Under construction.
 
-##### 3.2.1 PromptPay (พร้อมเพย์)
+#### 2.4 Example
 
-#### 3.3 Indonesia
-
-##### 3.3.1 QRIS
-
-#### 3.4 Malaysia
-
-##### 3.4.1 DuitNow
+Under construction.

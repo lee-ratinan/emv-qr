@@ -20,7 +20,7 @@ if ( ! empty($str))
           <h1>Test QR Code Decoder</h1>
           <hr>
           <form method="POST">
-            <input class="form-control mb-3" type="text" name="qrcode"/>
+            <input class="form-control mb-3" type="text" name="qrcode" value="<?=@$str?>"/>
             <input class="btn btn-success mb-3" type="submit" value="Decode"/>
           </form>
           <?= (isset($json) ? '<h2>Result</h2><pre>' . $json . '</pre>' : '') ?>

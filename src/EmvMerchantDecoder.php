@@ -17,6 +17,7 @@ class EmvMerchantDecoder extends EmvMerchant {
 	{
 		parent::__construct();
 		$this->mode = parent::MODE_DECODE;
+		$this->qr_string = $string;
 		$this->decode($string);
 	}
 
@@ -28,7 +29,6 @@ class EmvMerchantDecoder extends EmvMerchant {
 	protected function decode($string)
 	{
 		$string = str_replace(chr(194) . chr(160), ' ', $string);
-		$this->qr_string = $string;
 		while ( ! empty($string))
 		{
 			$strId = substr($string, parent::POS_ZERO, parent::LENGTH_TWO);
@@ -50,19 +50,19 @@ class EmvMerchantDecoder extends EmvMerchant {
 					$this->process_currency($strValue);
 					break;
 				case parent::ID_TRANSACTION_AMOUNT:
-					$this->process_amount($strValue); // @todo check
+					$this->process_amount($strValue);
 					break;
 				case parent::ID_TIP_OR_CONVENIENCE_FEE_INDICATOR:
-					$this->process_fee_indicator($strValue); // @todo check
+					$this->process_fee_indicator($strValue);
 					break;
 				case parent::ID_VALUE_OF_FEE_FIXED:
-					$this->process_fee_value_fixed($strValue); // @todo check
+					$this->process_fee_value_fixed($strValue);
 					break;
 				case parent::ID_VALUE_OF_FEE_PERCENTAGE:
-					$this->process_fee_value_percentage($strValue); // @todo check
+					$this->process_fee_value_percentage($strValue);
 					break;
 				case parent::ID_COUNTRY_CODE:
-					$this->process_country_code($strValue); // @todo check
+					$this->process_country_code($strValue);
 					break;
 				case parent::ID_MERCHANT_NAME:
 					$this->merchant_name = $this->validate_ans_charset($strValue, parent::MODE_SANITIZER);
@@ -74,17 +74,22 @@ class EmvMerchantDecoder extends EmvMerchant {
 					$this->merchant_postal_code = $this->validate_ans_charset($strValue, parent::MODE_SANITIZER);;
 					break;
 				case parent::ID_ADDITIONAL_DATA_FIELDS:
-					$this->process_additional_data($strValue); // @todo check
+					$this->process_additional_data($strValue);
 					break;
 				case parent::ID_CRC:
 					$this->process_crc($strValue);
 					break;
 				case parent::ID_MERCHANT_INFORMATION_LANGUAGE_TEMPLATE:
-					$this->process_warning(parent::ID_MERCHANT_INFORMATION_LANGUAGE_TEMPLATE, "Merchant information - language template is not supported by this library. Value read from the input: {$strValue}.");
+					$this->add_message(parent::ID_MERCHANT_INFORMATION_LANGUAGE_TEMPLATE, parent::MESSAGE_TYPE_WARNING, parent::WARNING_ID_LANGUAGE_TEMPLATE_NOT_SUPPORTED);
+					break;
 				default:
 					$this->process_accounts($intId, $strValue);
 			}
 			$string = substr($string, parent::LENGTH_FOUR + $intLength);
+		}
+		if (parent::POINT_OF_INITIATION_DYNAMIC_VALUE == $this->point_of_initiation && is_null($this->transaction_amount))
+		{
+			$this->add_message(parent::ID_TRANSACTION_AMOUNT, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_AMOUNT_MISSING);
 		}
 		return $this;
 	}
@@ -164,46 +169,25 @@ class EmvMerchantDecoder extends EmvMerchant {
 	/**
 	 * Validate and assign amount to the class
 	 * Matching:
-	 * - \d+ An integer
+	 * - \d+ or \d+\. An integer
 	 * or
 	 * - \d+\.\d+ A floating point number
 	 * @param $strValue
 	 */
 	private function process_amount($strValue)
 	{
-		if ($this->validate_number($strValue, parent::MODE_VALIDATOR))
+		$value = $this->parse_money_amount($strValue);
+		if (FALSE == $value)
 		{
-			// validated
-			$value = $this->validate_number($strValue, parent::MODE_PARSE_VALUE);
-			if (0.0 < $value)
-			{
-				$this->transaction_amount = $value;
-			}
-		} else
-		{
-			// failed validation
 			$this->add_message(parent::ID_TRANSACTION_AMOUNT, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_AMOUNT_INVALID, $strValue);
-		}
-
-
-		if (preg_match('/^(\d+|\d+\.\d+)$/', $strValue))
-		{
-			$val = floatval($strValue);
-			if (0 < $val)
-			{
-				$this->transaction_amount = (float)number_format($val, 2, '.', '');
-				if (parent::POINT_OF_INITIATION_STATIC == $this->point_of_initiation)
-				{
-					$this->process_warning(parent::ID_TRANSACTION_AMOUNT, "Point of initiation is static ('{$this->point_of_initiation}'), but the transaction amount is set ('{$strValue}').");
-				}
-			} else
-			{
-				$this->point_of_initiation = parent::POINT_OF_INITIATION_STATIC;
-				$this->process_warning(parent::ID_TRANSACTION_AMOUNT, "Transaction amount is omitted. Expected a positive number, found '{$strValue}'. Point of initiation is forced to be static.");
-			}
 		} else
 		{
-			$this->process_error(parent::ID_TRANSACTION_AMOUNT, "Transaction amount is not a number. Expected a positive number, found '{$strValue}'.");
+			$this->transaction_amount = $value;
+			if (parent::POINT_OF_INITIATION_STATIC_VALUE == $this->point_of_initiation)
+			{
+				$this->point_of_initiation = parent::POINT_OF_INITIATION_DYNAMIC_VALUE;
+				$this->add_message(parent::ID_TRANSACTION_AMOUNT, parent::MESSAGE_TYPE_WARNING, parent::WARNING_ID_POINT_OF_INITIATION_STATIC_WITH_AMOUNT);
+			}
 		}
 	}
 
@@ -217,29 +201,49 @@ class EmvMerchantDecoder extends EmvMerchant {
 			$this->tip_or_convenience_fee_indicator = $this->tip_or_convenience_fee_indicators[$strValue];
 		} else
 		{
-			$this->process_error(parent::ID_TIP_OR_CONVENIENCE_FEE_INDICATOR, "Tip or convenience fee indicator is invalid. Expected '01', '02', or '03', found '{$strValue}'.");
+			$this->add_message(parent::ID_TIP_OR_CONVENIENCE_FEE_INDICATOR, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_FEE_INDICATOR_INVALID, $strValue);
 		}
 	}
 
+	/**
+	 * @param $strValue
+	 */
 	private function process_fee_value_fixed($strValue)
 	{
-		if (self::FEE_INDICATOR_CONVENIENCE_FEE_FIXED == $this->tip_or_convenience_fee_indicator)
+		if (self::FEE_INDICATOR_CONVENIENCE_FEE_FIXED_VALUE == $this->tip_or_convenience_fee_indicator)
 		{
-			$this->convenience_fee_fixed = $strValue;
+			$value = $this->parse_money_amount($strValue);
+			if (FALSE == $value)
+			{
+				$this->add_message(parent::ID_VALUE_OF_FEE_FIXED, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_CONVENIENT_FEE_INVALID, $strValue);
+			} else
+			{
+				$this->convenience_fee_fixed = $value;
+			}
 		} else
 		{
-			$this->process_error(parent::ID_VALUE_OF_FEE_FIXED, "Tip or convenience fee indicator is invalid. Expected '01', '02', or '03', found '{$strValue}'.");
+			$this->add_message(parent::ID_VALUE_OF_FEE_FIXED, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_FEE2_EXIST_BUT_INDICATOR_INVALID, $strValue);
 		}
 	}
 
+	/**
+	 * @param $strValue
+	 */
 	private function process_fee_value_percentage($strValue)
 	{
-		if (self::FEE_INDICATOR_CONVENIENCE_FEE_PERCENTAGE == $this->tip_or_convenience_fee_indicator)
+		if (self::FEE_INDICATOR_CONVENIENCE_FEE_PERCENTAGE_VALUE == $this->tip_or_convenience_fee_indicator)
 		{
-			$this->convenience_fee_fixed = $strValue;
+			$value = $this->parse_percentage_amount($strValue);
+			if (FALSE == $value)
+			{
+				$this->add_message(parent::ID_VALUE_OF_FEE_PERCENTAGE, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_CONVENIENT_FEE_INVALID, $strValue);
+			} else
+			{
+				$this->convenience_fee_percentage = $value;
+			}
 		} else
 		{
-			$this->process_error(parent::ID_VALUE_OF_FEE_PERCENTAGE, "Tip or convenience fee indicator is invalid. Expected '01', '02', or '03', found '{$strValue}'.");
+			$this->add_message(parent::ID_VALUE_OF_FEE_PERCENTAGE, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_FEE3_EXIST_BUT_INDICATOR_INVALID, $strValue);
 		}
 	}
 
@@ -254,7 +258,7 @@ class EmvMerchantDecoder extends EmvMerchant {
 			$this->country_code = $strValue;
 		} else
 		{
-			$this->process_error(parent::ID_COUNTRY_CODE, "Country code is not supported. Currently, this class only supports SG, TH, MY, ID, found '{$strValue}'.");
+			$this->add_message(parent::ID_COUNTRY_CODE, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_COUNTRY_CODE_INVALID, $strValue);
 		}
 	}
 
@@ -272,42 +276,107 @@ class EmvMerchantDecoder extends EmvMerchant {
 			switch ($strId)
 			{
 				case parent::ID_ADDITIONAL_DATA_BILL_NUMBER:
-					$this->additional_fields['bill_number'] = $strValue;
+					$this->process_additional_data_field($strValue, parent::LENGTH_TWENTY_FIVE, parent::ID_ADDITIONAL_DATA_BILL_NUMBER, parent::ID_ADDITIONAL_DATA_BILL_NUMBER_KEY);
 					break;
 				case parent::ID_ADDITIONAL_DATA_MOBILE_NUMBER:
-					$this->additional_fields['mobile_number'] = $strValue;
+					$this->process_additional_data_field($strValue, parent::LENGTH_TWENTY_FIVE, parent::ID_ADDITIONAL_DATA_MOBILE_NUMBER, parent::ID_ADDITIONAL_DATA_MOBILE_NUMBER_KEY);
 					break;
 				case parent::ID_ADDITIONAL_DATA_STORE_LABEL:
-					$this->additional_fields['store_label'] = $strValue;
+					$this->process_additional_data_field($strValue, parent::LENGTH_TWENTY_FIVE, parent::ID_ADDITIONAL_DATA_STORE_LABEL, parent::ID_ADDITIONAL_DATA_STORE_LABEL_KEY);
 					break;
 				case parent::ID_ADDITIONAL_DATA_LOYALTY_NUMBER:
-					$this->additional_fields['loyalty_number'] = $strValue;
+					$this->process_additional_data_field($strValue, parent::LENGTH_TWENTY_FIVE, parent::ID_ADDITIONAL_DATA_LOYALTY_NUMBER, parent::ID_ADDITIONAL_DATA_LOYALTY_NUMBER_KEY);
 					break;
 				case parent::ID_ADDITIONAL_DATA_REFERENCE_LABEL:
-					$this->additional_fields['reference_label'] = $strValue;
+					$this->process_additional_data_field($strValue, parent::LENGTH_TWENTY_FIVE, parent::ID_ADDITIONAL_DATA_REFERENCE_LABEL, parent::ID_ADDITIONAL_DATA_REFERENCE_LABEL_KEY);
 					break;
 				case parent::ID_ADDITIONAL_DATA_CUSTOMER_LABEL:
-					$this->additional_fields['customer_label'] = $strValue;
+					$this->process_additional_data_field($strValue, parent::LENGTH_TWENTY_FIVE, parent::ID_ADDITIONAL_DATA_CUSTOMER_LABEL, parent::ID_ADDITIONAL_DATA_CUSTOMER_LABEL_KEY);
 					break;
 				case parent::ID_ADDITIONAL_DATA_TERMINAL_LABEL:
-					$this->additional_fields['terminal_label'] = $strValue;
+					$this->process_additional_data_field($strValue, parent::LENGTH_TWENTY_FIVE, parent::ID_ADDITIONAL_DATA_TERMINAL_LABEL, parent::ID_ADDITIONAL_DATA_TERMINAL_LABEL_KEY);
 					break;
 				case parent::ID_ADDITIONAL_DATA_PURPOSE_OF_TRANSACTION:
-					$this->additional_fields['purpose_of_transaction'] = $strValue;
+					$this->process_additional_data_field($strValue, parent::LENGTH_TWENTY_FIVE, parent::ID_ADDITIONAL_DATA_PURPOSE_OF_TRANSACTION, parent::ID_ADDITIONAL_DATA_PURPOSE_OF_TRANSACTION_KEY);
 					break;
 				case parent::ID_ADDITIONAL_DATA_ADDITIONAL_CUSTOMER_DATA_REQUEST:
-					$this->additional_fields['customer_data_request'] = $strValue;
+					$this->process_additional_customer_data_request($strValue);
 					break;
 				case parent::ID_ADDITIONAL_DATA_MERCHANT_TAX_ID:
-					$this->additional_fields['merchant_tax_id'] = $strValue;
+					$this->process_additional_data_field($strValue, parent::LENGTH_TWENTY, parent::ID_ADDITIONAL_DATA_MERCHANT_TAX_ID, parent::ID_ADDITIONAL_DATA_MERCHANT_TAX_ID_KEY);
 					break;
 				case parent::ID_ADDITIONAL_DATA_MERCHANT_CHANNEL:
-					$this->additional_fields['merchant_channel'] = $strValue;
+					$this->process_additional_data_channel($strValue);
 					break;
 				default:
-					$this->additional_fields['ID-' . $strId] = $strValue;
+					$this->additional_fields[$strId] = $this->validate_ans_charset($strValue, parent::MODE_SANITIZER);
 			}
 			$string = substr($string, parent::LENGTH_FOUR + $intLength);
+		}
+	}
+
+	private function process_additional_data_field($strValue, $length, $field_id, $field_name)
+	{
+		if ($this->validate_ans_charset_len($strValue, $length))
+		{
+			$this->additional_fields[$field_name] = $strValue;
+		} else
+		{
+			$this->add_message(parent::ID_ADDITIONAL_DATA_FIELDS . '.' . $field_id, parent::MESSAGE_TYPE_WARNING, parent::WARNING_ID_ADDITIONAL_DATA_INVALID, [$field_name, $strValue]);
+		}
+	}
+
+	/**
+	 * @param $string
+	 */
+	private function process_additional_customer_data_request($string)
+	{
+		while ( ! empty($string))
+		{
+			$key = substr($string, parent::POS_ZERO, parent::LENGTH_ONE);
+			switch ($key)
+			{
+				case parent::ID_ADDITIONAL_DATA_CUSTOMER_DATA_REQUEST_MOBILE_ID:
+					$this->additional_fields[parent::ID_ADDITIONAL_DATA_ADDITIONAL_CUSTOMER_DATA_REQUEST_KEY][] = parent::ID_ADDITIONAL_DATA_CUSTOMER_DATA_REQUEST_MOBILE_LABEL;
+					break;
+				case parent::ID_ADDITIONAL_DATA_CUSTOMER_DATA_REQUEST_ADDRESS_ID:
+					$this->additional_fields[parent::ID_ADDITIONAL_DATA_ADDITIONAL_CUSTOMER_DATA_REQUEST_KEY][] = parent::ID_ADDITIONAL_DATA_CUSTOMER_DATA_REQUEST_ADDRESS_LABEL;
+					break;
+				case parent::ID_ADDITIONAL_DATA_CUSTOMER_DATA_REQUEST_EMAIL_ID:
+					$this->additional_fields[parent::ID_ADDITIONAL_DATA_ADDITIONAL_CUSTOMER_DATA_REQUEST_KEY][] = parent::ID_ADDITIONAL_DATA_CUSTOMER_DATA_REQUEST_EMAIL_LABEL;
+					break;
+				default:
+					$this->add_message(parent::ID_ADDITIONAL_DATA_FIELDS . '.' . parent::ID_ADDITIONAL_DATA_ADDITIONAL_CUSTOMER_DATA_REQUEST, parent::MESSAGE_TYPE_WARNING, parent::WARNING_ID_INVALID_CUSTOMER_REQUEST_TYPE, $key);
+			}
+			$string = substr($string, parent::POS_ONE);
+		}
+	}
+
+	private function process_additional_data_channel($string)
+	{
+		$media = substr($string, parent::POS_ZERO, parent::LENGTH_ONE);
+		$location = substr($string, parent::POS_ONE, parent::LENGTH_ONE);
+		$presence = substr($string, parent::POS_TWO, parent::LENGTH_ONE);
+		if (isset($this->merchant_channel_medias[$media]))
+		{
+			$this->additional_fields[parent::ID_ADDITIONAL_DATA_MERCHANT_CHANNEL_KEY][parent::MERCHANT_CHANNEL_CHAR_MEDIA_KEY] = $this->merchant_channel_medias[$media];
+		} else
+		{
+			$this->add_message(parent::ID_ADDITIONAL_DATA_FIELDS . '.' . parent::ID_ADDITIONAL_DATA_MERCHANT_CHANNEL, parent::MESSAGE_TYPE_WARNING, parent::WARNING_ID_INVALID_MERCHANT_CHANNEL, [parent::MERCHANT_CHANNEL_CHAR_MEDIA_KEY, $media]);
+		}
+		if (isset($this->merchant_channel_locations[$location]))
+		{
+			$this->additional_fields[parent::ID_ADDITIONAL_DATA_MERCHANT_CHANNEL_KEY][parent::MERCHANT_CHANNEL_CHAR_LOCATION_KEY] = $this->merchant_channel_locations[$location];
+		} else
+		{
+			$this->add_message(parent::ID_ADDITIONAL_DATA_FIELDS . '.' . parent::ID_ADDITIONAL_DATA_MERCHANT_CHANNEL, parent::MESSAGE_TYPE_WARNING, parent::WARNING_ID_INVALID_MERCHANT_CHANNEL, [parent::MERCHANT_CHANNEL_CHAR_LOCATION_KEY, $location]);
+		}
+		if (isset($this->merchant_channel_presences[$presence]))
+		{
+			$this->additional_fields[parent::ID_ADDITIONAL_DATA_MERCHANT_CHANNEL_KEY][parent::MERCHANT_CHANNEL_CHAR_PRESENCE_KEY] = $this->merchant_channel_presences[$presence];
+		} else
+		{
+			$this->add_message(parent::ID_ADDITIONAL_DATA_FIELDS . '.' . parent::ID_ADDITIONAL_DATA_MERCHANT_CHANNEL, parent::MESSAGE_TYPE_WARNING, parent::WARNING_ID_INVALID_MERCHANT_CHANNEL, [parent::MERCHANT_CHANNEL_CHAR_PRESENCE_KEY, $presence]);
 		}
 	}
 
@@ -322,7 +391,7 @@ class EmvMerchantDecoder extends EmvMerchant {
 		$newCrc = $this->CRC16HexDigest($checkData);
 		if ($strValue != $newCrc)
 		{
-			$this->process_error(parent::ID_CRC, "Failed CRC verification. Expected '{$newCrc}', found '{$strValue}'.");
+			$this->add_message(parent::ID_CRC, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_CRC_INVALID, [$newCrc, $strValue]);
 		}
 	}
 
