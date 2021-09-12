@@ -404,7 +404,7 @@ class EmvMerchantDecoder extends EmvMerchant {
 	{
 		if (parent::ID_ACCOUNT_LOWER_BOUNDARY > $intId || parent::ID_ACCOUNT_UPPER_BOUNDARY < $intId)
 		{
-			$this->process_error($intId, "Account ID is out of bound. Expected between '02' and '51' inclusive, found '{$intId}'.");
+			$this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_ACCOUNT_OUT_OF_BOUND, $intId);
 			return;
 		}
 		$account_raw = [];
@@ -420,16 +420,22 @@ class EmvMerchantDecoder extends EmvMerchant {
 		switch ($account_raw['00'])
 		{
 			case parent::PAYNOW_CHANNEL:
-				$this->accounts[] = $this->process_paynow($account_raw, $intId);
+				$this->process_paynow($account_raw, $intId);
 				break;
 			case parent::PROMPTPAY_CHANNEL:
-				$this->accounts[] = $this->process_promptpay($account_raw, $intId); // todo: check
+				$this->process_promptpay($account_raw, $intId);
 				break;
 			case parent::SGQR_CHANNEL:
-				$this->accounts[] = $this->process_sgqr($account_raw, $intId); // todo: check
+				$this->process_sgqr($account_raw, $intId);
+				break;
+			case parent::TELKOM_CHANNEL:
+				$this->process_telkom($account_raw, $intId);
+				break;
+			case parent::QRIS_CHANNEL:
+				$this->process_qris($account_raw, $intId);
 				break;
 			case parent::FAVE_CHANNEL:
-				$this->accounts[] = $this->process_favepay($account_raw, $intId); // todo: check
+				$this->process_favepay($account_raw, $intId); // todo: check
 				break;
 			case parent::DASH_CHANNEL:
 				$this->accounts[] = $this->process_dash($account_raw, $intId); // todo: check
@@ -456,7 +462,7 @@ class EmvMerchantDecoder extends EmvMerchant {
 				$this->accounts[] = $this->process_airpay($account_raw, $intId); // todo: check
 				break;
 			default:
-				$this->accounts[] = array_merge(['original_id' => $intId], $account_raw);
+				$this->accounts[$account_raw['00']] = array_merge([parent::ID_ORIGINAL_LABEL => $intId], $account_raw);
 		}
 	}
 
@@ -464,138 +470,177 @@ class EmvMerchantDecoder extends EmvMerchant {
 	 * Process PayNow account
 	 * @param $account_raw
 	 * @param $intId
-	 * @return array
 	 */
 	private function process_paynow($account_raw, $intId)
 	{
-		// MOSTLY ID = 26
-		$account['original_id'] = $intId;
-		foreach ($account_raw as $id => $val)
+		$account[parent::ID_ORIGINAL_LABEL] = $intId;
+		$account[$this->paynow_keys[parent::PAYNOW_ID_CHANNEL]] = $account_raw[parent::PAYNOW_ID_CHANNEL];
+		// PROXY TYPE AND VALUE
+		$proxy_type = $account_raw[parent::PAYNOW_ID_PROXY_TYPE];
+		$proxy_value = $account_raw[parent::PAYNOW_ID_PROXY_VALUE];
+		if (isset($this->paynow_proxy_type[$proxy_type]))
 		{
-			switch ($id)
+			$account[$this->paynow_keys[parent::PAYNOW_ID_PROXY_TYPE]] = $this->paynow_proxy_type[$proxy_type];
+			if (parent::PAYNOW_PROXY_MOBILE == $proxy_type)
 			{
-				case parent::PAYNOW_ID_PROXY_TYPE:
-					$account[$this->paynow_keys[$id]] = $this->paynow_proxy_type[$val];
-					break;
-				case parent::PAYNOW_ID_AMOUNT_EDITABLE:
-					$account[$this->paynow_keys[$id]] = $this->paynow_amount_editable[$val];
-					break;
-				default:
-					$account[$this->paynow_keys[$id]] = $val;
-			}
-		}
-		if (empty($account['proxy_type']))
-		{
-			$this->process_error($intId, "[PayNow] Missing proxy type.");
-		} else if (empty($account['proxy_value']))
-		{
-			$this->process_error($intId, "[PayNow] Missing proxy value.");
-		} else if ($account['proxy_type'] == $this->paynow_proxy_type['2'] && ! preg_match('/[A-Z0-9]{9,13}/', $account['proxy_value']))
-		{
-			$this->process_error($intId, "[PayNow] UEN, as a proxy value, is invalid. Found '{$account['proxy_value']}'.");
-		} else if ($account['proxy_type'] == $this->paynow_proxy_type['0'] && ! preg_match('/\+\d{8,16}/', $account['proxy_value']))
-		{
-			$this->process_error($intId, "[PayNow] Mobile number, as a proxy value, is invalid. Found '{$account['proxy_value']}'.");
-		} else if (isset($account['amount_editable']))
-		{
-			if (FALSE == $account['amount_editable'] && empty($this->transaction_amount))
-			{
-				$account['amount_editable'] = TRUE;
-				$this->process_warning($intId, "[PayNow] Amount editable flag was false while the transaction amount is not set. The field amount editable is now changed to true.");
-			}
-		} else if (isset($account['expiry_date']))
-		{
-			date_default_timezone_set(parent::TIMEZONE_SINGAPORE);
-			$year = substr($account['expiry_date'], parent::POS_ZERO, parent::LENGTH_FOUR);
-			$month = substr($account['expiry_date'], parent::POS_FOUR, parent::LENGTH_TWO);
-			$date = substr($account['expiry_date'], parent::POS_SIX, parent::LENGTH_TWO);
-			$date_string = "$year-$month-$date";
-			if ( ! preg_match('/20\d{2}\-(0[1-9]|1[0-2])\-(0[1-9]|[1-2]\d|3[0-1])/', $date_string))
-			{
-				$this->process_warning($intId, "[PayNow] Expiry date is invalid. Expected a date, found '{$account['expiry_date']}'. Expiry date is removed.");
-				unset($account['expiry_date']);
+				// Accept all country's phone number with country code (E.164 format)
+				if (preg_match('/^\+(\d){8,15}$/', $proxy_value))
+				{
+					$account[$this->paynow_keys[parent::PAYNOW_ID_PROXY_VALUE]] = $proxy_value;
+				} else
+				{
+					$this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_INVALID_PROXY_VALUE, [$this->paynow_proxy_type[parent::PAYNOW_PROXY_MOBILE], $proxy_value]);
+				}
 			} else
 			{
-				$expiry_date = strtotime("{$date_string} 23:59:59");
-				$timestamp = strtotime("now");
-				if ($expiry_date < $timestamp)
+				// UEN format, src: https://www.uen.gov.sg/ueninternet/faces/pages/admin/aboutUEN.jspx
+				/*
+				 * Businesses registered with ACRA: nnnnnnnnX
+				 * Local companies registered with ACRA: yyyynnnnnX
+				 * All other entities which will be issued new UEN: TyyPQnnnnX
+				 */
+				if (preg_match('/^(\d{8}[A-Z]|(19|20)\d{7}[A-Z]|(S|T)\d{2}[A-Z]{2}\d{4}[A-Z])(\d{2,4}){0,1}$/', $proxy_value))
 				{
-					$this->process_error($intId, "[PayNow] This QR code is expired. PayNow expiry date is '{$date_string}'.");
+					$account[$this->paynow_keys[parent::PAYNOW_ID_PROXY_VALUE]] = $proxy_value;
+				} else
+				{
+					$this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_INVALID_PROXY_VALUE, [$this->paynow_proxy_type[parent::PAYNOW_PROXY_UEN], $proxy_value]);
 				}
 			}
+		} else
+		{
+			$this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_MISSING_PROXY_TYPE);
 		}
-		return $account;
+		// EDITABLE
+		$editable = $account_raw[parent::PAYNOW_ID_AMOUNT_EDITABLE];
+		if (isset($this->paynow_amount_editable[$editable]))
+		{
+			$account[$this->paynow_keys[parent::PAYNOW_ID_AMOUNT_EDITABLE]] = $this->paynow_amount_editable[$editable];
+			if ($editable == parent::PAYNOW_AMOUNT_EDITABLE_FALSE && $this->point_of_initiation == parent::POINT_OF_INITIATION_STATIC_VALUE)
+			{
+				$this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_EDITABLE_FALSE_BUT_STATIC);
+			}
+		}
+		// EXPIRY DATE
+		$expiry_date = $this->parse_date_yyyymmdd($account_raw[parent::PAYNOW_ID_EXPIRY_DATE]);
+		if (FALSE != $expiry_date)
+		{
+			date_default_timezone_set(parent::TIMEZONE_SINGAPORE);
+			$now = date(parent::FORMAT_DATE);
+			if ($expiry_date < $now)
+			{
+				$this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_EXPIRED_QR, $expiry_date);
+			}
+		} else
+		{
+			$this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_EXPIRY_DATE_INVALID, $account_raw[parent::PAYNOW_ID_EXPIRY_DATE]);
+		}
+		$this->accounts[parent::PAYNOW_CHANNEL] = $account;
 	}
 
 	/**
-	 * todo: verify
 	 * Process PromptPay account
 	 * @param $account_raw
 	 * @param $intId
-	 * @return array
 	 */
 	private function process_promptpay($account_raw, $intId)
 	{
 		// MOSTLY 29
-		$account['original_id'] = $intId;
+		$account[parent::ID_ORIGINAL_LABEL] = $intId;
 		$account[$this->promptpay_keys[99]] = parent::PROMPTPAY_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
+		$account[$this->promptpay_keys[parent::PROMPTPAY_ID_APP_ID]] = $account_raw[parent::PROMPTPAY_ID_APP_ID];
+		if ( ! empty($account_raw[parent::PROMPTPAY_ID_MOBILE]))
 		{
-			switch ($id)
+			if (preg_match('/^0066(6|8|9)(\d{8})$/', $account_raw[parent::PROMPTPAY_ID_MOBILE]))
 			{
-				case parent::PROMPTPAY_ID_APP_ID:
-					$account[$this->promptpay_keys[$id]] = $val;
-					break;
-				case parent::PROMPTPAY_ID_MOBILE:
-					$account[$this->promptpay_keys[97]] = parent::PROMPTPAY_PROXY_MOBILE;
-					$account[$this->promptpay_keys[98]] = $val;
-					break;
-				case parent::PROMPTPAY_ID_TAX_ID:
-					$account[$this->promptpay_keys[97]] = parent::PROMPTPAY_PROXY_TAX_ID;
-					$account[$this->promptpay_keys[98]] = $val;
-					break;
-				case parent::PROMPTPAY_ID_EWALLET_ID:
-					$account[$this->promptpay_keys[97]] = parent::PROMPTPAY_PROXY_EWALLET_ID;
-					$account[$this->promptpay_keys[98]] = $val;
-					break;
+				$account[$this->promptpay_keys[97]] = parent::PROMPTPAY_PROXY_MOBILE;
+				$account[$this->promptpay_keys[98]] = $account_raw[parent::PROMPTPAY_ID_MOBILE];
+				$account[$this->promptpay_keys[96]] = '+66' . substr($account_raw[parent::PROMPTPAY_ID_MOBILE], parent::POS_FOUR);
+			} else
+			{
+				$this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PROMPTPAY_INVALID_PROXY, $account_raw[parent::PROMPTPAY_ID_MOBILE]);
 			}
+		} else if ( ! empty($account_raw[parent::PROMPTPAY_ID_TAX_ID]))
+		{
+			if (preg_match('/^\d{13}$/', $account_raw[parent::PROMPTPAY_ID_TAX_ID]))
+			{
+				$account[$this->promptpay_keys[97]] = parent::PROMPTPAY_PROXY_TAX_ID;
+				$account[$this->promptpay_keys[98]] = $account_raw[parent::PROMPTPAY_ID_TAX_ID];
+			} else
+			{
+				$this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PROMPTPAY_INVALID_PROXY, $account_raw[parent::PROMPTPAY_ID_TAX_ID]);
+			}
+		} else if ( ! empty($account_raw[parent::PROMPTPAY_ID_EWALLET_ID]))
+		{
+			$account[$this->promptpay_keys[97]] = parent::PROMPTPAY_PROXY_EWALLET_ID;
+			$account[$this->promptpay_keys[98]] = $account_raw[parent::PROMPTPAY_ID_TAX_ID];
+		} else
+		{
+			$this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PROMPTPAY_MISSING_PROXY);
 		}
-		return $account;
+		$this->accounts[parent::PROMPTPAY_CHANNEL_NAME] = $account;
 	}
 
 	/**
 	 * Process SGQR information - not an account but required
 	 * @param $account_raw
 	 * @param $intId
-	 * @return array
 	 */
 	private function process_sgqr($account_raw, $intId)
 	{
 		// FIXED 51
-		$account['original_id'] = $intId;
+		$account[parent::ID_ORIGINAL_LABEL] = $intId;
 		foreach ($account_raw as $id => $val)
 		{
 			$account[$this->sgqr_keys[$id]] = $val;
 		}
-		return $account;
+		$this->accounts[parent::SGQR_CHANNEL] = $account;
 	}
 
 	/**
-	 * todo: verify
+	 * @param $account_raw
+	 * @param $intId
+	 */
+	private function process_telkom($account_raw, $intId)
+	{
+		// FIXED 51
+		$account[parent::ID_ORIGINAL_LABEL] = $intId;
+		foreach ($account_raw as $id => $val)
+		{
+			$account[$this->telkom_keys[$id]] = $val;
+		}
+		$this->accounts[parent::TELKOM_CHANNEL] = $account;
+	}
+
+	/**
+	 * @param $account_raw
+	 * @param $intId
+	 */
+	private function process_qris($account_raw, $intId)
+	{
+		// FIXED 51
+		$account[parent::ID_ORIGINAL_LABEL] = $intId;
+		foreach ($account_raw as $id => $val)
+		{
+			$account[$this->qris_keys[$id]] = $val;
+		}
+		$this->accounts[parent::QRIS_CHANNEL] = $account;
+	}
+
+	/**
 	 * Process FavePay
 	 * @param $account_raw
 	 * @param $intId
-	 * @return array
 	 */
 	private function process_favepay($account_raw, $intId)
 	{
-		$account['original_id'] = $intId;
-		$account['channel_name'] = parent::FAVE_CHANNEL_NAME;
+		$account[parent::ID_ORIGINAL_LABEL] = $intId;
+		$account['channel'] = parent::FAVE_CHANNEL_NAME;
 		foreach ($account_raw as $id => $val)
 		{
 			$account[$this->favepay_keys[$id]] = $val;
 		}
-		return $account;
+		$this->accounts[parent::FAVE_CHANNEL_NAME] = $account;
 	}
 
 	/**

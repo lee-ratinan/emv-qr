@@ -1,4 +1,5 @@
 <?php
+
 namespace EMVQR;
 
 /**
@@ -33,9 +34,7 @@ class EmvMerchant {
 	 */
 	const ID_ACCOUNT_LOWER_BOUNDARY = 2;
 	const ID_ACCOUNT_UPPER_BOUNDARY = 51;
-	const ID_ACCOUNT_PAYNOW = '26';
-	const ID_ACCOUNT_PROMPTPAY = '29';
-	const ID_ACCOUNT_SGQR = '51';
+	const ID_ORIGINAL_LABEL = 'original_id';
 
 	/**
 	 * MERCHANT CATEGORY CODE (52)
@@ -459,8 +458,8 @@ class EmvMerchant {
 	const FEE_INDICATOR_CONVENIENCE_FEE_PERCENTAGE = '03';
 	const FEE_INDICATOR_CONVENIENCE_FEE_PERCENTAGE_VALUE = 'CONVENIENCE_FEE_PERCENTAGE';
 	protected $tip_or_convenience_fee_indicators = [
-		self::FEE_INDICATOR_TIP                        => self::FEE_INDICATOR_TIP_VALUE,
-		self::FEE_INDICATOR_CONVENIENCE_FEE_FIXED      => self::FEE_INDICATOR_CONVENIENCE_FEE_FIXED_VALUE,
+		self::FEE_INDICATOR_TIP => self::FEE_INDICATOR_TIP_VALUE,
+		self::FEE_INDICATOR_CONVENIENCE_FEE_FIXED => self::FEE_INDICATOR_CONVENIENCE_FEE_FIXED_VALUE,
 		self::FEE_INDICATOR_CONVENIENCE_FEE_PERCENTAGE => self::FEE_INDICATOR_CONVENIENCE_FEE_PERCENTAGE_VALUE
 	];
 
@@ -596,6 +595,7 @@ class EmvMerchant {
 	 * Others
 	 */
 	const TIMEZONE_SINGAPORE = 'Asia/Singapore';
+	const FORMAT_DATE = 'Y-m-d';
 
 	/* | --------------------------------------------------------------------------------------------------------
 	   | PAYNOW (26)
@@ -610,8 +610,9 @@ class EmvMerchant {
 	const PAYNOW_PROXY_UEN = '2';
 	const PAYNOW_AMOUNT_EDITABLE_TRUE = '1';
 	const PAYNOW_AMOUNT_EDITABLE_FALSE = '0';
+	const PAYNOW_DEFAULT_EXPIRY_DATE = '99991231';
 	protected $paynow_keys = [
-		'00' => 'channel',
+		'00' => 'reverse_domain',
 		'01' => 'proxy_type',
 		'02' => 'proxy_value',
 		'03' => 'amount_editable',
@@ -622,8 +623,8 @@ class EmvMerchant {
 		'2' => 'UEN'
 	];
 	protected $paynow_amount_editable = [
-		'1' => true,
-		'0' => false
+		'1' => TRUE,
+		'0' => FALSE
 	];
 
 	/* | --------------------------------------------------------------------------------------------------------
@@ -635,14 +636,27 @@ class EmvMerchant {
 	const PROMPTPAY_ID_MOBILE = '01';
 	const PROMPTPAY_ID_TAX_ID = '02';
 	const PROMPTPAY_ID_EWALLET_ID = '03';
-	const PROMPTPAY_PROXY_MOBILE = 'mobile';
-	const PROMPTPAY_PROXY_TAX_ID = 'tax_id';
-	const PROMPTPAY_PROXY_EWALLET_ID = 'ewallet_Id';
+	const PROMPTPAY_PROXY_MOBILE = 'MOBILE';
+	const PROMPTPAY_PROXY_TAX_ID = 'TAX_ID';
+	const PROMPTPAY_PROXY_EWALLET_ID = 'EWALLET_ID';
 	protected $promptpay_keys = [
-		'00' => 'app_id',
+		'00' => 'guid',
+		'96' => 'mobile_number',
 		'97' => 'proxy_type',
 		'98' => 'proxy_value',
 		'99' => 'channel_name'
+	];
+
+
+	/* | --------------------------------------------------------------------------------------------------------
+	   | TELKOM.ID
+	   | -------------------------------------------------------------------------------------------------------- */
+	const TELKOM_CHANNEL = 'ID.CO.TELKOM.WWW';
+	protected $telkom_keys = [
+		'00' => 'reverse_domain',
+		'01' => '01',
+		'02' => '02',
+		'03' => '03'
 	];
 
 	/* | --------------------------------------------------------------------------------------------------------
@@ -650,7 +664,7 @@ class EmvMerchant {
 	   | -------------------------------------------------------------------------------------------------------- */
 	const SGQR_CHANNEL = 'SG.SGQR';
 	protected $sgqr_keys = [
-		'00' => 'channel',
+		'00' => 'reverse_domain',
 		'01' => 'sgqr_id_number',
 		'02' => 'version',
 		'03' => 'postal_code',
@@ -661,12 +675,22 @@ class EmvMerchant {
 	];
 
 	/* | --------------------------------------------------------------------------------------------------------
+	   | QRIS (51)
+	   | -------------------------------------------------------------------------------------------------------- */
+	const QRIS_CHANNEL = 'ID.CO.QRIS.WWW';
+	protected $qris_keys = [
+		'00' => 'reverse_domain',
+		'02' => '02',
+		'03' => '03'
+	];
+
+	/* | --------------------------------------------------------------------------------------------------------
 	   | FAVEPAY
 	   | -------------------------------------------------------------------------------------------------------- */
 	const FAVE_CHANNEL = 'COM.MYFAVE';
 	const FAVE_CHANNEL_NAME = 'FavePay';
 	protected $favepay_keys = [
-		'00' => 'channel',
+		'00' => 'reverse_domain',
 		'01' => 'url'
 	];
 
@@ -780,6 +804,14 @@ class EmvMerchant {
 	const ERROR_ID_COUNTRY_CODE_INVALID = 'E009';
 	const ERROR_ID_CRC_INVALID = 'E010';
 	const ERROR_ID_AMOUNT_MISSING = 'E011';
+	const ERROR_ID_ACCOUNT_OUT_OF_BOUND = 'E012';
+	const ERROR_ID_PAYNOW_INVALID_PROXY_VALUE = 'E013';
+	const ERROR_ID_PAYNOW_MISSING_PROXY_TYPE = 'E014';
+	const ERROR_ID_PAYNOW_EDITABLE_FALSE_BUT_STATIC = 'E015';
+	const ERROR_ID_PAYNOW_EXPIRED_QR = 'E016';
+	const ERROR_ID_PAYNOW_EXPIRY_DATE_INVALID = 'E017';
+	const ERROR_ID_PROMPTPAY_MISSING_PROXY = 'E018';
+	const ERROR_ID_PROMPTPAY_INVALID_PROXY = 'E019';
 	// WARNING CODES
 	const WARNING_ID_MCC_INVALID = 'W001';
 	const WARNING_ID_MCC_UNKNOWN = 'W002';
@@ -802,6 +834,14 @@ class EmvMerchant {
 		self::ERROR_ID_COUNTRY_CODE_INVALID => "Country code is not supported. Currently, this class only supports SG, TH, MY, ID, found '???'.",
 		self::ERROR_ID_CRC_INVALID => "CRC found in the QR Code is incorrect. Expected '???1', found '???2'.",
 		self::ERROR_ID_AMOUNT_MISSING => "The type of initiation of this QR Code requires the transaction amount but such amount does not exist.",
+		self::ERROR_ID_ACCOUNT_OUT_OF_BOUND => "ID is out-of-bound. Expected '02' to '51', found '???'.",
+		self::ERROR_ID_PAYNOW_INVALID_PROXY_VALUE => "Proxy value is invalid. Expected the value of type ???1, found '???2'.",
+		self::ERROR_ID_PAYNOW_MISSING_PROXY_TYPE => "Proxy type is missing.",
+		self::ERROR_ID_PAYNOW_EDITABLE_FALSE_BUT_STATIC => "PayNow transaction value is set to not editable but the point of initiation is static.",
+		self::ERROR_ID_PAYNOW_EXPIRED_QR => "This QR code is already expired. The expiry date was ???.",
+		self::ERROR_ID_PAYNOW_EXPIRY_DATE_INVALID => "The expiry date of this QR code is invalid. Expected the date in 'yyyymmdd' format, found '???'.",
+		self::ERROR_ID_PROMPTPAY_MISSING_PROXY => "The proxy value (mobile number, tax ID, or eWallet ID) is missing.",
+		self::ERROR_ID_PROMPTPAY_INVALID_PROXY => "The proxy value is invalid. Expected a mobile phone number or tax ID, found '???'.",
 		// WARNING
 		self::WARNING_ID_MCC_INVALID => "Merchant category code is invalid. Expected 4-digit string, found '???'.",
 		self::WARNING_ID_MCC_UNKNOWN => "Merchant category code is unknown or does not exist in the system. Found '???'.",
@@ -909,7 +949,7 @@ class EmvMerchant {
 		$crc16 = 0xFFFF; // the CRC
 		$len = strlen($str);
 
-		for($i = 0; $i < $len; $i++ )
+		for ($i = 0; $i < $len; $i++)
 		{
 			$t = ($crc16 >> 8) ^ ord($str[$i]); // High byte Xor Message Byte to get index
 			$crc16 = (($crc16 << 8) & 0xffff) ^ $CRC16_Lookup[$t]; // Update the CRC from table
@@ -944,7 +984,7 @@ class EmvMerchant {
 		if (isset($this->messages[$message_id]))
 		{
 			$message = $this->messages[$message_id];
-			if (!empty($value_found))
+			if ( ! empty($value_found))
 			{
 				if (is_array($value_found))
 				{
@@ -961,7 +1001,7 @@ class EmvMerchant {
 				}
 			}
 			$array = [
-				'field_id' => $field_id,
+				'field_id' => intval($field_id),
 				'code' => $message_id,
 				'message' => $message
 			];
@@ -974,9 +1014,10 @@ class EmvMerchant {
 					$this->warnings[] = $array;
 					break;
 			}
-		} else {
+		} else
+		{
 			$this->errors[] = [
-				'field_id' => $field_id,
+				'field_id' => intval($field_id),
 				'code' => self::ERROR_ID_NOT_FOUND,
 				'message' => $this->messages[self::ERROR_ID_NOT_FOUND]
 			];
@@ -984,10 +1025,10 @@ class EmvMerchant {
 	}
 
 	/**
-	 * @deprecated
-	 * Add error to the errors field
 	 * @param $field_id
 	 * @param $error
+	 * @deprecated
+	 * Add error to the errors field
 	 */
 	protected function process_error($field_id, $error)
 	{
@@ -995,10 +1036,10 @@ class EmvMerchant {
 	}
 
 	/**
-	 * @deprecated
-	 * Add warning to the warnings field
 	 * @param $field_id
 	 * @param $warning
+	 * @deprecated
+	 * Add warning to the warnings field
 	 */
 	protected function process_warning($field_id, $warning)
 	{
@@ -1023,7 +1064,7 @@ class EmvMerchant {
 			case self::MODE_SANITIZER:
 				return filter_var($string, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW);
 			default:
-				return false;
+				return FALSE;
 		}
 	}
 
@@ -1049,7 +1090,7 @@ class EmvMerchant {
 			return floatval($amount);
 		} else
 		{
-			return false;
+			return FALSE;
 		}
 	}
 
@@ -1065,7 +1106,26 @@ class EmvMerchant {
 			return floatval($amount);
 		} else
 		{
-			return false;
+			return FALSE;
+		}
+	}
+
+	/**
+	 * Parse date in yyyymmdd format to Y-m-d
+	 * @param $string
+	 * @return false|string
+	 */
+	protected function parse_date_yyyymmdd($string)
+	{
+		if (preg_match('/[2-9]\d{3}(0[1-9]|1[0-2])(0[1-9]|[1-2]\d|3[0-1])/', $string))
+		{
+			$year = substr($string, self::POS_ZERO, self::LENGTH_FOUR);
+			$month = substr($string, self::POS_FOUR, self::LENGTH_TWO);
+			$date = substr($string, self::POS_SIX, self::LENGTH_TWO);
+			return "{$year}-{$month}-{$date}";
+		} else
+		{
+			return FALSE;
 		}
 	}
 
