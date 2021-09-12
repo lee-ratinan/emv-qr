@@ -9,7 +9,7 @@ This repo is for reading and generating EMV QR Code for various countries, curre
 
   * Singapore
   * Thailand
-  * (Indonesia)
+  * Indonesia
   * (Malaysia)
 
 ## EMVCo QR Code Specification for Merchant-Presented QR Code
@@ -152,18 +152,17 @@ Result:
     "qr_string": "00020101021126490009SG.PAYNOW010120210202012345X0301104082021123151820007SG.SGQR0113202012345X123020701.000103068286710402010503123060400000708201912315204000053037025802SG5911RATINAN LEE6009SINGAPORE610682876162140110987654321X630429FD",
     "payload_format_indicator": "01",
     "point_of_initiation": "STATIC",
-    "accounts": [
-        {
+    "accounts": {
+        "SG.PAYNOW": {
             "original_id": 26,
-            "channel": "SG.PAYNOW",
+            "reverse_domain": "SG.PAYNOW",
             "proxy_type": "UEN",
             "proxy_value": "202012345X",
-            "amount_editable": true,
-            "expiry_date": "20211231"
+            "amount_editable": true
         },
-        {
+        "SG.SGQR": {
             "original_id": 51,
-            "channel": "SG.SGQR",
+            "reverse_domain": "SG.SGQR",
             "sgqr_id_number": "202012345X123",
             "version": "01.0001",
             "postal_code": "828671",
@@ -172,13 +171,16 @@ Result:
             "miscellaneous": "0000",
             "new_version_date": "20191231"
         }
-    ],
+    },
     "merchant_category_code": {
         "code": "0000",
         "value": "Generic"
     },
     "transaction_currency": "SGD",
     "transaction_amount": null,
+    "tip_or_convenience_fee_indicator": null,
+    "convenience_fee_fixed": null,
+    "convenience_fee_percentage": null,
     "country_code": "SG",
     "merchant_name": "RATINAN LEE",
     "merchant_city": "SINGAPORE",
@@ -206,6 +208,108 @@ Under construction.
 
 Under construction.
 
-#### 2.4 Example
+#### 3.4 Example
 
 Under construction.
+
+### 4 Account Templates
+
+#### 4.1 Singapore
+
+##### PayNow
+
+```JSON
+{
+    "SG.PAYNOW": {
+        "original_id": 26,
+        "reverse_domain": "SG.PAYNOW",
+        "proxy_type": "UEN",
+        "proxy_value": "202012345X",
+        "amount_editable": true,
+        "expiry_date": "2099-12-31"
+    }
+}
+```
+##### FavePay
+
+```JSON
+{
+    "FavePay": {
+        "original_id": 27,
+        "channel": "FavePay",
+        "reverse_domain": "COM.MYFAVE",
+        "url": "https://myfave.com/qr/xxxxxx"
+    }
+}
+```
+
+##### SGQR
+
+```JSON
+{
+    "SG.SGQR": {
+        "original_id": 51,
+        "reverse_domain": "SG.SGQR",
+        "sgqr_id_number": "202012345X123",
+        "version": "01.0001",
+        "postal_code": "828671",
+        "level": "01",
+        "unit_number": "123",
+        "miscellaneous": "0000",
+        "new_version_date": "20191231"
+    }
+}
+```
+
+#### 4.2 Thailand
+
+##### PromptPay
+
+```JSON
+{
+    "TH.PROMPTPAY": {
+        "original_id": 29,
+        "channel_name": "TH.PROMPTPAY",
+        "guid": "A000000677010111",
+        "proxy_type": "MOBILE",
+        "proxy_value": "0066899999999",
+        "mobile_number": "+66899999999"
+    }
+}
+```
+#### 4.3 Indonesia
+
+##### Telkom
+
+```JSON
+{
+    "ID.CO.TELKOM.WWW": {
+        "original_id": 26,
+        "reverse_domain": "ID.CO.TELKOM.WWW",
+        "01": "936008980255996627",
+        "02": "000195255996627",
+        "03": "UMI"
+    }
+}
+```
+
+##### QRIS
+
+```JSON
+{
+    "ID.CO.QRIS.WWW": {
+        "original_id": 51,
+        "reverse_domain": "ID.CO.QRIS.WWW",
+        "nmid": "ID1234567890123",
+        "03": "UMI"
+    }
+}
+```
+
+#### 4.4 Malaysia
+
+The QR Code for Malaysia, DuitNow, has not yet been implemented.
+
+#### 4.5 Hong Kong
+
+The QR Code for Hong Kong has not yet been implemented.

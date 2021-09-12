@@ -647,7 +647,6 @@ class EmvMerchant {
 		'99' => 'channel_name'
 	];
 
-
 	/* | --------------------------------------------------------------------------------------------------------
 	   | TELKOM.ID
 	   | -------------------------------------------------------------------------------------------------------- */
@@ -680,7 +679,7 @@ class EmvMerchant {
 	const QRIS_CHANNEL = 'ID.CO.QRIS.WWW';
 	protected $qris_keys = [
 		'00' => 'reverse_domain',
-		'02' => '02',
+		'02' => 'nmid', // National Merchant ID
 		'03' => '03'
 	];
 
@@ -1022,28 +1021,6 @@ class EmvMerchant {
 				'message' => $this->messages[self::ERROR_ID_NOT_FOUND]
 			];
 		}
-	}
-
-	/**
-	 * @param $field_id
-	 * @param $error
-	 * @deprecated
-	 * Add error to the errors field
-	 */
-	protected function process_error($field_id, $error)
-	{
-		$this->errors[$field_id] = $error;
-	}
-
-	/**
-	 * @param $field_id
-	 * @param $warning
-	 * @deprecated
-	 * Add warning to the warnings field
-	 */
-	protected function process_warning($field_id, $warning)
-	{
-		$this->warnings[$field_id] = $warning;
 	}
 
 	/* | --------------------------------------------------------------------------------------------------------

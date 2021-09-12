@@ -435,31 +435,31 @@ class EmvMerchantDecoder extends EmvMerchant {
 				$this->process_qris($account_raw, $intId);
 				break;
 			case parent::FAVE_CHANNEL:
-				$this->process_favepay($account_raw, $intId); // todo: check
+				$this->process_favepay($account_raw, $intId);
 				break;
 			case parent::DASH_CHANNEL:
-				$this->accounts[] = $this->process_dash($account_raw, $intId); // todo: check
+				$this->accounts['DASH'] = $this->process_dash($account_raw, $intId); // todo: check
 				break;
 			case parent::LIQUIDPAY_CHANNEL:
-				$this->accounts[] = $this->process_liquidpay($account_raw, $intId); // todo: check
+				$this->accounts['LIQUIDPAY'] = $this->process_liquidpay($account_raw, $intId); // todo: check
 				break;
 			case parent::EZLINK_CHANNEL:
-				$this->accounts[] = $this->process_ezlink($account_raw, $intId); // todo: check
+				$this->accounts['EZLINK'] = $this->process_ezlink($account_raw, $intId); // todo: check
 				break;
 			case parent::GRAB_CHANNEL:
-				$this->accounts[] = $this->process_grab($account_raw, $intId); // todo: check
+				$this->accounts['GRAB'] = $this->process_grab($account_raw, $intId); // todo: check
 				break;
 			case parent::PAYLAH_CHANNEL:
-				$this->accounts[] = $this->process_paylah($account_raw, $intId); // todo: check
+				$this->accounts['PAYLAH'] = $this->process_paylah($account_raw, $intId); // todo: check
 				break;
 			case parent::WECHAT_CHANNEL:
-				$this->accounts[] = $this->process_wechat($account_raw, $intId); // todo: check
+				$this->accounts['WECHAT'] = $this->process_wechat($account_raw, $intId); // todo: check
 				break;
 			case parent::UOB_CHANNEL:
-				$this->accounts[] = $this->process_uob($account_raw, $intId); // todo: check
+				$this->accounts['UOB'] = $this->process_uob($account_raw, $intId); // todo: check
 				break;
 			case parent::AIRPAY_CHANNEL:
-				$this->accounts[] = $this->process_airpay($account_raw, $intId); // todo: check
+				$this->accounts['SHOPEE'] = $this->process_airpay($account_raw, $intId); // todo: check
 				break;
 			default:
 				$this->accounts[$account_raw['00']] = array_merge([parent::ID_ORIGINAL_LABEL => $intId], $account_raw);
