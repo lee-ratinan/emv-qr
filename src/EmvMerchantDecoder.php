@@ -11,7 +11,7 @@ class EmvMerchantDecoder extends EmvMerchant {
 
 	/**
 	 * EmvMerchantDecoder constructor.
-	 * @param $string string Input string read from the QR Code
+	 * @param string $string Input string read from the QR Code
 	 */
 	public function __construct($string)
 	{
@@ -23,7 +23,7 @@ class EmvMerchantDecoder extends EmvMerchant {
 
 	/**
 	 * Read and decode the EMV QR string
-	 * @param $string string Input string read from the QR Code
+	 * @param string $string Input string read from the QR Code
 	 * @return EmvMerchantDecoder
 	 */
 	protected function decode($string)
@@ -96,7 +96,7 @@ class EmvMerchantDecoder extends EmvMerchant {
 
 	/**
 	 * Validate and assign payload format indicator to the class
-	 * @param $strValue
+	 * @param string $strValue
 	 */
 	private function process_payload_format_indicator($strValue)
 	{
@@ -111,7 +111,7 @@ class EmvMerchantDecoder extends EmvMerchant {
 
 	/**
 	 * Validate and assign point of initiation to the class
-	 * @param $strValue
+	 * @param string $strValue
 	 */
 	private function process_point_of_initiation($strValue)
 	{
@@ -130,7 +130,7 @@ class EmvMerchantDecoder extends EmvMerchant {
 
 	/**
 	 * Assign merchant category code and its value (according to ISO 18245; if any) to the class
-	 * @param $strValue
+	 * @param string $strValue
 	 */
 	private function process_merchant_category_code($strValue)
 	{
@@ -153,7 +153,7 @@ class EmvMerchantDecoder extends EmvMerchant {
 
 	/**
 	 * Validate and assign currency to the class
-	 * @param $strValue
+	 * @param string $strValue
 	 */
 	private function process_currency($strValue)
 	{
@@ -172,7 +172,7 @@ class EmvMerchantDecoder extends EmvMerchant {
 	 * - \d+ or \d+\. An integer
 	 * or
 	 * - \d+\.\d+ A floating point number
-	 * @param $strValue
+	 * @param string $strValue
 	 */
 	private function process_amount($strValue)
 	{
@@ -192,7 +192,8 @@ class EmvMerchantDecoder extends EmvMerchant {
 	}
 
 	/**
-	 * @param $strValue
+	 * Validate and assign fee indicator to the class
+	 * @param string $strValue
 	 */
 	private function process_fee_indicator($strValue)
 	{
@@ -206,7 +207,8 @@ class EmvMerchantDecoder extends EmvMerchant {
 	}
 
 	/**
-	 * @param $strValue
+	 * Validate and assign fee value (fixed amount) to the class
+	 * @param string $strValue
 	 */
 	private function process_fee_value_fixed($strValue)
 	{
@@ -227,7 +229,8 @@ class EmvMerchantDecoder extends EmvMerchant {
 	}
 
 	/**
-	 * @param $strValue
+	 * Validate and assign fee value (percentage) to the class
+	 * @param string $strValue
 	 */
 	private function process_fee_value_percentage($strValue)
 	{
@@ -249,7 +252,7 @@ class EmvMerchantDecoder extends EmvMerchant {
 
 	/**
 	 * Validate and assign country code to the class
-	 * @param $strValue
+	 * @param string $strValue
 	 */
 	private function process_country_code($strValue)
 	{
@@ -264,7 +267,7 @@ class EmvMerchantDecoder extends EmvMerchant {
 
 	/**
 	 * Process additional data fields
-	 * @param $string
+	 * @param string $string
 	 */
 	private function process_additional_data($string)
 	{
@@ -315,6 +318,13 @@ class EmvMerchantDecoder extends EmvMerchant {
 		}
 	}
 
+	/**
+	 * Process individual additional data field
+	 * @param string $strValue
+	 * @param int $length
+	 * @param string $field_id
+	 * @param string $field_name
+	 */
 	private function process_additional_data_field($strValue, $length, $field_id, $field_name)
 	{
 		if ($this->validate_ans_charset_len($strValue, $length))
@@ -327,7 +337,8 @@ class EmvMerchantDecoder extends EmvMerchant {
 	}
 
 	/**
-	 * @param $string
+	 * Process additional customer data request
+	 * @param string $string
 	 */
 	private function process_additional_customer_data_request($string)
 	{
@@ -352,6 +363,10 @@ class EmvMerchantDecoder extends EmvMerchant {
 		}
 	}
 
+	/**
+	 * Process and verify additional data channel
+	 * @param string $string
+	 */
 	private function process_additional_data_channel($string)
 	{
 		$media = substr($string, parent::POS_ZERO, parent::LENGTH_ONE);
@@ -382,7 +397,7 @@ class EmvMerchantDecoder extends EmvMerchant {
 
 	/**
 	 * Process and verify the CRC field
-	 * @param $strValue
+	 * @param string $strValue
 	 */
 	private function process_crc($strValue)
 	{
@@ -396,9 +411,9 @@ class EmvMerchantDecoder extends EmvMerchant {
 	}
 
 	/**
-	 * Process account
-	 * @param $intId
-	 * @param $strValue
+	 * Process accounts
+	 * @param int $intId
+	 * @param string $strValue
 	 */
 	private function process_accounts($intId, $strValue)
 	{
@@ -428,39 +443,39 @@ class EmvMerchantDecoder extends EmvMerchant {
 			case parent::SGQR_CHANNEL:
 				$this->process_sgqr($account_raw, $intId);
 				break;
-			case parent::TELKOM_CHANNEL:
-				$this->process_telkom($account_raw, $intId);
-				break;
+//			case parent::TELKOM_CHANNEL:
+//				$this->process_telkom($account_raw, $intId); // todo: check
+//				break;
 			case parent::QRIS_CHANNEL:
 				$this->process_qris($account_raw, $intId);
 				break;
 			case parent::FAVE_CHANNEL:
 				$this->process_favepay($account_raw, $intId);
 				break;
-			case parent::DASH_CHANNEL:
-				$this->accounts['DASH'] = $this->process_dash($account_raw, $intId); // todo: check
-				break;
-			case parent::LIQUIDPAY_CHANNEL:
-				$this->accounts['LIQUIDPAY'] = $this->process_liquidpay($account_raw, $intId); // todo: check
-				break;
-			case parent::EZLINK_CHANNEL:
-				$this->accounts['EZLINK'] = $this->process_ezlink($account_raw, $intId); // todo: check
-				break;
-			case parent::GRAB_CHANNEL:
-				$this->accounts['GRAB'] = $this->process_grab($account_raw, $intId); // todo: check
-				break;
-			case parent::PAYLAH_CHANNEL:
-				$this->accounts['PAYLAH'] = $this->process_paylah($account_raw, $intId); // todo: check
-				break;
-			case parent::WECHAT_CHANNEL:
-				$this->accounts['WECHAT'] = $this->process_wechat($account_raw, $intId); // todo: check
-				break;
-			case parent::UOB_CHANNEL:
-				$this->accounts['UOB'] = $this->process_uob($account_raw, $intId); // todo: check
-				break;
-			case parent::AIRPAY_CHANNEL:
-				$this->accounts['SHOPEE'] = $this->process_airpay($account_raw, $intId); // todo: check
-				break;
+//			case parent::DASH_CHANNEL:
+//				$this->accounts['DASH'] = $this->process_dash($account_raw, $intId); // todo: check
+//				break;
+//			case parent::LIQUIDPAY_CHANNEL:
+//				$this->accounts['LIQUIDPAY'] = $this->process_liquidpay($account_raw, $intId); // todo: check
+//				break;
+//			case parent::EZLINK_CHANNEL:
+//				$this->accounts['EZLINK'] = $this->process_ezlink($account_raw, $intId); // todo: check
+//				break;
+//			case parent::GRAB_CHANNEL:
+//				$this->accounts['GRAB'] = $this->process_grab($account_raw, $intId); // todo: check
+//				break;
+//			case parent::PAYLAH_CHANNEL:
+//				$this->accounts['PAYLAH'] = $this->process_paylah($account_raw, $intId); // todo: check
+//				break;
+//			case parent::WECHAT_CHANNEL:
+//				$this->accounts['WECHAT'] = $this->process_wechat($account_raw, $intId); // todo: check
+//				break;
+//			case parent::UOB_CHANNEL:
+//				$this->accounts['UOB'] = $this->process_uob($account_raw, $intId); // todo: check
+//				break;
+//			case parent::AIRPAY_CHANNEL:
+//				$this->accounts['SHOPEE'] = $this->process_airpay($account_raw, $intId); // todo: check
+//				break;
 			default:
 				$this->accounts[$account_raw['00']] = array_merge([parent::ID_ORIGINAL_LABEL => $intId], $account_raw);
 		}
@@ -468,8 +483,8 @@ class EmvMerchantDecoder extends EmvMerchant {
 
 	/**
 	 * Process PayNow account
-	 * @param $account_raw
-	 * @param $intId
+	 * @param string $account_raw
+	 * @param int $intId
 	 */
 	private function process_paynow($account_raw, $intId)
 	{
@@ -540,8 +555,8 @@ class EmvMerchantDecoder extends EmvMerchant {
 
 	/**
 	 * Process PromptPay account
-	 * @param $account_raw
-	 * @param $intId
+	 * @param string $account_raw
+	 * @param int $intId
 	 */
 	private function process_promptpay($account_raw, $intId)
 	{
@@ -583,8 +598,8 @@ class EmvMerchantDecoder extends EmvMerchant {
 
 	/**
 	 * Process SGQR information - not an account but required
-	 * @param $account_raw
-	 * @param $intId
+	 * @param string $account_raw
+	 * @param int $intId
 	 */
 	private function process_sgqr($account_raw, $intId)
 	{
@@ -598,23 +613,26 @@ class EmvMerchantDecoder extends EmvMerchant {
 	}
 
 	/**
-	 * @param $account_raw
-	 * @param $intId
+	 * todo: verify
+	 * Process Temkom information
+	 * @param string $account_raw
+	 * @param int $intId
 	 */
-	private function process_telkom($account_raw, $intId)
-	{
-		// FIXED 51
-		$account[parent::ID_ORIGINAL_LABEL] = $intId;
-		foreach ($account_raw as $id => $val)
-		{
-			$account[$this->telkom_keys[$id]] = $val;
-		}
-		$this->accounts[parent::TELKOM_CHANNEL] = $account;
-	}
+//	private function process_telkom($account_raw, $intId)
+//	{
+//		// FIXED 51
+//		$account[parent::ID_ORIGINAL_LABEL] = $intId;
+//		foreach ($account_raw as $id => $val)
+//		{
+//			$account[$this->telkom_keys[$id]] = $val;
+//		}
+//		$this->accounts[parent::TELKOM_CHANNEL] = $account;
+//	}
 
 	/**
-	 * @param $account_raw
-	 * @param $intId
+	 * Process QRIC
+	 * @param string $account_raw
+	 * @param int $intId
 	 */
 	private function process_qris($account_raw, $intId)
 	{
@@ -629,8 +647,8 @@ class EmvMerchantDecoder extends EmvMerchant {
 
 	/**
 	 * Process FavePay
-	 * @param $account_raw
-	 * @param $intId
+	 * @param string $account_raw
+	 * @param int $intId
 	 */
 	private function process_favepay($account_raw, $intId)
 	{
@@ -646,145 +664,145 @@ class EmvMerchantDecoder extends EmvMerchant {
 	/**
 	 * todo: verify
 	 * Process Dash
-	 * @param $account_raw
-	 * @param $intId
+	 * @param string $account_raw
+	 * @param int $intId
 	 * @return array
 	 */
-	private function process_dash($account_raw, $intId)
-	{
-		$account['original_id'] = $intId;
-		$account['channel_name'] = parent::DASH_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
-		{
-			$account[$this->dash_keys[$id]] = $val;
-		}
-		return $account;
-	}
+//	private function process_dash($account_raw, $intId)
+//	{
+//		$account['original_id'] = $intId;
+//		$account['channel_name'] = parent::DASH_CHANNEL_NAME;
+//		foreach ($account_raw as $id => $val)
+//		{
+//			$account[$this->dash_keys[$id]] = $val;
+//		}
+//		return $account;
+//	}
 
 	/**
 	 * todo: verify
 	 * Process LiquidPay
-	 * @param $account_raw
-	 * @param $intId
+	 * @param string $account_raw
+	 * @param int $intId
 	 * @return array
 	 */
-	private function process_liquidpay($account_raw, $intId)
-	{
-		$account['original_id'] = $intId;
-		$account['channel_name'] = parent::LIQUIDPAY_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
-		{
-			$account[$this->liquidpay_keys[$id]] = $val;
-		}
-		return $account;
-	}
+//	private function process_liquidpay($account_raw, $intId)
+//	{
+//		$account['original_id'] = $intId;
+//		$account['channel_name'] = parent::LIQUIDPAY_CHANNEL_NAME;
+//		foreach ($account_raw as $id => $val)
+//		{
+//			$account[$this->liquidpay_keys[$id]] = $val;
+//		}
+//		return $account;
+//	}
 
 	/**
 	 * todo: verify
 	 * Process EZ-Link
-	 * @param $account_raw
-	 * @param $intId
+	 * @param string $account_raw
+	 * @param int $intId
 	 * @return array
 	 */
-	private function process_ezlink($account_raw, $intId)
-	{
-		$account['original_id'] = $intId;
-		$account['channel_name'] = parent::EZLINK_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
-		{
-			$account[$this->ezlink_keys[$id]] = $val;
-		}
-		return $account;
-	}
+//	private function process_ezlink($account_raw, $intId)
+//	{
+//		$account['original_id'] = $intId;
+//		$account['channel_name'] = parent::EZLINK_CHANNEL_NAME;
+//		foreach ($account_raw as $id => $val)
+//		{
+//			$account[$this->ezlink_keys[$id]] = $val;
+//		}
+//		return $account;
+//	}
 
 	/**
 	 * todo: verify
 	 * Process GrabPay
-	 * @param $account_raw
-	 * @param $intId
+	 * @param string $account_raw
+	 * @param int $intId
 	 * @return array
 	 */
-	private function process_grab($account_raw, $intId)
-	{
-		$account['original_id'] = $intId;
-		$account['channel_name'] = parent::GRAB_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
-		{
-			$account[$this->grab_keys[$id]] = $val;
-		}
-		return $account;
-	}
+//	private function process_grab($account_raw, $intId)
+//	{
+//		$account['original_id'] = $intId;
+//		$account['channel_name'] = parent::GRAB_CHANNEL_NAME;
+//		foreach ($account_raw as $id => $val)
+//		{
+//			$account[$this->grab_keys[$id]] = $val;
+//		}
+//		return $account;
+//	}
 
 	/**
 	 * todo: verify
 	 * Process DBS PayLah!
-	 * @param $account_raw
-	 * @param $intId
+	 * @param string $account_raw
+	 * @param int $intId
 	 * @return array
 	 */
-	private function process_paylah($account_raw, $intId)
-	{
-		$account['original_id'] = $intId;
-		$account['channel_name'] = parent::PAYLAH_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
-		{
-			$account[$this->paylah_keys[$id]] = $val;
-		}
-		return $account;
-	}
+//	private function process_paylah($account_raw, $intId)
+//	{
+//		$account['original_id'] = $intId;
+//		$account['channel_name'] = parent::PAYLAH_CHANNEL_NAME;
+//		foreach ($account_raw as $id => $val)
+//		{
+//			$account[$this->paylah_keys[$id]] = $val;
+//		}
+//		return $account;
+//	}
 
 	/**
 	 * todo: verify
 	 * Process WeChat Pay
-	 * @param $account_raw
-	 * @param $intId
+	 * @param string $account_raw
+	 * @param int $intId
 	 * @return array
 	 */
-	private function process_wechat($account_raw, $intId)
-	{
-		$account['original_id'] = $intId;
-		$account['channel_name'] = parent::WECHAT_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
-		{
-			$account[$this->wechat_keys[$id]] = $val;
-		}
-		return $account;
-	}
+//	private function process_wechat($account_raw, $intId)
+//	{
+//		$account['original_id'] = $intId;
+//		$account['channel_name'] = parent::WECHAT_CHANNEL_NAME;
+//		foreach ($account_raw as $id => $val)
+//		{
+//			$account[$this->wechat_keys[$id]] = $val;
+//		}
+//		return $account;
+//	}
 
 	/**
 	 * todo: verify
 	 * Process UOB
-	 * @param $account_raw
-	 * @param $intId
+	 * @param string $account_raw
+	 * @param int $intId
 	 * @return array
 	 */
-	private function process_uob($account_raw, $intId)
-	{
-		$account['original_id'] = $intId;
-		$account['channel_name'] = parent::UOB_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
-		{
-			$account[$this->uob_keys[$id]] = $val;
-		}
-		return $account;
-	}
+//	private function process_uob($account_raw, $intId)
+//	{
+//		$account['original_id'] = $intId;
+//		$account['channel_name'] = parent::UOB_CHANNEL_NAME;
+//		foreach ($account_raw as $id => $val)
+//		{
+//			$account[$this->uob_keys[$id]] = $val;
+//		}
+//		return $account;
+//	}
 
 	/**
 	 * todo: verify
 	 * Process AirPay / ShopeePay
-	 * @param $account_raw
-	 * @param $intId
+	 * @param string $account_raw
+	 * @param int $intId
 	 * @return array
 	 */
-	private function process_airpay($account_raw, $intId)
-	{
-		$account['original_id'] = $intId;
-		$account['channel_name'] = parent::AIRPAY_CHANNEL_NAME;
-		foreach ($account_raw as $id => $val)
-		{
-			$account[$this->airpay_keys[$id]] = $val;
-		}
-		return $account;
-	}
+//	private function process_airpay($account_raw, $intId)
+//	{
+//		$account['original_id'] = $intId;
+//		$account['channel_name'] = parent::AIRPAY_CHANNEL_NAME;
+//		foreach ($account_raw as $id => $val)
+//		{
+//			$account[$this->airpay_keys[$id]] = $val;
+//		}
+//		return $account;
+//	}
 
 }

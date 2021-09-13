@@ -279,20 +279,6 @@ Under construction.
 ```
 #### 4.3 Indonesia
 
-##### Telkom
-
-```JSON
-{
-    "ID.CO.TELKOM.WWW": {
-        "original_id": 26,
-        "reverse_domain": "ID.CO.TELKOM.WWW",
-        "01": "936008980255996627",
-        "02": "000195255996627",
-        "03": "UMI"
-    }
-}
-```
-
 ##### QRIS
 
 ```JSON

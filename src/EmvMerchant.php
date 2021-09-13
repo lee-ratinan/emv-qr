@@ -610,7 +610,7 @@ class EmvMerchant {
 	const PAYNOW_PROXY_UEN = '2';
 	const PAYNOW_AMOUNT_EDITABLE_TRUE = '1';
 	const PAYNOW_AMOUNT_EDITABLE_FALSE = '0';
-	const PAYNOW_DEFAULT_EXPIRY_DATE = '99991231';
+	const PAYNOW_DEFAULT_EXPIRY_DATE = '20991231';
 	protected $paynow_keys = [
 		'00' => 'reverse_domain',
 		'01' => 'proxy_type',
@@ -792,6 +792,7 @@ class EmvMerchant {
 	const ERROR_VALUE_PLACEHOLDER = '???';
 	// ERROR CODES
 	const ERROR_ID_NOT_FOUND = 'E00X';
+	const ERROR_MESSAGE_TYPE_NOT_FOUND = 'E00Y';
 	const ERROR_ID_PAYLOAD_FORMAT_INDICATOR_INVALID = 'E001';
 	const ERROR_ID_TYPE_OF_INITIATION_INVALID = 'E002';
 	const ERROR_ID_CURRENCY_NOT_SUPPORTED = 'E003';
@@ -822,6 +823,7 @@ class EmvMerchant {
 	protected $messages = [
 		// ERROR
 		self::ERROR_ID_NOT_FOUND => "Error ID not found.",
+		self::ERROR_MESSAGE_TYPE_NOT_FOUND => "Message type was not found.",
 		self::ERROR_ID_PAYLOAD_FORMAT_INDICATOR_INVALID => "Payload format indicator is invalid. Expected '01', found '???'.",
 		self::ERROR_ID_TYPE_OF_INITIATION_INVALID => "Type of initiation is invalid. Expected '11' or '12', found '???'.",
 		self::ERROR_ID_CURRENCY_NOT_SUPPORTED => "Currency is not supported. Found '???' as the currency code. Please check the latest release documentation for supported currencies.",
@@ -902,10 +904,9 @@ class EmvMerchant {
 	   | Generated CRC: 0x29B1
 	   |
 	   | -------------------------------------------------------------------------------------------------------- */
-
 	/**
 	 * Returns CRC16 of a string as int value
-	 * @param $str
+	 * @param $str The string to digest
 	 * @return string
 	 */
 	protected function CRC16($str)
@@ -944,10 +945,8 @@ class EmvMerchant {
 			0xEF1F, 0xFF3E, 0xCF5D, 0xDF7C, 0xAF9B, 0xBFBA, 0x8FD9, 0x9FF8,
 			0x6E17, 0x7E36, 0x4E55, 0x5E74, 0x2E93, 0x3EB2, 0x0ED1, 0x1EF0
 		);
-
 		$crc16 = 0xFFFF; // the CRC
 		$len = strlen($str);
-
 		for ($i = 0; $i < $len; $i++)
 		{
 			$t = ($crc16 >> 8) ^ ord($str[$i]); // High byte Xor Message Byte to get index
@@ -959,7 +958,7 @@ class EmvMerchant {
 
 	/**
 	 * Returns CRC16 of a string as hexadecimal string
-	 * @param $str
+	 * @param string $str The string to digest
 	 * @return string
 	 */
 	protected function CRC16HexDigest($str)
@@ -970,33 +969,32 @@ class EmvMerchant {
 	/* | --------------------------------------------------------------------------------------------------------
 	   | ERRORS
 	   | -------------------------------------------------------------------------------------------------------- */
-
 	/**
 	 * Add error or warning message
-	 * @param string $field_id
-	 * @param string $message_type
-	 * @param string $message_id
-	 * @param string|array $value_found
+	 * @param string|int $field_id Field ID
+	 * @param string $message_type Type of the message, MESSAGE_TYPE_ERROR or MESSAGE_TYPE_WARNING
+	 * @param string $message_id The message ID as defined in the class
+	 * @param string|array $params The string or array of the values to be passed to the message
 	 */
-	protected function add_message($field_id, $message_type, $message_id, $value_found = '')
+	protected function add_message($field_id, $message_type, $message_id, $params = '')
 	{
 		if (isset($this->messages[$message_id]))
 		{
 			$message = $this->messages[$message_id];
-			if ( ! empty($value_found))
+			if ( ! empty($params))
 			{
-				if (is_array($value_found))
+				if (is_array($params))
 				{
-					$intCount = count($value_found);
+					$intCount = count($params);
 					$search_array = [];
 					for ($i = 1; $i <= $intCount; $i++)
 					{
 						$search_array[] = self::ERROR_VALUE_PLACEHOLDER . $i;
 					}
-					$message = str_replace($search_array, $value_found, $message);
+					$message = str_replace($search_array, $params, $message);
 				} else
 				{
-					$message = str_replace(self::ERROR_VALUE_PLACEHOLDER, $value_found, $message);
+					$message = str_replace(self::ERROR_VALUE_PLACEHOLDER, $params, $message);
 				}
 			}
 			$array = [
@@ -1012,6 +1010,13 @@ class EmvMerchant {
 				case self::MESSAGE_TYPE_WARNING:
 					$this->warnings[] = $array;
 					break;
+				default:
+					$this->warnings[] = $array;
+					$this->errors[] = [
+						'field_id' => intval($field_id),
+						'code' => self::ERROR_MESSAGE_TYPE_NOT_FOUND,
+						'message' => $this->messages[self::ERROR_MESSAGE_TYPE_NOT_FOUND]
+					];
 			}
 		} else
 		{
@@ -1028,8 +1033,8 @@ class EmvMerchant {
 	   | -------------------------------------------------------------------------------------------------------- */
 	/**
 	 * Validate or clean characters for those in ANS format
-	 * @param $string string The string to validate
-	 * @param $mode string Either sanitizer or validator
+	 * @param string $string The string to validate
+	 * @param string $mode Either sanitizer or validator
 	 * @return false|int|string
 	 */
 	protected function validate_ans_charset($string, $mode)
@@ -1046,8 +1051,9 @@ class EmvMerchant {
 	}
 
 	/**
-	 * @param $string
-	 * @param $length
+	 * Validate the character set and check length of the input string
+	 * @param string $string String to check
+	 * @param int $length Max length
 	 * @return bool
 	 */
 	protected function validate_ans_charset_len($string, $length)
@@ -1089,7 +1095,7 @@ class EmvMerchant {
 
 	/**
 	 * Parse date in yyyymmdd format to Y-m-d
-	 * @param $string
+	 * @param string $string
 	 * @return false|string
 	 */
 	protected function parse_date_yyyymmdd($string)
