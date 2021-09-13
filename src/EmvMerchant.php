@@ -588,6 +588,7 @@ class EmvMerchant {
 	const LENGTH_TWO = 2;
 	const LENGTH_THREE = 3;
 	const LENGTH_FOUR = 4;
+	const LENGTH_TEN = 10;
 	const LENGTH_TWENTY = 20;
 	const LENGTH_TWENTY_FIVE = 25;
 
