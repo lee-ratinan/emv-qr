@@ -476,9 +476,9 @@ class EmvMerchant {
 	 * @var string[] ISO3166
 	 */
 	protected $country_codes = [
-		self::COUNTRY_HK,
+		//self::COUNTRY_HK,
 		self::COUNTRY_ID,
-		self::COUNTRY_MY,
+		//self::COUNTRY_MY,
 		self::COUNTRY_SG,
 		self::COUNTRY_TH
 	];
@@ -813,6 +813,7 @@ class EmvMerchant {
 	const ERROR_ID_PAYNOW_EXPIRY_DATE_INVALID = 'E017';
 	const ERROR_ID_PROMPTPAY_MISSING_PROXY = 'E018';
 	const ERROR_ID_PROMPTPAY_INVALID_PROXY = 'E019';
+	const ERROR_ID_MISSING_FIELD = 'E999';
 	// WARNING CODES
 	const WARNING_ID_MCC_INVALID = 'W001';
 	const WARNING_ID_MCC_UNKNOWN = 'W002';
@@ -822,7 +823,7 @@ class EmvMerchant {
 	const WARNING_ID_INVALID_CUSTOMER_REQUEST_TYPE = 'W006';
 	const WARNING_ID_INVALID_MERCHANT_CHANNEL = 'W007';
 	protected $messages = [
-		// ERROR
+		// ERROR DECODER
 		self::ERROR_ID_NOT_FOUND => "Error ID not found.",
 		self::ERROR_MESSAGE_TYPE_NOT_FOUND => "Message type was not found.",
 		self::ERROR_ID_PAYLOAD_FORMAT_INDICATOR_INVALID => "Payload format indicator is invalid. Expected '01', found '???'.",
@@ -844,6 +845,8 @@ class EmvMerchant {
 		self::ERROR_ID_PAYNOW_EXPIRY_DATE_INVALID => "The expiry date of this QR code is invalid. Expected the date in 'yyyymmdd' format, found '???'.",
 		self::ERROR_ID_PROMPTPAY_MISSING_PROXY => "The proxy value (mobile number, tax ID, or eWallet ID) is missing.",
 		self::ERROR_ID_PROMPTPAY_INVALID_PROXY => "The proxy value is invalid. Expected a mobile phone number or tax ID, found '???'.",
+		// ERROR GENERATOR
+		self::ERROR_ID_MISSING_FIELD => "The field ID ??? has never been set.",
 		// WARNING
 		self::WARNING_ID_MCC_INVALID => "Merchant category code is invalid. Expected 4-digit string, found '???'.",
 		self::WARNING_ID_MCC_UNKNOWN => "Merchant category code is unknown or does not exist in the system. Found '???'.",

@@ -43,7 +43,12 @@ if ( ! empty($str))
           <form method="POST">
             <input class="form-control mb-3" type="text" name="qrcode" value="<?= @$str ?>" placeholder="QR Code" required />
             <div class="text-end">
-              <a class="btn btn-outline-secondary mb-3" href="decoder-scan.html">Scan from camera or upload image</a>
+              <a class="btn btn-outline-secondary mb-3" href="decoder-scan.html">
+                <svg role="img" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 496 512" style="height:1em;width:1em;">
+                  <path fill="currentColor" d="M512 144v288c0 26.5-21.5 48-48 48H48c-26.5 0-48-21.5-48-48V144c0-26.5 21.5-48 48-48h88l12.3-32.9c7-18.7 24.9-31.1 44.9-31.1h125.5c20 0 37.9 12.4 44.9 31.1L376 96h88c26.5 0 48 21.5 48 48zM376 288c0-66.2-53.8-120-120-120s-120 53.8-120 120 53.8 120 120 120 120-53.8 120-120zm-32 0c0 48.5-39.5 88-88 88s-88-39.5-88-88 39.5-88 88-88 88 39.5 88 88z" class=""></path>
+                </svg>
+                Scan from camera or upload image
+              </a>
               <input class="btn btn-success mb-3" type="submit" value="Decode"/>
             </div>
           </form>
