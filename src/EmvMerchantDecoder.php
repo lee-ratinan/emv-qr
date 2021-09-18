@@ -527,28 +527,34 @@ class EmvMerchantDecoder extends EmvMerchant {
 			$this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_MISSING_PROXY_TYPE);
 		}
 		// EDITABLE
-		$editable = $account_raw[parent::PAYNOW_ID_AMOUNT_EDITABLE];
-		if (isset($this->paynow_amount_editable[$editable]))
+		if (isset($account_raw[parent::PAYNOW_ID_AMOUNT_EDITABLE]))
 		{
-			$account[$this->paynow_keys[parent::PAYNOW_ID_AMOUNT_EDITABLE]] = $this->paynow_amount_editable[$editable];
-			if ($editable == parent::PAYNOW_AMOUNT_EDITABLE_FALSE && $this->point_of_initiation == parent::POINT_OF_INITIATION_STATIC_VALUE)
+			$editable = $account_raw[parent::PAYNOW_ID_AMOUNT_EDITABLE];
+			if (isset($this->paynow_amount_editable[$editable]))
 			{
-				$this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_EDITABLE_FALSE_BUT_STATIC);
+				$account[$this->paynow_keys[parent::PAYNOW_ID_AMOUNT_EDITABLE]] = $this->paynow_amount_editable[$editable];
+				if ($editable == parent::PAYNOW_AMOUNT_EDITABLE_FALSE && $this->point_of_initiation == parent::POINT_OF_INITIATION_STATIC_VALUE)
+				{
+					$this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_EDITABLE_FALSE_BUT_STATIC);
+				}
 			}
 		}
 		// EXPIRY DATE
-		$expiry_date = $this->parse_date_yyyymmdd($account_raw[parent::PAYNOW_ID_EXPIRY_DATE]);
-		if (FALSE != $expiry_date)
+		if (isset($account_raw[parent::PAYNOW_ID_EXPIRY_DATE]))
 		{
-			date_default_timezone_set(parent::TIMEZONE_SINGAPORE);
-			$now = date(parent::FORMAT_DATE);
-			if ($expiry_date < $now)
+			$expiry_date = $this->parse_date_yyyymmdd($account_raw[parent::PAYNOW_ID_EXPIRY_DATE]);
+			if (FALSE != $expiry_date)
 			{
-				$this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_EXPIRED_QR, $expiry_date);
+				date_default_timezone_set(parent::TIMEZONE_SINGAPORE);
+				$now = date(parent::FORMAT_DATE);
+				if ($expiry_date < $now)
+				{
+					$this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_EXPIRED_QR, $expiry_date);
+				}
+			} else
+			{
+				$this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_EXPIRY_DATE_INVALID, $account_raw[parent::PAYNOW_ID_EXPIRY_DATE]);
 			}
-		} else
-		{
-			$this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_EXPIRY_DATE_INVALID, $account_raw[parent::PAYNOW_ID_EXPIRY_DATE]);
 		}
 		$this->accounts[parent::PAYNOW_CHANNEL] = $account;
 	}
