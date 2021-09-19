@@ -17,7 +17,7 @@ if ( ! empty($str))
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
     <style>
-        #qr-reader button, #qr-reader__dashboard_section_swaplink, #qr-reader__filescan_input {
+        #qr-reader button, #qr-reader__dashboard_section_swaplink, #qr-reader__filescan_input, #qr-reader__camera_selection {
             color: #6c757d;
             border: 1px solid #6c757d;
             display: inline-block;
