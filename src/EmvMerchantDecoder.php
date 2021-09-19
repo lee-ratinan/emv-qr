@@ -623,39 +623,6 @@ class EmvMerchantDecoder extends EmvMerchant {
     }
 
     /**
-     * todo: verify
-     * Process Temkom information
-     * @param string $account_raw
-     * @param int $intId
-     */
-//    private function process_telkom($account_raw, $intId)
-//    {
-//        // FIXED 51
-//        $account[parent::ID_ORIGINAL_LABEL] = $intId;
-//        foreach ($account_raw as $id => $val)
-//        {
-//            $account[$this->telkom_keys[$id]] = $val;
-//        }
-//        $this->accounts[parent::TELKOM_CHANNEL] = $account;
-//    }
-
-    /**
-     * Process QRIC
-     * @param string $account_raw
-     * @param int $intId
-     */
-    private function process_qris($account_raw, $intId)
-    {
-        // FIXED 51
-        $account[parent::ID_ORIGINAL_LABEL] = $intId;
-        foreach ($account_raw as $id => $val)
-        {
-            $account[$this->qris_keys[$id]] = $val;
-        }
-        $this->accounts[parent::QRIS_CHANNEL] = $account;
-    }
-
-    /**
      * Process FavePay
      * @param string $account_raw
      * @param int $intId
@@ -671,13 +638,46 @@ class EmvMerchantDecoder extends EmvMerchant {
         $this->accounts[parent::FAVE_CHANNEL_NAME] = $account;
     }
 
-    /**
-     * todo: verify
-     * Process Dash
-     * @param string $account_raw
-     * @param int $intId
-     * @return array
-     */
+//    /**
+//     * todo: verify
+//     * Process Temkom information
+//     * @param string $account_raw
+//     * @param int $intId
+//     */
+//    private function process_telkom($account_raw, $intId)
+//    {
+//        // FIXED 51
+//        $account[parent::ID_ORIGINAL_LABEL] = $intId;
+//        foreach ($account_raw as $id => $val)
+//        {
+//            $account[$this->telkom_keys[$id]] = $val;
+//        }
+//        $this->accounts[parent::TELKOM_CHANNEL] = $account;
+//    }
+
+//    /**
+//     * Process QRIC
+//     * @param string $account_raw
+//     * @param int $intId
+//     */
+//    private function process_qris($account_raw, $intId)
+//    {
+//        // FIXED 51
+//        $account[parent::ID_ORIGINAL_LABEL] = $intId;
+//        foreach ($account_raw as $id => $val)
+//        {
+//            $account[$this->qris_keys[$id]] = $val;
+//        }
+//        $this->accounts[parent::QRIS_CHANNEL] = $account;
+//    }
+
+//    /**
+//     * todo: verify
+//     * Process Dash
+//     * @param string $account_raw
+//     * @param int $intId
+//     * @return array
+//     */
 //    private function process_dash($account_raw, $intId)
 //    {
 //        $account['original_id'] = $intId;
@@ -689,13 +689,13 @@ class EmvMerchantDecoder extends EmvMerchant {
 //        return $account;
 //    }
 
-    /**
-     * todo: verify
-     * Process LiquidPay
-     * @param string $account_raw
-     * @param int $intId
-     * @return array
-     */
+//    /**
+//     * todo: verify
+//     * Process LiquidPay
+//     * @param string $account_raw
+//     * @param int $intId
+//     * @return array
+//     */
 //    private function process_liquidpay($account_raw, $intId)
 //    {
 //        $account['original_id'] = $intId;
@@ -707,13 +707,13 @@ class EmvMerchantDecoder extends EmvMerchant {
 //        return $account;
 //    }
 
-    /**
-     * todo: verify
-     * Process EZ-Link
-     * @param string $account_raw
-     * @param int $intId
-     * @return array
-     */
+//    /**
+//     * todo: verify
+//     * Process EZ-Link
+//     * @param string $account_raw
+//     * @param int $intId
+//     * @return array
+//     */
 //    private function process_ezlink($account_raw, $intId)
 //    {
 //        $account['original_id'] = $intId;
@@ -725,13 +725,13 @@ class EmvMerchantDecoder extends EmvMerchant {
 //        return $account;
 //    }
 
-    /**
-     * todo: verify
-     * Process GrabPay
-     * @param string $account_raw
-     * @param int $intId
-     * @return array
-     */
+//    /**
+//     * todo: verify
+//     * Process GrabPay
+//     * @param string $account_raw
+//     * @param int $intId
+//     * @return array
+//     */array
 //    private function process_grab($account_raw, $intId)
 //    {
 //        $account['original_id'] = $intId;
@@ -743,13 +743,13 @@ class EmvMerchantDecoder extends EmvMerchant {
 //        return $account;
 //    }
 
-    /**
-     * todo: verify
-     * Process DBS PayLah!
-     * @param string $account_raw
-     * @param int $intId
-     * @return array
-     */
+//    /**
+//     * todo: verify
+//     * Process DBS PayLah!
+//     * @param string $account_raw
+//     * @param int $intId
+//     * @return array
+//     */
 //    private function process_paylah($account_raw, $intId)
 //    {
 //        $account['original_id'] = $intId;
@@ -761,13 +761,13 @@ class EmvMerchantDecoder extends EmvMerchant {
 //        return $account;
 //    }
 
-    /**
-     * todo: verify
-     * Process WeChat Pay
-     * @param string $account_raw
-     * @param int $intId
-     * @return array
-     */
+//    /**
+//     * todo: verify
+//     * Process WeChat Pay
+//     * @param string $account_raw
+//     * @param int $intId
+//     * @return array
+//     */
 //    private function process_wechat($account_raw, $intId)
 //    {
 //        $account['original_id'] = $intId;
@@ -779,13 +779,13 @@ class EmvMerchantDecoder extends EmvMerchant {
 //        return $account;
 //    }
 
-    /**
-     * todo: verify
-     * Process UOB
-     * @param string $account_raw
-     * @param int $intId
-     * @return array
-     */
+//    /**
+//     * todo: verify
+//     * Process UOB
+//     * @param string $account_raw
+//     * @param int $intId
+//     * @return array
+//     */
 //    private function process_uob($account_raw, $intId)
 //    {
 //        $account['original_id'] = $intId;
@@ -797,13 +797,13 @@ class EmvMerchantDecoder extends EmvMerchant {
 //        return $account;
 //    }
 
-    /**
-     * todo: verify
-     * Process AirPay / ShopeePay
-     * @param string $account_raw
-     * @param int $intId
-     * @return array
-     */
+//    /**
+//     * todo: verify
+//     * Process AirPay / ShopeePay
+//     * @param string $account_raw
+//     * @param int $intId
+//     * @return array
+//     */
 //    private function process_airpay($account_raw, $intId)
 //    {
 //        $account['original_id'] = $intId;

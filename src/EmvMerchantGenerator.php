@@ -17,6 +17,8 @@ class EmvMerchantGenerator extends EmvMerchant {
     const STATUS_MISSING_FIELDS = "Required field(s) are missing.";
     const STATUS_INVALID_VALUE = "Required field has invalid character(s) and/or too long.";
     const STATUS_INVALID_FIELD_ID = "Field ID or field name is invalid.";
+    const STATUS_IN_WRONG_COUNTRY = "The current account is not supported by the country already set.";
+    const STATUS_NO_ACCOUNT_ID = "The system cannot find the right ID for this account.";
 
     /* | --------------------------------------------------------------------------------------------------------
        | GENERATOR:
@@ -87,6 +89,10 @@ class EmvMerchantGenerator extends EmvMerchant {
                 case parent::COUNTRY_ID:
                     $this->country_code = parent::COUNTRY_ID;
                     $this->transaction_currency = parent::CURRENCY_IDR_NUMERIC;
+                    break;
+                case parent::COUNTRY_IN:
+                    $this->country_code = parent::COUNTRY_IN;
+                    $this->transaction_currency = parent::CURRENCY_INR_NUMERIC;
                     break;
                 case parent::COUNTRY_MY:
                     $this->country_code = parent::COUNTRY_MY;
@@ -303,27 +309,233 @@ class EmvMerchantGenerator extends EmvMerchant {
         {
             if ($this->validate_ans_charset_len($field_value, $max_length))
             {
-                $this->additional_fields[$field_id] = $field_id . sprintf('%02d', $field_value) . $field_value;
+                $this->additional_fields[$field_id] = $field_id . sprintf('%02d', strlen($field_value)) . $field_value;
                 return $this->return_status(TRUE);
             }
         } else if ($function == parent::ID_ADDITIONAL_DATA_ADDITIONAL_CUSTOMER_DATA_REQUEST_KEY)
         {
             if (preg_match('/^[A|M|E]{1,3}$/', $field_value))
             {
-                $this->additional_fields[$field_id] = $field_id . sprintf('%02d', $field_value) . $field_value;
+                $this->additional_fields[$field_id] = $field_id . sprintf('%02d', strlen($field_value)) . $field_value;
                 return $this->return_status(TRUE);
             }
         } else if ($function == parent::ID_ADDITIONAL_DATA_MERCHANT_CHANNEL_KEY)
         {
             if (preg_match('/^[0-7][0-3][0-3]$/', $field_value))
             {
-                $this->additional_fields[$field_id] = $field_id . sprintf('%02d', $field_value) . $field_value;
+                $this->additional_fields[$field_id] = $field_id . sprintf('%02d', strlen($field_value)) . $field_value;
                 return $this->return_status(TRUE);
             }
         }
         return $this->return_status(FALSE, self::STATUS_INVALID_VALUE, parent::ID_ADDITIONAL_DATA_FIELDS . '.' . $field_name);
     }
 
+    /* | --------------------------------------------------------------------------------------------------------
+       | ACCOUNTS
+       | -------------------------------------------------------------------------------------------------------- */
+
+    /**
+     * Find account ID
+     * @param int $preferred
+     * @return false|string
+     */
+    private function assign_account_id($preferred = parent::ID_ACCOUNT_START_INDEX)
+    {
+        if ($preferred < parent::ID_ACCOUNT_START_INDEX || $preferred > parent::ID_ACCOUNT_UPPER_BOUNDARY)
+        {
+            $preferred = parent::ID_ACCOUNT_START_INDEX;
+        }
+        for (; $preferred <= parent::ID_ACCOUNT_UPPER_BOUNDARY; $preferred++)
+        {
+            if ( ! isset($this->accounts[$preferred]))
+            {
+                return (string)$preferred;
+            }
+        }
+        return FALSE;
+    }
+
+    /**
+     * Setup PayNow Account
+     * @param string $proxy_type
+     * @param string $proxy_value
+     * @param string $editable (optional)
+     * @param string $expiry (optional)
+     * @return array Status
+     */
+    public function set_account_paynow($proxy_type, $proxy_value, $editable = parent::PAYNOW_AMOUNT_EDITABLE_TRUE, $expiry = parent::PAYNOW_DEFAULT_EXPIRY_DATE)
+    {
+        if (empty($this->country_code))
+        {
+            $this->set_country(parent::COUNTRY_SG);
+        } else if (parent::COUNTRY_SG != $this->country_code)
+        {
+            return $this->return_status(FALSE, self::STATUS_IN_WRONG_COUNTRY, parent::PAYNOW_CHANNEL);
+        }
+        $id = $this->assign_account_id(parent::ID_ACCOUNT_START_INDEX);
+        if (FALSE == $id)
+        {
+            return $this->return_status(FALSE, self::STATUS_NO_ACCOUNT_ID, parent::PAYNOW_CHANNEL);
+        }
+        // PROXY
+        if (isset($this->paynow_proxy_type[$proxy_type]))
+        {
+            $account[$this->paynow_keys[parent::PAYNOW_ID_PROXY_TYPE]] = $proxy_type;
+            if (parent::PAYNOW_PROXY_MOBILE == $proxy_type)
+            {
+                // Accept all country's phone number with country code (E.164 format)
+                if (preg_match('/^\+(\d){8,15}$/', $proxy_value))
+                {
+                    $account[$this->paynow_keys[parent::PAYNOW_ID_PROXY_VALUE]] = $proxy_value;
+                } else
+                {
+                    return $this->return_status(FALSE, self::STATUS_INVALID_VALUE, parent::PAYNOW_CHANNEL . '.' . parent::PAYNOW_ID_PROXY_VALUE);
+                }
+            } else
+            {
+                // UEN format, src: https://www.uen.gov.sg/ueninternet/faces/pages/admin/aboutUEN.jspx
+                /*
+                 * Businesses registered with ACRA: nnnnnnnnX
+                 * Local companies registered with ACRA: yyyynnnnnX
+                 * All other entities which will be issued new UEN: TyyPQnnnnX
+                 */
+                if (preg_match('/^(\d{8}[A-Z]|(19|20)\d{7}[A-Z]|(S|T)\d{2}[A-Z]{2}\d{4}[A-Z])(\d{2,4}){0,1}$/', $proxy_value))
+                {
+                    $account[$this->paynow_keys[parent::PAYNOW_ID_PROXY_VALUE]] = $proxy_value;
+                } else
+                {
+                    return $this->return_status(FALSE, self::STATUS_INVALID_VALUE, parent::PAYNOW_CHANNEL . '.' . parent::PAYNOW_ID_PROXY_VALUE);
+                }
+            }
+        } else
+        {
+            return $this->return_status(FALSE, self::STATUS_INVALID_VALUE, parent::PAYNOW_CHANNEL . '.' . parent::PAYNOW_ID_PROXY_TYPE);
+        }
+        // EDITABLE
+        if ($editable == parent::PAYNOW_AMOUNT_EDITABLE_TRUE || $editable == parent::PAYNOW_AMOUNT_EDITABLE_FALSE)
+        {
+            $account[parent::PAYNOW_ID_AMOUNT_EDITABLE] = $editable;
+        } else
+        {
+            return $this->return_status(FALSE, self::STATUS_INVALID_VALUE, parent::PAYNOW_CHANNEL . '.' . parent::PAYNOW_ID_AMOUNT_EDITABLE);
+        }
+        // EXPIRY
+        $expiry_formatted = $this->format_date_with_dash($expiry, $check_future = TRUE);
+        if (FALSE == $expiry_formatted)
+        {
+            return $this->return_status(FALSE, self::STATUS_INVALID_VALUE, parent::PAYNOW_CHANNEL . '.' . parent::PAYNOW_ID_EXPIRY_DATE);
+        } else
+        {
+            $account[parent::PAYNOW_ID_EXPIRY_DATE] = $expiry_formatted;
+        }
+        $this->accounts[$id] = $account;
+        return $this->return_status(TRUE);
+    }
+
+    public function set_account_sgqr()
+    {
+        if (empty($this->country_code))
+        {
+            $this->set_country(parent::COUNTRY_SG);
+        } else if (parent::COUNTRY_SG != $this->country_code)
+        {
+            return $this->return_status(FALSE, self::STATUS_IN_WRONG_COUNTRY, parent::SGQR_CHANNEL);
+        }
+        $id = $this->assign_account_id(parent::ID_ACCOUNT_UPPER_BOUNDARY);
+        if (FALSE == $id)
+        {
+            return $this->return_status(FALSE, self::STATUS_NO_ACCOUNT_ID, parent::SGQR_CHANNEL);
+        }
+        //
+        $this->accounts[$id] = $account;
+        return $this->return_status(TRUE);
+    }
+
+    public function set_account_sg_favepay()
+    {
+        if (empty($this->country_code))
+        {
+            $this->set_country(parent::COUNTRY_SG);
+        } else if (parent::COUNTRY_SG != $this->country_code)
+        {
+            return $this->return_status(FALSE, self::STATUS_IN_WRONG_COUNTRY, parent::FAVE_CHANNEL_NAME);
+        }
+        $id = $this->assign_account_id(parent::ID_ACCOUNT_START_INDEX);
+        if (FALSE == $id)
+        {
+            return $this->return_status(FALSE, self::STATUS_NO_ACCOUNT_ID, parent::FAVE_CHANNEL_NAME);
+        }
+        //
+        $this->accounts[$id] = $account;
+        return $this->return_status(TRUE);
+    }
+
+    /**
+     * Setup PromptPay account
+     * @param string $proxy_type
+     * @param string $proxy_value
+     * @return array Status
+     */
+    public function set_account_promptpay($proxy_type, $proxy_value)
+    {
+        if (empty($this->country_code))
+        {
+            $this->set_country(parent::COUNTRY_TH);
+        } else if (parent::COUNTRY_TH != $this->country_code)
+        {
+            return $this->return_status(FALSE, self::STATUS_IN_WRONG_COUNTRY, parent::PROMPTPAY_CHANNEL_NAME);
+        }
+        $id = $this->assign_account_id(parent::PROMPTPAY_PREFER_ID);
+        if (FALSE == $id)
+        {
+            return $this->return_status(FALSE, self::STATUS_NO_ACCOUNT_ID, parent::PROMPTPAY_CHANNEL_NAME);
+        }
+        $account[parent::PROMPTPAY_ID_APP_ID] = parent::PROMPTPAY_CHANNEL;
+        switch ($proxy_type)
+        {
+            case parent::PROMPTPAY_PROXY_MOBILE:
+                if (preg_match('/^0066(6|8|9)(\d{8})$/', $proxy_value))
+                {
+                    $account[parent::PROMPTPAY_ID_MOBILE] = $proxy_value;
+                } else if (preg_match('/^\+66(6|8|9)(\d{8})$/', $proxy_value))
+                {
+                    $account[parent::PROMPTPAY_ID_MOBILE] = str_replace('+66', '0066', $proxy_value);
+                } else
+                {
+                    return $this->return_status(FALSE, self::STATUS_INVALID_VALUE, parent::PROMPTPAY_CHANNEL_NAME . '.' . parent::PROMPTPAY_ID_MOBILE);
+                }
+                break;
+            case parent::PROMPTPAY_PROXY_TAX_ID:
+                if (preg_match('/^\d{13}$/', $proxy_value))
+                {
+                    $account[parent::PROMPTPAY_ID_TAX_ID] = $proxy_value;
+                } else if (preg_match('/^\d\-\d{4}\-\d{5}\-\d{2}\-\d$/', $proxy_value))
+                {
+                    $account[parent::PROMPTPAY_ID_TAX_ID] = str_replace('-', '', $proxy_value);
+                } else
+                {
+                    return $this->return_status(FALSE, self::STATUS_INVALID_VALUE, parent::PROMPTPAY_CHANNEL_NAME . '.' . parent::PROMPTPAY_ID_TAX_ID);
+                }
+                break;
+            case parent::PROMPTPAY_PROXY_EWALLET_ID:
+                if ($this->validate_ans_charset_len($proxy_value, parent::LENGTH_TWENTY_FIVE))
+                {
+                    $account[parent::PROMPTPAY_ID_EWALLET_ID] = $proxy_value;
+                } else
+                {
+                    return $this->return_status(FALSE, self::STATUS_INVALID_VALUE, parent::PROMPTPAY_CHANNEL_NAME . '.' . parent::PROMPTPAY_ID_EWALLET_ID);
+                }
+                break;
+            default:
+                return $this->return_status(FALSE, self::STATUS_INVALID_VALUE, parent::PROMPTPAY_CHANNEL_NAME . '.' . parent::PROMPTPAY_CHANNEL_NAME);
+        }
+        $this->accounts[$id] = $account;
+        return $this->return_status(TRUE);
+    }
+
+    /* | --------------------------------------------------------------------------------------------------------
+       | GENERATE QR
+       | -------------------------------------------------------------------------------------------------------- */
     /**
      * Generate the QR code string
      * @return array|string Return array if error, otherwise, the string for generating QR code

@@ -25,14 +25,19 @@ $purpose_of_transaction = $_POST['purpose_of_transaction'];
 $additional_customer_data_request = $_POST['additional_customer_data_request'];
 $merchant_tax_id = $_POST['merchant_tax_id'];
 $merchant_channel = $_POST['merchant_channel'];
-function print_text_input($field_name, $label, $value, $note = '')
+// set accounts
+
+
+$promptpay_proxy_type = $_POST['promptpay_proxy_type'];
+$promptpay_proxy_value = $_POST['promptpay_proxy_value'];
+function print_text_input($field_name, $label, $value, $note = '', $type = 'text')
 {
     echo '<div class="row g-3 align-items-center mb-3">
               <div class="col-6 col-md-4">
                 <label for="' . $field_name . '" class="col-form-label">' . $label . '</label>
               </div>
               <div class="col-6 col-md-4">
-                <input class="form-control" name="' . $field_name . '" id="' . $field_name . '" value="' . $value . '" />
+                <input class="form-control" type="' . $type . '" name="' . $field_name . '" id="' . $field_name . '" value="' . $value . '" />
               </div>
               <div class="col-6 col-md-4"><span class="form-text">' . $note . '</span></div>
             </div>';
@@ -56,10 +61,26 @@ function print_select_input($field_name, $label, $value, $options = [], $note = 
             </div>';
 }
 
+function print_header($head)
+{
+    echo '<div class="row mb-3"><div class="col"><b>' . $head . '</b><hr></div></div>';
+}
+
+function print_status($status)
+{
+    if ($status['status'])
+    {
+        echo "-- OK!\n";
+    } else
+    {
+        echo "-- " . $status['message'] . " (" . json_encode($status['field_id']) . ")\n";
+    }
+}
+
 ?>
 <html>
   <head>
-    <title>TEST DECODER</title>
+    <title>TEST GENERATOR</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet"
           integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
     <style>
@@ -104,119 +125,117 @@ function print_select_input($field_name, $label, $value, $options = [], $note = 
                 $emv = new \EMVQR\EmvMerchantGenerator();
                 $status = $emv->set_country($country_code);
                 echo "From set_country()\n";
-                echo json_encode($status, JSON_PRETTY_PRINT);
+                print_status($status);
                 $status = $emv->set_merchant_info($merchant_name, $merchant_city, $merchant_category_code, $postal_code);
                 echo "\nFrom set_merchant_info()\n";
-                echo json_encode($status, JSON_PRETTY_PRINT);
+                print_status($status);
                 if (empty($price))
                 {
                     $status = $emv->set_point_of_initiation_static();
                     echo "\nFrom set_point_of_initiation_static()\n";
-                    echo json_encode($status, JSON_PRETTY_PRINT);
+                    print_status($status);
                 } else
                 {
                     $status = $emv->set_price($price);
                     echo "\nFrom set_price()\n";
-                    echo json_encode($status, JSON_PRETTY_PRINT);
+                    print_status($status);
                 }
                 if ( ! empty($tip_or_fees))
                 {
                     $status = $emv->set_tip_or_fees($tip_or_fees, $fees_amount);
                     echo "\nFrom set_tip_or_fees()\n";
-                    echo json_encode($status, JSON_PRETTY_PRINT);
+                    print_status($status);
                 }
                 echo "\nFrom set_additional_info() - if any:\n";
                 if ( ! empty($bill_number))
                 {
                     $status = $emv->set_additional_info($emv::ID_ADDITIONAL_DATA_BILL_NUMBER_KEY, $bill_number);
-                    echo json_encode($status, JSON_PRETTY_PRINT)."\n";
+                    print_status($status);
                 }
                 if ( ! empty($mobile_number))
                 {
                     $status = $emv->set_additional_info($emv::ID_ADDITIONAL_DATA_MOBILE_NUMBER_KEY, $mobile_number);
-                    echo json_encode($status, JSON_PRETTY_PRINT)."\n";
+                    print_status($status);
                 }
                 if ( ! empty($store_label))
                 {
                     $status = $emv->set_additional_info($emv::ID_ADDITIONAL_DATA_STORE_LABEL_KEY, $store_label);
-                    echo json_encode($status, JSON_PRETTY_PRINT)."\n";
+                    print_status($status);
                 }
                 if ( ! empty($loyalty_number))
                 {
                     $status = $emv->set_additional_info($emv::ID_ADDITIONAL_DATA_LOYALTY_NUMBER_KEY, $loyalty_number);
-                    echo json_encode($status, JSON_PRETTY_PRINT)."\n";
+                    print_status($status);
                 }
                 if ( ! empty($reference_label))
                 {
                     $status = $emv->set_additional_info($emv::ID_ADDITIONAL_DATA_REFERENCE_LABEL_KEY, $reference_label);
-                    echo json_encode($status, JSON_PRETTY_PRINT)."\n";
+                    print_status($status);
                 }
                 if ( ! empty($customer_label))
                 {
                     $status = $emv->set_additional_info($emv::ID_ADDITIONAL_DATA_CUSTOMER_LABEL_KEY, $customer_label);
-                    echo json_encode($status, JSON_PRETTY_PRINT)."\n";
+                    print_status($status);
                 }
                 if ( ! empty($terminal_label))
                 {
                     $status = $emv->set_additional_info($emv::ID_ADDITIONAL_DATA_TERMINAL_LABEL_KEY, $terminal_label);
-                    echo json_encode($status, JSON_PRETTY_PRINT)."\n";
+                    print_status($status);
                 }
                 if ( ! empty($purpose_of_transaction))
                 {
                     $status = $emv->set_additional_info($emv::ID_ADDITIONAL_DATA_PURPOSE_OF_TRANSACTION_KEY, $purpose_of_transaction);
-                    echo json_encode($status, JSON_PRETTY_PRINT)."\n";
+                    print_status($status);
                 }
                 if ( ! empty($additional_customer_data_request))
                 {
                     $status = $emv->set_additional_info($emv::ID_ADDITIONAL_DATA_ADDITIONAL_CUSTOMER_DATA_REQUEST_KEY, $additional_customer_data_request);
-                    echo json_encode($status, JSON_PRETTY_PRINT)."\n";
+                    print_status($status);
                 }
                 if ( ! empty($merchant_tax_id))
                 {
                     $status = $emv->set_additional_info($emv::ID_ADDITIONAL_DATA_MERCHANT_TAX_ID_KEY, $merchant_tax_id);
-                    echo json_encode($status, JSON_PRETTY_PRINT)."\n";
+                    print_status($status);
                 }
                 if ( ! empty($merchant_channel))
                 {
                     $status = $emv->set_additional_info($emv::ID_ADDITIONAL_DATA_MERCHANT_CHANNEL_KEY, $merchant_channel);
-                    echo json_encode($status, JSON_PRETTY_PRINT)."\n";
+                    print_status($status);
                 }
+                echo "\nFrom accounts:\n";
+
+                if ( ! empty($promptpay_proxy_type))
+                {
+                    $status = $emv->set_account_promptpay($promptpay_proxy_type, $promptpay_proxy_value);
+                    print_status($status);
+                }
+                // Output:
                 $string = $emv->generate_qr_string();
-                echo "QR Code String:\n";
-                echo $string."\n";
-                /*
-
-                
-                // Accounts
-                // @todo: loop through accounts */
+                echo "\nQR Code String:\n";
+                echo $string . "\n\n";
+                echo "emvQr Object:\n";
+                echo json_encode($emv, JSON_PRETTY_PRINT);
                 echo '</pre>';
-            }
-
-
-            if (isset($emv))
-            {
-                $qr_string = $emv->generate_qr_string();
-                //echo $qr_string;
-                $object = $emv->get_object();
-                //echo '<pre>' . json_encode($object, JSON_PRETTY_PRINT) . '</pre>';
-                //echo '<pre>' . json_encode($status, JSON_PRETTY_PRINT) . '</pre>';
             }
             ?>
           <form class="form" method="POST">
               <?php
+              print_header('Country');
               print_select_input('country_code', 'Country', @$country_code, [
                   '' => '-',
                   'SG' => 'Singapore',
                   'TH' => 'Thailand',
-                  'ID' => 'Indonesia',
+                  'ID' => 'Indonesia (not available at the moment, will trigger error)',
                   'MY' => 'Malaysia (not available at the moment, will trigger error)',
                   'HK' => 'Hong Kong (not available at the moment, will trigger error)',
                   'IN' => 'India (not available at the moment, will trigger error)'
               ], 'ID 53, 58 (country code and currency code)');
+              print_header('Merchant Information');
               print_text_input('merchant_name', 'Merchant Name', @$merchant_name, 'ID 59');
               print_text_input('merchant_city', 'Merchant City', @$merchant_city, 'ID 60');
               print_text_input('merchant_category_code', 'Merchant Category Code', @$merchant_category_code, 'ID 52');
               print_text_input('postal_code', 'Postal Code', @$postal_code, 'ID 61');
+              print_header('Price, Tip, Fees');
               print_text_input('price', 'Price', @$price, 'ID 01, 54');
               print_select_input('tip_or_fees', 'Tip or Convenience Fees', @$tip_or_fees, [
                   '' => '-',
@@ -226,6 +245,7 @@ function print_select_input($field_name, $label, $value, $options = [], $note = 
                   '04' => 'Invalid Code (will trigger error)'
               ], 'ID 55');
               print_text_input('fees_amount', 'Fees Amount', @$fees_amount, 'ID 56 or 57');
+              print_header('Additional Information');
               print_text_input('bill_number', 'Bill Number', @$bill_number, 'ID 62 - 01');
               print_text_input('mobile_number', 'Mobile Number', @$mobile_number, 'ID 62 - 02');
               print_text_input('store_label', 'Store Label', @$store_label, 'ID 62 - 03');
@@ -237,8 +257,39 @@ function print_select_input($field_name, $label, $value, $options = [], $note = 
               print_text_input('additional_customer_data_request', 'Additional Customer Data Request', @$additional_customer_data_request, 'ID 62 - 09');
               print_text_input('merchant_tax_id', 'Merchant Tax ID', @$merchant_tax_id, 'ID 62 - 10');
               print_text_input('merchant_channel', 'Merchant Channel', @$merchant_channel, 'ID 62 - 11');
+              print_header('Singapore');
+              print_select_input('paynow_proxy_type', 'PayNow - Proxy Type', @$paynow_proxy_type, [
+                  '' => '-',
+                  '0' => 'Mobile',
+                  '2' => 'UEN',
+                  '1' => 'NRIC (will trigger error)'
+              ], 'PayNow');
+              print_text_input('paynow_proxy_value', 'PayNow - Proxy Value', @$paynow_proxy_value, 'PayNow');
+              print_select_input('paynow_amount_editable', 'PayNow - Editable?', @$paynow_amount_editable, [
+                  '' => '-',
+                  '1' => 'True',
+                  '0' => 'False'
+              ], 'PayNow');
+              print_text_input('paynow_expiry', 'PayNow - Expiry Date', @$paynow_expiry, 'PayNow', 'date');
+              print_text_input('favepay_id', 'FavePay - https://myfave.com/qr/', @$favepay_id, 'FavePay');
+              print_text_input('sgqr_id', 'SGQR - ID', @$sgqr_id, 'SGQR');
+              print_text_input('sgqr_version', 'SGQR - version', @$sgqr_version, 'SGQR, value = 01.0001');
+              print_text_input('sgqr_postal_code', 'SGQR - Postal Code', @$sgqr_postal_code, 'SGQR');
+              print_text_input('sgqr_level', 'SGQR - Level', @$sgqr_level, 'SGQR');
+              print_text_input('sgqr_unit', 'SGQR - Unit Number', @$sgqr_unit, 'SGQR');
+              print_text_input('sgqr_misc', 'SGQR - Miscellaneous', @$sgqr_misc, 'SGQR, value = 0000');
+              print_text_input('sgqr_version_date', 'SGQR - Version Date', @$sgqr_version_date, 'SGQR, value = 2019-12-31', 'date');
+              print_header('Thailand');
+              print_select_input('promptpay_proxy_type', 'PromptPay - Proxy Type', @$promptpay_proxy_type, [
+                  '' => '-',
+                  'MOBILE' => 'Mobile',
+                  'TAX_ID' => 'Tax ID',
+                  'EWALLET_ID' => 'eWallet ID',
+                  'XXX' => 'Invalid (will trigger error)'
+              ], 'PromptPay');
+              print_text_input('promptpay_proxy_value', 'PromptPay - Proxy Value', @$promptpay_proxy_value, 'PromptPay');
               ?>
-            <input type="text" name="submit" value="1"/>
+            <input type="hidden" name="submit" value="1"/>
             <div class="text-end">
               <input class="btn btn-success mb-3" type="submit" value="Generate"/>
             </div>
