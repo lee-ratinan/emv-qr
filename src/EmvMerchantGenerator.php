@@ -447,11 +447,14 @@ class EmvMerchantGenerator extends EmvMerchant {
             return $this->return_status(FALSE, self::STATUS_NO_ACCOUNT_ID, parent::SGQR_CHANNEL);
         }
         //
-        $this->accounts[$id] = $account;
         return $this->return_status(TRUE);
     }
 
-    public function set_account_sg_favepay()
+    /**
+     * @param $fave_id
+     * @return array Status
+     */
+    public function set_account_sg_favepay($fave_id)
     {
         if (empty($this->country_code))
         {
@@ -465,8 +468,11 @@ class EmvMerchantGenerator extends EmvMerchant {
         {
             return $this->return_status(FALSE, self::STATUS_NO_ACCOUNT_ID, parent::FAVE_CHANNEL_NAME);
         }
-        //
-        $this->accounts[$id] = $account;
+        // @todo: verify Fave ID
+        $this->accounts[$id] = [
+            parent::FAVE_ID_REVERSE_DOMAIN => parent::FAVE_CHANNEL,
+            parent::FAVE_ID_URL => parent::FAVE_URL . $fave_id
+        ];
         return $this->return_status(TRUE);
     }
 
@@ -643,15 +649,6 @@ class EmvMerchantGenerator extends EmvMerchant {
         $string .= $this->CRC16HexDigest($string);
         $this->qr_string = $string;
         return $this->qr_string;
-    }
-
-    /**
-     * Get the whole object for debugging purpose
-     * @return EmvMerchantGenerator
-     */
-    public function get_object()
-    {
-        return $this;
     }
 
 }

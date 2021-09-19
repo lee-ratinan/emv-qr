@@ -696,6 +696,9 @@ class EmvMerchant {
        | -------------------------------------------------------------------------------------------------------- */
     const FAVE_CHANNEL = 'COM.MYFAVE';
     const FAVE_CHANNEL_NAME = 'FavePay';
+    const FAVE_URL = 'https://myfave.com/qr/';
+    const FAVE_ID_REVERSE_DOMAIN = '00';
+    const FAVE_ID_URL = '01';
     protected $favepay_keys = [
         '00' => 'reverse_domain',
         '01' => 'url'
