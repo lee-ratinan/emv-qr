@@ -380,13 +380,13 @@ class EmvMerchantGenerator extends EmvMerchant {
         // PROXY
         if (isset($this->paynow_proxy_type[$proxy_type]))
         {
-            $account[$this->paynow_keys[parent::PAYNOW_ID_PROXY_TYPE]] = $proxy_type;
+            $account[parent::PAYNOW_ID_PROXY_TYPE] = $proxy_type;
             if (parent::PAYNOW_PROXY_MOBILE == $proxy_type)
             {
                 // Accept all country's phone number with country code (E.164 format)
                 if (preg_match('/^\+(\d){8,15}$/', $proxy_value))
                 {
-                    $account[$this->paynow_keys[parent::PAYNOW_ID_PROXY_VALUE]] = $proxy_value;
+                    $account[parent::PAYNOW_ID_PROXY_VALUE] = $proxy_value;
                 } else
                 {
                     return $this->return_status(FALSE, self::STATUS_INVALID_VALUE, parent::PAYNOW_CHANNEL . '.' . parent::PAYNOW_ID_PROXY_VALUE);
@@ -401,7 +401,7 @@ class EmvMerchantGenerator extends EmvMerchant {
                  */
                 if (preg_match('/^(\d{8}[A-Z]|(19|20)\d{7}[A-Z]|(S|T)\d{2}[A-Z]{2}\d{4}[A-Z])(\d{2,4}){0,1}$/', $proxy_value))
                 {
-                    $account[$this->paynow_keys[parent::PAYNOW_ID_PROXY_VALUE]] = $proxy_value;
+                    $account[parent::PAYNOW_ID_PROXY_VALUE] = $proxy_value;
                 } else
                 {
                     return $this->return_status(FALSE, self::STATUS_INVALID_VALUE, parent::PAYNOW_CHANNEL . '.' . parent::PAYNOW_ID_PROXY_VALUE);
@@ -420,19 +420,33 @@ class EmvMerchantGenerator extends EmvMerchant {
             return $this->return_status(FALSE, self::STATUS_INVALID_VALUE, parent::PAYNOW_CHANNEL . '.' . parent::PAYNOW_ID_AMOUNT_EDITABLE);
         }
         // EXPIRY
-        $expiry_formatted = $this->format_date_with_dash($expiry, $check_future = TRUE);
-        if (FALSE == $expiry_formatted)
+        if (!empty($expiry))
         {
-            return $this->return_status(FALSE, self::STATUS_INVALID_VALUE, parent::PAYNOW_CHANNEL . '.' . parent::PAYNOW_ID_EXPIRY_DATE);
-        } else
-        {
-            $account[parent::PAYNOW_ID_EXPIRY_DATE] = $expiry_formatted;
+            $expiry_formatted = $this->format_date_with_dash($expiry, TRUE);
+            if (FALSE == $expiry_formatted)
+            {
+                return $this->return_status(FALSE, self::STATUS_INVALID_VALUE, parent::PAYNOW_CHANNEL . '.' . parent::PAYNOW_ID_EXPIRY_DATE);
+            } else
+            {
+                $account[parent::PAYNOW_ID_EXPIRY_DATE] = $expiry_formatted;
+            }
         }
         $this->accounts[$id] = $account;
         return $this->return_status(TRUE);
     }
 
-    public function set_account_sgqr()
+    /**
+     * Setup SGQR account
+     * @param $id_no
+     * @param $version
+     * @param $postal_code
+     * @param $level
+     * @param $unit
+     * @param $misc
+     * @param $version_date
+     * @return array Status
+     */
+    public function set_account_sgqr($id_no, $version, $postal_code, $level, $unit, $misc, $version_date)
     {
         if (empty($this->country_code))
         {
@@ -446,11 +460,21 @@ class EmvMerchantGenerator extends EmvMerchant {
         {
             return $this->return_status(FALSE, self::STATUS_NO_ACCOUNT_ID, parent::SGQR_CHANNEL);
         }
-        //
+        $this->accounts[$id] = [
+            parent::SGQR_ID_REVERSE_DOMAIN => parent::SGQR_CHANNEL,
+            parent::SGQR_ID_IDENTIFICATION_NUMBER => $id_no,
+            parent::SGQR_ID_VERSION => $version,
+            parent::SGQR_ID_POSTAL_CODE => $postal_code,
+            parent::SGQR_ID_LEVEL => $level,
+            parent::SGQR_ID_UNIT_NUMBER => $unit,
+            parent::SGQR_ID_MISC => $misc,
+            parent::SGQR_ID_VERSION_DATE => date('Ymd', strtotime($version_date))
+        ];
         return $this->return_status(TRUE);
     }
 
     /**
+     * Setup FavePay account
      * @param $fave_id
      * @return array Status
      */
@@ -641,7 +665,13 @@ class EmvMerchantGenerator extends EmvMerchant {
         if ( ! empty($this->additional_fields))
         {
             $additional_fields = implode('', $this->additional_fields);
-            $string .= parent::ID_ADDITIONAL_DATA_FIELDS . sprintf('%02f', strlen($additional_fields)) . $additional_fields;
+            if (99 < strlen($additional_fields))
+            {
+                // skip
+            } else
+            {
+                $string .= parent::ID_ADDITIONAL_DATA_FIELDS . sprintf('%02d', strlen($additional_fields)) . $additional_fields;
+            }
         }
         // 64 - not supports - skip
         // 63 CRC

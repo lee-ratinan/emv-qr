@@ -447,9 +447,9 @@ class EmvMerchantDecoder extends EmvMerchant {
 //            case parent::TELKOM_CHANNEL:
 //                $this->process_telkom($account_raw, $intId); // todo: check
 //                break;
-            case parent::QRIS_CHANNEL:
-                $this->process_qris($account_raw, $intId);
-                break;
+//            case parent::QRIS_CHANNEL:
+//                $this->process_qris($account_raw, $intId);
+//                break;
             case parent::FAVE_CHANNEL:
                 $this->process_favepay($account_raw, $intId);
                 break;

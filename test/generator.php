@@ -26,8 +26,18 @@ $additional_customer_data_request = $_POST['additional_customer_data_request'];
 $merchant_tax_id = $_POST['merchant_tax_id'];
 $merchant_channel = $_POST['merchant_channel'];
 // set accounts
-
-
+$paynow_proxy_type = $_POST['paynow_proxy_type'];
+$paynow_proxy_value = $_POST['paynow_proxy_value'];
+$paynow_amount_editable = $_POST['paynow_amount_editable'];
+$paynow_expiry = $_POST['paynow_expiry'];
+$favepay_id = $_POST['favepay_id'];
+$sgqr_id = $_POST['sgqr_id'];
+$sgqr_version = $_POST['sgqr_version'];
+$sgqr_postal_code = $_POST['sgqr_postal_code'];
+$sgqr_level = $_POST['sgqr_level'];
+$sgqr_unit = $_POST['sgqr_unit'];
+$sgqr_misc = $_POST['sgqr_misc'];
+$sgqr_version_date = $_POST['sgqr_version_date'];
 $promptpay_proxy_type = $_POST['promptpay_proxy_type'];
 $promptpay_proxy_value = $_POST['promptpay_proxy_value'];
 function print_text_input($field_name, $label, $value, $note = '', $type = 'text')
@@ -207,10 +217,28 @@ function print_status($status)
                     print_status($status);
                 }
                 echo "\nFrom accounts:\n";
-
+                if ( ! empty($paynow_proxy_type))
+                {
+                    $status = $emv->set_account_paynow($paynow_proxy_type, $paynow_proxy_value, $paynow_amount_editable, $paynow_expiry);
+                    echo "PayNow\n";
+                    print_status($status);
+                }
+                if ( ! empty($favepay_id))
+                {
+                    $status = $emv->set_account_sg_favepay($favepay_id);
+                    echo "Fave\n";
+                    print_status($status);
+                }
+                if ( ! empty($sgqr_id))
+                {
+                    $status = $emv->set_account_sgqr($sgqr_id, $sgqr_version, $sgqr_postal_code, $sgqr_level, $sgqr_unit, $sgqr_misc, $sgqr_version_date);
+                    echo "SGQR\n";
+                    print_status($status);
+                }
                 if ( ! empty($promptpay_proxy_type))
                 {
                     $status = $emv->set_account_promptpay($promptpay_proxy_type, $promptpay_proxy_value);
+                    echo "PromptPay\n";
                     print_status($status);
                 }
                 // Output:
@@ -219,13 +247,17 @@ function print_status($status)
                 echo $string . "\n\n";
                 echo "emvQr Object:\n";
                 echo json_encode($emv, JSON_PRETTY_PRINT);
+                echo "\n\nQR Code:\n";
                 echo '</pre>';
+                echo '<script src="qrious.min.js"></script><div class="qrcode"><canvas id="qr" style="width: 80vw; max-width: 400px;"></canvas></div>';
+                echo '<script>let qr = new QRious({element: document.getElementById("qr"),value: "'.$string.'",level: "H",mime: "image/png",size: 1000});</script>';
+                echo '<br><br>';
             }
             ?>
           <form class="form" method="POST">
               <?php
               print_header('Country');
-              print_select_input('country_code', 'Country', @$country_code, [
+              print_select_input('country_code', 'Country', $country_code, [
                   '' => '-',
                   'SG' => 'Singapore',
                   'TH' => 'Thailand',
@@ -235,63 +267,63 @@ function print_status($status)
                   'IN' => 'India (not available at the moment, will trigger error)'
               ], 'ID 53, 58 (country code and currency code)');
               print_header('Merchant Information');
-              print_text_input('merchant_name', 'Merchant Name', @$merchant_name, 'ID 59');
-              print_text_input('merchant_city', 'Merchant City', @$merchant_city, 'ID 60');
-              print_text_input('merchant_category_code', 'Merchant Category Code', @$merchant_category_code, 'ID 52');
-              print_text_input('postal_code', 'Postal Code', @$postal_code, 'ID 61');
+              print_text_input('merchant_name', 'Merchant Name', $merchant_name, 'ID 59');
+              print_text_input('merchant_city', 'Merchant City', $merchant_city, 'ID 60');
+              print_text_input('merchant_category_code', 'Merchant Category Code', $merchant_category_code, 'ID 52');
+              print_text_input('postal_code', 'Postal Code', $postal_code, 'ID 61');
               print_header('Price, Tip, Fees');
-              print_text_input('price', 'Price', @$price, 'ID 01, 54');
-              print_select_input('tip_or_fees', 'Tip or Convenience Fees', @$tip_or_fees, [
+              print_text_input('price', 'Price', $price, 'ID 01, 54');
+              print_select_input('tip_or_fees', 'Tip or Convenience Fees', $tip_or_fees, [
                   '' => '-',
                   '01' => 'Tip',
                   '02' => 'Convenience Fees (fixed)',
                   '03' => 'Convenience Fees (percentage)',
                   '04' => 'Invalid Code (will trigger error)'
               ], 'ID 55');
-              print_text_input('fees_amount', 'Fees Amount', @$fees_amount, 'ID 56 or 57');
+              print_text_input('fees_amount', 'Fees Amount', $fees_amount, 'ID 56 or 57');
               print_header('Additional Information');
-              print_text_input('bill_number', 'Bill Number', @$bill_number, 'ID 62 - 01');
-              print_text_input('mobile_number', 'Mobile Number', @$mobile_number, 'ID 62 - 02');
-              print_text_input('store_label', 'Store Label', @$store_label, 'ID 62 - 03');
-              print_text_input('loyalty_number', 'Loyalty Number', @$loyalty_number, 'ID 62 - 04');
-              print_text_input('reference_label', 'Reference Label', @$reference_label, 'ID 62 - 05');
-              print_text_input('customer_label', 'Customer Label', @$customer_label, 'ID 62 - 06');
-              print_text_input('terminal_label', 'Terminal Label', @$terminal_label, 'ID 62 - 07');
-              print_text_input('purpose_of_transaction', 'Purpose of Transaction', @$purpose_of_transaction, 'ID 62 - 08');
-              print_text_input('additional_customer_data_request', 'Additional Customer Data Request', @$additional_customer_data_request, 'ID 62 - 09');
-              print_text_input('merchant_tax_id', 'Merchant Tax ID', @$merchant_tax_id, 'ID 62 - 10');
-              print_text_input('merchant_channel', 'Merchant Channel', @$merchant_channel, 'ID 62 - 11');
+              print_text_input('bill_number', 'Bill Number', $bill_number, 'ID 62 - 01');
+              print_text_input('mobile_number', 'Mobile Number', $mobile_number, 'ID 62 - 02');
+              print_text_input('store_label', 'Store Label', $store_label, 'ID 62 - 03');
+              print_text_input('loyalty_number', 'Loyalty Number', $loyalty_number, 'ID 62 - 04');
+              print_text_input('reference_label', 'Reference Label', $reference_label, 'ID 62 - 05');
+              print_text_input('customer_label', 'Customer Label', $customer_label, 'ID 62 - 06');
+              print_text_input('terminal_label', 'Terminal Label', $terminal_label, 'ID 62 - 07');
+              print_text_input('purpose_of_transaction', 'Purpose of Transaction', $purpose_of_transaction, 'ID 62 - 08');
+              print_text_input('additional_customer_data_request', 'Additional Customer Data Request', $additional_customer_data_request, 'ID 62 - 09');
+              print_text_input('merchant_tax_id', 'Merchant Tax ID', $merchant_tax_id, 'ID 62 - 10');
+              print_text_input('merchant_channel', 'Merchant Channel', $merchant_channel, 'ID 62 - 11');
               print_header('Singapore');
-              print_select_input('paynow_proxy_type', 'PayNow - Proxy Type', @$paynow_proxy_type, [
+              print_select_input('paynow_proxy_type', 'PayNow - Proxy Type', $paynow_proxy_type, [
                   '' => '-',
                   '0' => 'Mobile',
                   '2' => 'UEN',
                   '1' => 'NRIC (will trigger error)'
               ], 'PayNow');
-              print_text_input('paynow_proxy_value', 'PayNow - Proxy Value', @$paynow_proxy_value, 'PayNow');
-              print_select_input('paynow_amount_editable', 'PayNow - Editable?', @$paynow_amount_editable, [
+              print_text_input('paynow_proxy_value', 'PayNow - Proxy Value', $paynow_proxy_value, 'PayNow');
+              print_select_input('paynow_amount_editable', 'PayNow - Editable?', $paynow_amount_editable, [
                   '' => '-',
                   '1' => 'True',
                   '0' => 'False'
               ], 'PayNow');
-              print_text_input('paynow_expiry', 'PayNow - Expiry Date', @$paynow_expiry, 'PayNow', 'date');
-              print_text_input('favepay_id', 'FavePay - https://myfave.com/qr/', @$favepay_id, 'FavePay');
-              print_text_input('sgqr_id', 'SGQR - ID', @$sgqr_id, 'SGQR');
-              print_text_input('sgqr_version', 'SGQR - version', @$sgqr_version, 'SGQR, value = 01.0001');
-              print_text_input('sgqr_postal_code', 'SGQR - Postal Code', @$sgqr_postal_code, 'SGQR');
-              print_text_input('sgqr_level', 'SGQR - Level', @$sgqr_level, 'SGQR');
-              print_text_input('sgqr_unit', 'SGQR - Unit Number', @$sgqr_unit, 'SGQR');
-              print_text_input('sgqr_misc', 'SGQR - Miscellaneous', @$sgqr_misc, 'SGQR, value = 0000');
-              print_text_input('sgqr_version_date', 'SGQR - Version Date', @$sgqr_version_date, 'SGQR, value = 2019-12-31', 'date');
+              print_text_input('paynow_expiry', 'PayNow - Expiry Date', $paynow_expiry, 'PayNow', 'date');
+              print_text_input('favepay_id', 'FavePay - https://myfave.com/qr/', $favepay_id, 'FavePay');
+              print_text_input('sgqr_id', 'SGQR - ID', $sgqr_id, 'SGQR');
+              print_text_input('sgqr_version', 'SGQR - version', $sgqr_version, 'SGQR, value = 01.0001');
+              print_text_input('sgqr_postal_code', 'SGQR - Postal Code', $sgqr_postal_code, 'SGQR');
+              print_text_input('sgqr_level', 'SGQR - Level', $sgqr_level, 'SGQR');
+              print_text_input('sgqr_unit', 'SGQR - Unit Number', $sgqr_unit, 'SGQR');
+              print_text_input('sgqr_misc', 'SGQR - Miscellaneous', $sgqr_misc, 'SGQR, value = 0000');
+              print_text_input('sgqr_version_date', 'SGQR - Version Date', $sgqr_version_date, 'SGQR, value = 2019-12-31', 'date');
               print_header('Thailand');
-              print_select_input('promptpay_proxy_type', 'PromptPay - Proxy Type', @$promptpay_proxy_type, [
+              print_select_input('promptpay_proxy_type', 'PromptPay - Proxy Type', $promptpay_proxy_type, [
                   '' => '-',
                   'MOBILE' => 'Mobile',
                   'TAX_ID' => 'Tax ID',
                   'EWALLET_ID' => 'eWallet ID',
                   'XXX' => 'Invalid (will trigger error)'
               ], 'PromptPay');
-              print_text_input('promptpay_proxy_value', 'PromptPay - Proxy Value', @$promptpay_proxy_value, 'PromptPay');
+              print_text_input('promptpay_proxy_value', 'PromptPay - Proxy Value', $promptpay_proxy_value, 'PromptPay');
               ?>
             <input type="hidden" name="submit" value="1"/>
             <div class="text-end">
@@ -299,7 +331,7 @@ function print_status($status)
             </div>
           </form>
           <hr>
-          <p>&copy; Ratinan Lee - 2021</p>
+          <p>&copy; Ratinan Lee - 2021 - QR Generator from <a href="https://github.com/TamerSali/QR-Code-Generator" target="_blank">TamerSali/QR-Code-Generator</a> repository.</p>
         </div>
       </div>
     </div>

@@ -658,18 +658,26 @@ class EmvMerchant {
     /* | --------------------------------------------------------------------------------------------------------
        | TELKOM.ID
        | -------------------------------------------------------------------------------------------------------- */
-    const TELKOM_CHANNEL = 'ID.CO.TELKOM.WWW';
-    protected $telkom_keys = [
-        '00' => 'reverse_domain',
-        '01' => '01',
-        '02' => '02',
-        '03' => '03'
-    ];
+//    const TELKOM_CHANNEL = 'ID.CO.TELKOM.WWW';
+//    protected $telkom_keys = [
+//        '00' => 'reverse_domain',
+//        '01' => '01',
+//        '02' => '02',
+//        '03' => '03'
+//    ];
 
     /* | --------------------------------------------------------------------------------------------------------
        | SGQR (51)
        | -------------------------------------------------------------------------------------------------------- */
     const SGQR_CHANNEL = 'SG.SGQR';
+    const SGQR_ID_REVERSE_DOMAIN = '00';
+    const SGQR_ID_IDENTIFICATION_NUMBER = '01';
+    const SGQR_ID_VERSION = '02';
+    const SGQR_ID_POSTAL_CODE = '03';
+    const SGQR_ID_LEVEL = '04';
+    const SGQR_ID_UNIT_NUMBER = '05';
+    const SGQR_ID_MISC = '06';
+    const SGQR_ID_VERSION_DATE = '07';
     protected $sgqr_keys = [
         '00' => 'reverse_domain',
         '01' => 'sgqr_id_number',
@@ -684,12 +692,12 @@ class EmvMerchant {
     /* | --------------------------------------------------------------------------------------------------------
        | QRIS (51)
        | -------------------------------------------------------------------------------------------------------- */
-    const QRIS_CHANNEL = 'ID.CO.QRIS.WWW';
-    protected $qris_keys = [
-        '00' => 'reverse_domain',
-        '02' => 'nmid', // National Merchant ID
-        '03' => '03'
-    ];
+//    const QRIS_CHANNEL = 'ID.CO.QRIS.WWW';
+//    protected $qris_keys = [
+//        '00' => 'reverse_domain',
+//        '02' => 'nmid', // National Merchant ID
+//        '03' => '03'
+//    ];
 
     /* | --------------------------------------------------------------------------------------------------------
        | FAVEPAY
@@ -707,93 +715,93 @@ class EmvMerchant {
     /* | --------------------------------------------------------------------------------------------------------
        | DASH
        | -------------------------------------------------------------------------------------------------------- */
-    const DASH_CHANNEL = 'SG.COM.DASH.WWW';
-    const DASH_CHANNEL_NAME = 'Singtel Dash';
-    protected $dash_keys = [
-        '00' => 'channel',
-        '01' => 'merchant_account'
-    ];
+//    const DASH_CHANNEL = 'SG.COM.DASH.WWW';
+//    const DASH_CHANNEL_NAME = 'Singtel Dash';
+//    protected $dash_keys = [
+//        '00' => 'channel',
+//        '01' => 'merchant_account'
+//    ];
 
     /* | --------------------------------------------------------------------------------------------------------
        | LIQUIDPAY
        | -------------------------------------------------------------------------------------------------------- */
-    const LIQUIDPAY_CHANNEL = 'A0000007620001';
-    const LIQUIDPAY_CHANNEL_NAME = 'LiquidPay';
-    const LIQUIDPAY_REVERSE_URL = 'COM.LQDPALLIANCE.WWW';
-    protected $liquidpay_keys = [
-        '00' => 'app_id',
-        '01' => 'reverse_url',
-        '02' => 'payee_id',
-        '03' => 'service_code'
-    ];
+//    const LIQUIDPAY_CHANNEL = 'A0000007620001';
+//    const LIQUIDPAY_CHANNEL_NAME = 'LiquidPay';
+//    const LIQUIDPAY_REVERSE_URL = 'COM.LQDPALLIANCE.WWW';
+//    protected $liquidpay_keys = [
+//        '00' => 'app_id',
+//        '01' => 'reverse_url',
+//        '02' => 'payee_id',
+//        '03' => 'service_code'
+//    ];
 
     /* | --------------------------------------------------------------------------------------------------------
        | EZ-LINK
        | -------------------------------------------------------------------------------------------------------- */
-    const EZLINK_CHANNEL = 'SG.COM.EZLINK';
-    const EZLINK_CHANNEL_NAME = 'EZ-Link';
-    protected $ezlink_keys = [
-        '00' => 'channel',
-        '01' => 'merchant_id',
-        '02' => 'sgqr_indicator',
-        '03' => 'offline_usage',
-        '04' => 'verification_code'
-    ];
+//    const EZLINK_CHANNEL = 'SG.COM.EZLINK';
+//    const EZLINK_CHANNEL_NAME = 'EZ-Link';
+//    protected $ezlink_keys = [
+//        '00' => 'channel',
+//        '01' => 'merchant_id',
+//        '02' => 'sgqr_indicator',
+//        '03' => 'offline_usage',
+//        '04' => 'verification_code'
+//    ];
 
     /* | --------------------------------------------------------------------------------------------------------
        | GRABPAY
        | -------------------------------------------------------------------------------------------------------- */
-    const GRAB_CHANNEL = 'COM.GRAB';
-    const GRAB_CHANNEL_NAME = 'GrabPay';
-    protected $grab_keys = [
-        '00' => 'channel',
-        '01' => 'merchant_id'
-    ];
+//    const GRAB_CHANNEL = 'COM.GRAB';
+//    const GRAB_CHANNEL_NAME = 'GrabPay';
+//    protected $grab_keys = [
+//        '00' => 'channel',
+//        '01' => 'merchant_id'
+//    ];
 
     /* | --------------------------------------------------------------------------------------------------------
        | DBS PAYLAH!
        | -------------------------------------------------------------------------------------------------------- */
-    const PAYLAH_CHANNEL = 'COM.DBS';
-    const PAYLAH_CHANNEL_NAME = 'DBS PayLah!';
-    protected $paylah_keys = [
-        '00' => 'channel',
-        '01' => 'qr_transaction_ref_id',
-        '02' => 'qr_id'
-    ];
+//    const PAYLAH_CHANNEL = 'COM.DBS';
+//    const PAYLAH_CHANNEL_NAME = 'DBS PayLah!';
+//    protected $paylah_keys = [
+//        '00' => 'channel',
+//        '01' => 'qr_transaction_ref_id',
+//        '02' => 'qr_id'
+//    ];
 
     /* | --------------------------------------------------------------------------------------------------------
        | WECHAT PAY
        | -------------------------------------------------------------------------------------------------------- */
-    const WECHAT_CHANNEL = 'COM.QQ.WEIXIN.PAY';
-    const WECHAT_CHANNEL_NAME = 'WeChat Pay';
-    protected $wechat_keys = [
-        '00' => 'channel',
-        '01' => 'merchant_account',
-        '02' => 'terminal_id',
-        '03' => '??03??',
-        '04' => '??04??',
-        '99' => '??99??',
-    ];
+//    const WECHAT_CHANNEL = 'COM.QQ.WEIXIN.PAY';
+//    const WECHAT_CHANNEL_NAME = 'WeChat Pay';
+//    protected $wechat_keys = [
+//        '00' => 'channel',
+//        '01' => 'merchant_account',
+//        '02' => 'terminal_id',
+//        '03' => '??03??',
+//        '04' => '??04??',
+//        '99' => '??99??',
+//    ];
 
     /* | --------------------------------------------------------------------------------------------------------
        | UOB
        | -------------------------------------------------------------------------------------------------------- */
-    const UOB_CHANNEL = 'SG.COM.UOB';
-    const UOB_CHANNEL_NAME = 'UOB';
-    protected $uob_keys = [
-        '00' => 'channel',
-        '01' => 'merchant_account'
-    ];
+//    const UOB_CHANNEL = 'SG.COM.UOB';
+//    const UOB_CHANNEL_NAME = 'UOB';
+//    protected $uob_keys = [
+//        '00' => 'channel',
+//        '01' => 'merchant_account'
+//    ];
 
     /* | --------------------------------------------------------------------------------------------------------
        | SHOPEEPAY
        | -------------------------------------------------------------------------------------------------------- */
-    const AIRPAY_CHANNEL = 'SG.AIRPAY';
-    const AIRPAY_CHANNEL_NAME = 'ShopeePay/AirPay';
-    protected $airpay_keys = [
-        '00' => 'channel',
-        '01' => 'merchant_account_information'
-    ];
+//    const AIRPAY_CHANNEL = 'SG.AIRPAY';
+//    const AIRPAY_CHANNEL_NAME = 'ShopeePay/AirPay';
+//    protected $airpay_keys = [
+//        '00' => 'channel',
+//        '01' => 'merchant_account_information'
+//    ];
 
     /* | --------------------------------------------------------------------------------------------------------
        | ERRORS/WARNINGS
