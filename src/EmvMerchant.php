@@ -605,7 +605,11 @@ class EmvMerchant {
     const FORMAT_DATE = 'Y-m-d';
 
     /* | --------------------------------------------------------------------------------------------------------
-       | PAYNOW (26)
+       | SINGAPORE
+       | -------------------------------------------------------------------------------------------------------- */
+
+    /* | --------------------------------------------------------------------------------------------------------
+       | PAYNOW (PREFERABLY 26)
        | -------------------------------------------------------------------------------------------------------- */
     const PAYNOW_CHANNEL = 'SG.PAYNOW';
     const PAYNOW_ID_CHANNEL = '00';
@@ -635,39 +639,20 @@ class EmvMerchant {
     ];
 
     /* | --------------------------------------------------------------------------------------------------------
-       | PROMPTPAY (29)
+       | FAVEPAY (ANY)
        | -------------------------------------------------------------------------------------------------------- */
-    const PROMPTPAY_CHANNEL = 'A000000677010111';
-    const PROMPTPAY_CHANNEL_NAME = 'TH.PROMPTPAY';
-    const PROMPTPAY_PREFER_ID = '29';
-    const PROMPTPAY_ID_APP_ID = '00';
-    const PROMPTPAY_ID_MOBILE = '01';
-    const PROMPTPAY_ID_TAX_ID = '02';
-    const PROMPTPAY_ID_EWALLET_ID = '03';
-    const PROMPTPAY_PROXY_MOBILE = 'MOBILE';
-    const PROMPTPAY_PROXY_TAX_ID = 'TAX_ID';
-    const PROMPTPAY_PROXY_EWALLET_ID = 'EWALLET_ID';
-    protected $promptpay_keys = [
-        '00' => 'guid',
-        '96' => 'mobile_number',
-        '97' => 'proxy_type',
-        '98' => 'proxy_value',
-        '99' => 'channel_name'
+    const FAVE_CHANNEL = 'COM.MYFAVE';
+    const FAVE_CHANNEL_NAME = 'FavePay';
+    const FAVE_URL = 'https://myfave.com/qr/';
+    const FAVE_ID_REVERSE_DOMAIN = '00';
+    const FAVE_ID_URL = '01';
+    protected $favepay_keys = [
+        '00' => 'reverse_domain',
+        '01' => 'url'
     ];
 
     /* | --------------------------------------------------------------------------------------------------------
-       | TELKOM.ID
-       | -------------------------------------------------------------------------------------------------------- */
-//    const TELKOM_CHANNEL = 'ID.CO.TELKOM.WWW';
-//    protected $telkom_keys = [
-//        '00' => 'reverse_domain',
-//        '01' => '01',
-//        '02' => '02',
-//        '03' => '03'
-//    ];
-
-    /* | --------------------------------------------------------------------------------------------------------
-       | SGQR (51)
+       | SGQR (51 FIXED)
        | -------------------------------------------------------------------------------------------------------- */
     const SGQR_CHANNEL = 'SG.SGQR';
     const SGQR_ID_REVERSE_DOMAIN = '00';
@@ -690,6 +675,65 @@ class EmvMerchant {
     ];
 
     /* | --------------------------------------------------------------------------------------------------------
+       | THAILAND
+       | -------------------------------------------------------------------------------------------------------- */
+
+    /* | --------------------------------------------------------------------------------------------------------
+       | PROMPTPAY CREDIT TRANSFER (29)
+       | -------------------------------------------------------------------------------------------------------- */
+    const PROMPTPAY_CHANNEL = 'A000000677010111';
+    const PROMPTPAY_CHANNEL_NAME = 'TH.PROMPTPAY';
+    const PROMPTPAY_ID = '29';
+    const PROMPTPAY_ID_APP_ID = '00';
+    const PROMPTPAY_ID_MOBILE = '01';
+    const PROMPTPAY_ID_TAX_ID = '02';
+    const PROMPTPAY_ID_EWALLET_ID = '03';
+    const PROMPTPAY_ID_BANK_ACCT_NO = '04';
+    const PROMPTPAY_PROXY_MOBILE = 'MOBILE';
+    const PROMPTPAY_PROXY_TAX_ID = 'TAX_ID';
+    const PROMPTPAY_PROXY_EWALLET_ID = 'EWALLET_ID';
+    const PROMPTPAY_PROXY_BANK_ACCT_NO = 'BANK_ACCOUNT_NO';
+    protected $promptpay_keys = [
+        '00' => 'guid',
+        '96' => 'mobile_number',
+        '97' => 'proxy_type',
+        '98' => 'proxy_value',
+        '99' => 'channel_name'
+    ];
+
+    /* | --------------------------------------------------------------------------------------------------------
+       | PROMPTPAY BILL PAYMENT (30)
+       | -------------------------------------------------------------------------------------------------------- */
+    const PROMPTPAY_BILL_CHANNEL = 'A000000677010112';
+    const PROMPTPAY_BILL_CHANNEL_NAME = 'TH.PROMPTPAY.BILL';
+    const PROMPTPAY_BILL_ID = '30';
+    const PROMPTPAY_BILL_APP_ID = '00';
+    const PROMPTPAY_BILL_BILLER_ID = '01';
+    const PROMPTPAY_BILL_REF_1 = '02';
+    const PROMPTPAY_BILL_REF_2 = '03';
+    protected $promptpay_bill_keys = [
+        '00' => 'guid',
+        '01' => 'biller_id',
+        '02' => 'reference_no_1',
+        '03' => 'reference_no_2'
+    ];
+
+    /* | --------------------------------------------------------------------------------------------------------
+       | INDONESIA
+       | -------------------------------------------------------------------------------------------------------- */
+
+    /* | --------------------------------------------------------------------------------------------------------
+       | TELKOM.ID
+       | -------------------------------------------------------------------------------------------------------- */
+//    const TELKOM_CHANNEL = 'ID.CO.TELKOM.WWW';
+//    protected $telkom_keys = [
+//        '00' => 'reverse_domain',
+//        '01' => '01',
+//        '02' => '02',
+//        '03' => '03'
+//    ];
+
+    /* | --------------------------------------------------------------------------------------------------------
        | QRIS (51)
        | -------------------------------------------------------------------------------------------------------- */
 //    const QRIS_CHANNEL = 'ID.CO.QRIS.WWW';
@@ -700,17 +744,8 @@ class EmvMerchant {
 //    ];
 
     /* | --------------------------------------------------------------------------------------------------------
-       | FAVEPAY
+       | OTHERS
        | -------------------------------------------------------------------------------------------------------- */
-    const FAVE_CHANNEL = 'COM.MYFAVE';
-    const FAVE_CHANNEL_NAME = 'FavePay';
-    const FAVE_URL = 'https://myfave.com/qr/';
-    const FAVE_ID_REVERSE_DOMAIN = '00';
-    const FAVE_ID_URL = '01';
-    protected $favepay_keys = [
-        '00' => 'reverse_domain',
-        '01' => 'url'
-    ];
 
     /* | --------------------------------------------------------------------------------------------------------
        | DASH
@@ -928,7 +963,7 @@ class EmvMerchant {
        | -------------------------------------------------------------------------------------------------------- */
     /**
      * Returns CRC16 of a string as int value
-     * @param $str The string to digest
+     * @param string $str The string to digest
      * @return string
      */
     protected function CRC16($str)
@@ -992,7 +1027,7 @@ class EmvMerchant {
        | ERRORS
        | -------------------------------------------------------------------------------------------------------- */
     /**
-     * Add error or warning message
+     * Add error or warning message in class public property
      * @param string|int $field_id Field ID
      * @param string $message_type Type of the message, MESSAGE_TYPE_ERROR or MESSAGE_TYPE_WARNING
      * @param string $message_id The message ID as defined in the class
