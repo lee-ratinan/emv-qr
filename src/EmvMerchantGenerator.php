@@ -420,7 +420,7 @@ class EmvMerchantGenerator extends EmvMerchant {
             return $this->return_status(FALSE, self::STATUS_INVALID_VALUE, parent::PAYNOW_CHANNEL . '.' . parent::PAYNOW_ID_AMOUNT_EDITABLE);
         }
         // EXPIRY
-        if (!empty($expiry))
+        if ( ! empty($expiry))
         {
             $expiry_formatted = $this->format_date_with_dash($expiry, TRUE);
             if (FALSE == $expiry_formatted)
