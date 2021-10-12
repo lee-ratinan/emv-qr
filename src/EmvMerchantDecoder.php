@@ -447,6 +447,9 @@ class EmvMerchantDecoder extends EmvMerchant {
             case parent::FAVE_CHANNEL:
                 $this->process_favepay($account_raw, $intId);
                 break;
+            case parent::NETS_CHANNEL:
+                $this->process_nets($account_raw, $intId);
+                break;
             case parent::SGQR_CHANNEL:
                 $this->process_sgqr($account_raw, $intId);
                 break;
@@ -563,6 +566,23 @@ class EmvMerchantDecoder extends EmvMerchant {
             $account[$this->favepay_keys[$id]] = $val;
         }
         $this->accounts[parent::FAVE_CHANNEL_NAME] = $account;
+    }
+
+    /**
+     * @todo check
+     * Process NETS
+     * @param string $account_raw
+     * @param int $intId
+     */
+    private function process_nets($account_raw, $intId)
+    {
+        $account[parent::ID_ORIGINAL_LABEL] = $intId;
+        $account['channel'] = parent::NETS_CHANNEL_NAME;
+        foreach ($account_raw as $id => $val)
+        {
+            $account[$this->nets_keys[$id]] = $val;
+        }
+        $this->accounts[parent::NETS_CHANNEL_NAME] = $account;
     }
 
     /**

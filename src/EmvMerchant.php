@@ -652,6 +652,26 @@ class EmvMerchant {
     ];
 
     /* | --------------------------------------------------------------------------------------------------------
+       | NETS (ANY)
+       | -------------------------------------------------------------------------------------------------------- */
+    const NETS_CHANNEL = 'SG.COM.NETS';
+    const NETS_CHANNEL_NAME = 'NETS';
+    const NETS_ID_REVERSE_DOMAIN = '00';
+    const NETS_ID_QR_METADATA = '01';
+    const NETS_ID_MERCHANT_ID = '02';
+    const NETS_ID_TERMINAL_ID = '03';
+    const NETS_ID_TRANSACTION_AMOUNT_MODIFIER = '04';
+    const NETS_ID_SIGNATURE = '99';
+    protected $nets_keys = [
+        '00' => 'reverse_domain',
+        '01' => 'qr_metadata',
+        '02' => 'merchant_id',
+        '03' => 'terminal_id',
+        '04' => 'transaction_amount_modifier',
+        '99' => 'signature',
+    ];
+
+    /* | --------------------------------------------------------------------------------------------------------
        | SGQR (51 FIXED)
        | -------------------------------------------------------------------------------------------------------- */
     const SGQR_CHANNEL = 'SG.SGQR';
