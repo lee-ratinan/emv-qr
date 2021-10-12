@@ -9,9 +9,8 @@ This repo is for reading and generating EMV QR Code for various countries, curre
 
   * Singapore
   * Thailand
-  * Indonesia
 
-Possible expansion: Malaysia, Hong Kong, India.
+Possible expansion: Indonesia, Malaysia, Hong Kong, India.
 
 ## EMVCo QR Code Specification for Merchant-Presented QR Code
 

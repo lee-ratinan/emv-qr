@@ -15,7 +15,7 @@ class EmvMerchantDecoder extends EmvMerchant {
      * Otherwise, the decode($string) needs to be called explicitly in the program.
      * @param string $string (optional) Input string read from the QR Code
      */
-    public function __construct($string = '')
+    public function __construct($string = parent::EMPTY_STRING)
     {
         parent::__construct();
         $this->mode = parent::MODE_DECODE;
@@ -87,7 +87,7 @@ class EmvMerchantDecoder extends EmvMerchant {
                     $this->add_message(parent::ID_MERCHANT_INFORMATION_LANGUAGE_TEMPLATE, parent::MESSAGE_TYPE_WARNING, parent::WARNING_ID_LANGUAGE_TEMPLATE_NOT_SUPPORTED);
                     break;
                 default:
-                    $this->process_accounts($intId, $strValue); // @todo check
+                    $this->process_accounts($intId, $strValue);
             }
             $string = substr($string, parent::LENGTH_FOUR + $intLength);
         }
@@ -95,6 +95,7 @@ class EmvMerchantDecoder extends EmvMerchant {
         {
             $this->add_message(parent::ID_TRANSACTION_AMOUNT, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_AMOUNT_MISSING);
         }
+        // @todo make sure no missing mandatory fields
     }
 
     /**
@@ -185,7 +186,7 @@ class EmvMerchantDecoder extends EmvMerchant {
             $this->add_message(parent::ID_TRANSACTION_AMOUNT, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_AMOUNT_INVALID, $strValue);
         } else
         {
-            $this->transaction_amount = number_format($value, 2, '', '');
+            $this->transaction_amount = number_format($value, 2, parent::EMPTY_STRING, parent::EMPTY_STRING);
             if (parent::POINT_OF_INITIATION_STATIC_VALUE == $this->point_of_initiation)
             {
                 $this->point_of_initiation = parent::POINT_OF_INITIATION_DYNAMIC_VALUE;
@@ -223,7 +224,7 @@ class EmvMerchantDecoder extends EmvMerchant {
                 $this->add_message(parent::ID_VALUE_OF_FEE_FIXED, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_CONVENIENT_FEE_INVALID, $strValue);
             } else
             {
-                $this->convenience_fee_fixed = number_format($value, 2, '', '');
+                $this->convenience_fee_fixed = number_format($value, 2, parent::EMPTY_STRING, parent::EMPTY_STRING);
             }
         } else
         {
@@ -245,7 +246,7 @@ class EmvMerchantDecoder extends EmvMerchant {
                 $this->add_message(parent::ID_VALUE_OF_FEE_PERCENTAGE, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_CONVENIENT_FEE_INVALID, $strValue);
             } else
             {
-                $this->convenience_fee_percentage = number_format($value, 2, '', '');
+                $this->convenience_fee_percentage = number_format($value, self::LENGTH_TWO, parent::EMPTY_STRING, parent::EMPTY_STRING);
             }
         } else
         {
@@ -340,7 +341,6 @@ class EmvMerchantDecoder extends EmvMerchant {
     }
 
     /**
-     * // @todo check
      * Process additional customer data request
      * @param string $string
      */
@@ -368,7 +368,6 @@ class EmvMerchantDecoder extends EmvMerchant {
     }
 
     /**
-     * // @todo check
      * Process and verify additional data channel
      * @param string $string
      */
@@ -416,7 +415,6 @@ class EmvMerchantDecoder extends EmvMerchant {
     }
 
     /**
-     * // @todo check
      * Process accounts
      * @param int $intId
      * @param string $strValue
@@ -458,7 +456,7 @@ class EmvMerchantDecoder extends EmvMerchant {
                 $this->process_promptpay($account_raw, $intId);
                 break;
             case parent::PROMPTPAY_BILL_CHANNEL:
-                $this->process_promptpay_bill($account_raw, $intId); // todo: start working on it
+                $this->process_promptpay_bill($account_raw, $intId);
                 break;
             default:
                 $this->accounts[$account_raw['00']] = array_merge([parent::ID_ORIGINAL_LABEL => $intId], $account_raw);
@@ -470,7 +468,6 @@ class EmvMerchantDecoder extends EmvMerchant {
        | -------------------------------------------------------------------------------------------------------- */
 
     /**
-     * // @todo check
      * Process PayNow account
      * @param string $account_raw
      * @param int $intId
@@ -552,7 +549,6 @@ class EmvMerchantDecoder extends EmvMerchant {
     }
 
     /**
-     * // @todo check
      * Process FavePay
      * @param string $account_raw
      * @param int $intId
@@ -569,7 +565,6 @@ class EmvMerchantDecoder extends EmvMerchant {
     }
 
     /**
-     * @todo check
      * Process NETS
      * @param string $account_raw
      * @param int $intId
@@ -586,7 +581,6 @@ class EmvMerchantDecoder extends EmvMerchant {
     }
 
     /**
-     * // @todo check
      * Process SGQR information - not an account but required
      * @param string $account_raw
      * @param int $intId
@@ -607,7 +601,6 @@ class EmvMerchantDecoder extends EmvMerchant {
        | -------------------------------------------------------------------------------------------------------- */
 
     /**
-     * // @todo check
      * Process PromptPay account
      * @param string $account_raw
      * @param int $intId

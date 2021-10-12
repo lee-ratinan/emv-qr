@@ -498,11 +498,36 @@ class EmvMerchant {
      * CITY (60)
      */
     const ID_MERCHANT_CITY = '60';
-    const MERCHANT_CITY_SG = 'SINGAPORE';
-    const MERCHANT_CITY_BKK = 'BANGKOK';
-    const MERCHANT_CITY_JKT = 'JAKARTA';
-    const MERCHANT_CITY_KL = 'KUALA LUMPUR';
-    const MERCHANT_CITY_HK = 'HONG KONG';
+    const MERCHANT_CITY_SINGAPORE = 'SINGAPORE';
+    const MERCHANT_CITY_HONG_KONG = 'HONG KONG';
+    // THAILAND
+    const MERCHANT_CITY_BANGKOK = 'BANGKOK';
+    const MERCHANT_CITY_HAT_YAI = 'HAT YAI';
+    const MERCHANT_CITY_NAKHON_RATCHASIMA = 'NAKHON RATCHASIMA';
+    const MERCHANT_CITY_CHIANG_MAI = 'CHIANG MAI';
+    const MERCHANT_CITY_UDON_THANI = 'UDON THANI';
+    const MERCHANT_CITY_PATTAYA = 'PATTAYA';
+    const MERCHANT_CITY_KHON_KAEN = 'KHON KAEN';
+    const MERCHANT_CITY_PHUKET = 'PHUKET';
+    const MERCHANT_CITY_UBON_RATCHATHANI = 'UBON RATCHATHANI';
+    // INDONESIA
+    const MERCHANT_CITY_JAKARTA = 'JAKARTA';
+    const MERCHANT_CITY_SURABAYA = 'SURABAYA';
+    const MERCHANT_CITY_BANDUNG = 'BANDUNG';
+    const MERCHANT_CITY_MEDAN = 'MEDAN';
+    const MERCHANT_CITY_PALEMBANG = 'PALEMBANG';
+    const MERCHANT_CITY_DENPASAR = 'DENPASAR';
+    const MERCHANT_CITY_SEMARANG = 'SEMARANG';
+    // MALAYSIA
+    const MERCHANT_CITY_KUALA_LUMPUR = 'KUALA LUMPUR';
+    const MERCHANT_CITY_GEORGE_TOWN = 'GEORGE TOWN';
+    const MERCHANT_CITY_IPOH = 'IPOH';
+    const MERCHANT_CITY_KUCHING = 'KUCHING';
+    const MERCHANT_CITY_JOHOR_BAHRU = 'JOHOR BAHRU';
+    const MERCHANT_CITY_KOTA_KINABALU = 'KOTA KINABALU';
+    const MERCHANT_CITY_MALACCA = 'MALACCA';
+    const MERCHANT_CITY_MIRI = 'MIRI';
+    const MERCHANT_CITY_ALOR_SETAR = 'ALOR SETAR';
 
     /**
      * POSTAL CODE (61)
@@ -603,6 +628,7 @@ class EmvMerchant {
      */
     const TIMEZONE_SINGAPORE = 'Asia/Singapore';
     const FORMAT_DATE = 'Y-m-d';
+    const EMPTY_STRING = '';
 
     /* | --------------------------------------------------------------------------------------------------------
        | SINGAPORE
