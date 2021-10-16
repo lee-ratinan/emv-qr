@@ -469,7 +469,7 @@ class EmvMerchantDecoder extends EmvMerchant {
 
     /**
      * Process PayNow account
-     * @param string $account_raw
+     * @param string[] $account_raw
      * @param int $intId
      */
     private function process_paynow($account_raw, $intId)
@@ -550,48 +550,112 @@ class EmvMerchantDecoder extends EmvMerchant {
 
     /**
      * Process FavePay
-     * @param string $account_raw
+     * @param string[] $account_raw
      * @param int $intId
      */
     private function process_favepay($account_raw, $intId)
     {
         $account[parent::ID_ORIGINAL_LABEL] = $intId;
-        $account['channel'] = parent::FAVE_CHANNEL_NAME;
-        foreach ($account_raw as $id => $val)
+        $account[parent::STR_CHANNEL] = parent::FAVE_CHANNEL_NAME;
+        // REVERSE DOMAIN
+        $account[$this->favepay_keys[parent::FAVE_ID_REVERSE_DOMAIN]] = $account_raw[parent::FAVE_ID_REVERSE_DOMAIN];
+        // URL todo: check this is right?
+        if (filter_var($account_raw[parent::FAVE_ID_URL], FILTER_VALIDATE_URL))
         {
-            $account[$this->favepay_keys[$id]] = $val;
+            $account[$this->favepay_keys[parent::FAVE_ID_URL]] = $account_raw[parent::FAVE_ID_URL];
+        } else
+        {
+            $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->favepay_keys[parent::FAVE_ID_URL], 'URL', $account_raw[parent::FAVE_ID_URL]]);
         }
         $this->accounts[parent::FAVE_CHANNEL_NAME] = $account;
     }
 
     /**
+     * todo: verify inputs
      * Process NETS
-     * @param string $account_raw
+     * @param string[] $account_raw
      * @param int $intId
      */
     private function process_nets($account_raw, $intId)
     {
         $account[parent::ID_ORIGINAL_LABEL] = $intId;
-        $account['channel'] = parent::NETS_CHANNEL_NAME;
-        foreach ($account_raw as $id => $val)
-        {
-            $account[$this->nets_keys[$id]] = $val;
-        }
+        $account[parent::STR_CHANNEL] = parent::NETS_CHANNEL_NAME;
+        $account[$this->nets_keys[parent::NETS_ID_REVERSE_DOMAIN]] = $account_raw[parent::NETS_ID_REVERSE_DOMAIN];
+        $account[$this->nets_keys[parent::NETS_ID_QR_METADATA]] = $account_raw[parent::NETS_ID_QR_METADATA];
+        $account[$this->nets_keys[parent::NETS_ID_MERCHANT_ID]] = $account_raw[parent::NETS_ID_MERCHANT_ID];
+        $account[$this->nets_keys[parent::NETS_ID_TERMINAL_ID]] = $account_raw[parent::NETS_ID_TERMINAL_ID];
+        $account[$this->nets_keys[parent::NETS_ID_TRANSACTION_AMOUNT_MODIFIER]] = $account_raw[parent::NETS_ID_TRANSACTION_AMOUNT_MODIFIER];
+        $account[$this->nets_keys[parent::NETS_ID_SIGNATURE]] = $account_raw[parent::NETS_ID_SIGNATURE];
         $this->accounts[parent::NETS_CHANNEL_NAME] = $account;
     }
 
     /**
      * Process SGQR information - not an account but required
-     * @param string $account_raw
+     * @param string[] $account_raw
      * @param int $intId
      */
     private function process_sgqr($account_raw, $intId)
     {
         // FIXED 51
         $account[parent::ID_ORIGINAL_LABEL] = $intId;
-        foreach ($account_raw as $id => $val)
+        // 00 REVERSE DOMAIN
+        $account[$this->sgqr_keys[parent::SGQR_ID_REVERSE_DOMAIN]] = $account_raw[parent::SGQR_ID_REVERSE_DOMAIN];
+        // 01 ID: 12-HEX
+        if ($this->validate_ans_charset_len($account_raw[parent::SGQR_ID_IDENTIFICATION_NUMBER], 12))
         {
-            $account[$this->sgqr_keys[$id]] = $val;
+            $account[$this->sgqr_keys[parent::SGQR_ID_IDENTIFICATION_NUMBER]] = $account_raw[parent::SGQR_ID_IDENTIFICATION_NUMBER];
+        } else
+        {
+            $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->sgqr_keys[parent::SGQR_ID_IDENTIFICATION_NUMBER], 'ID', $account_raw[parent::SGQR_ID_IDENTIFICATION_NUMBER]]);
+        }
+        // 02 VERSION: NN.NNNN
+        if (preg_match('/\d{2}\.\d{4}/', $account_raw[parent::SGQR_ID_VERSION]))
+        {
+            $account[$this->sgqr_keys[parent::SGQR_ID_VERSION]] = $account_raw[parent::SGQR_ID_VERSION];
+        } else
+        {
+            $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->sgqr_keys[parent::SGQR_ID_VERSION], 'Version', $account_raw[parent::SGQR_ID_VERSION]]);
+        }
+        // 03 POSTAL CODE: NNNNNN
+        if (preg_match('/\d{6}/', $account_raw[parent::SGQR_ID_POSTAL_CODE]))
+        {
+            $account[$this->sgqr_keys[parent::SGQR_ID_POSTAL_CODE]] = $account_raw[parent::SGQR_ID_POSTAL_CODE];
+        } else
+        {
+            $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->sgqr_keys[parent::SGQR_ID_POSTAL_CODE], 'Postal Code', $account_raw[parent::SGQR_ID_POSTAL_CODE]]);
+        }
+        // 04 LEVEL
+        if ($this->validate_ans_charset_len($account_raw[parent::SGQR_ID_LEVEL], 3))
+        {
+            $account[$this->sgqr_keys[parent::SGQR_ID_LEVEL]] = $account_raw[parent::SGQR_ID_LEVEL];
+        } else
+        {
+            $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->sgqr_keys[parent::SGQR_ID_LEVEL], 'Level', $account_raw[parent::SGQR_ID_LEVEL]]);
+        }
+        // 05 UNIT NUMBER
+        if ($this->validate_ans_charset_len($account_raw[parent::SGQR_ID_UNIT_NUMBER], 5))
+        {
+            $account[$this->sgqr_keys[parent::SGQR_ID_UNIT_NUMBER]] = $account_raw[parent::SGQR_ID_UNIT_NUMBER];
+        } else
+        {
+            $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->sgqr_keys[parent::SGQR_ID_UNIT_NUMBER], 'Level', $account_raw[parent::SGQR_ID_UNIT_NUMBER]]);
+        }
+        // 06 MISC
+        if ($this->validate_ans_charset_len($account_raw[parent::SGQR_ID_MISC], 10))
+        {
+            $account[$this->sgqr_keys[parent::SGQR_ID_MISC]] = $account_raw[parent::SGQR_ID_MISC];
+        } else
+        {
+            $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->sgqr_keys[parent::SGQR_ID_MISC], 'Misc.', $account_raw[parent::SGQR_ID_MISC]]);
+        }
+        // 07 NEW VERSION DATE
+        $new_version_date = $this->parse_date_yyyymmdd($account_raw[parent::SGQR_ID_VERSION_DATE]);
+        if ($new_version_date)
+        {
+            $account[$this->sgqr_keys[parent::SGQR_ID_VERSION_DATE]] = $new_version_date;
+        } else
+        {
+            $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->sgqr_keys[parent::SGQR_ID_VERSION_DATE], 'New Version Date.', $account_raw[parent::SGQR_ID_VERSION_DATE]]);
         }
         $this->accounts[parent::SGQR_CHANNEL] = $account;
     }
@@ -644,9 +708,9 @@ class EmvMerchantDecoder extends EmvMerchant {
     }
 
     /**
-     * // @todo implement it
+     * @todo implement it
      * Process PromptPay Bill Payment account
-     * @param string $account_raw
+     * @param string[] $account_raw
      * @param int $intId
      */
     private function process_promptpay_bill($account_raw, $intId)

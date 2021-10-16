@@ -629,6 +629,7 @@ class EmvMerchant {
     const TIMEZONE_SINGAPORE = 'Asia/Singapore';
     const FORMAT_DATE = 'Y-m-d';
     const EMPTY_STRING = '';
+    const STR_CHANNEL = 'channel';
 
     /* | --------------------------------------------------------------------------------------------------------
        | SINGAPORE
@@ -792,6 +793,7 @@ class EmvMerchant {
     const ERROR_ID_PAYNOW_EXPIRY_DATE_INVALID = 'E017';
     const ERROR_ID_PROMPTPAY_MISSING_PROXY = 'E018';
     const ERROR_ID_PROMPTPAY_INVALID_PROXY = 'E019';
+    const ERROR_ID_GENERAL_INVALID_FIELD = 'E020';
     const ERROR_ID_MISSING_FIELD = 'E999';
     // WARNING CODES
     const WARNING_ID_MCC_INVALID = 'W001';
@@ -824,6 +826,7 @@ class EmvMerchant {
         self::ERROR_ID_PAYNOW_EXPIRY_DATE_INVALID => "The expiry date of this QR code is invalid. Expected the date in 'yyyymmdd' format, found '???'.",
         self::ERROR_ID_PROMPTPAY_MISSING_PROXY => "The proxy value (mobile number, tax ID, or eWallet ID) is missing.",
         self::ERROR_ID_PROMPTPAY_INVALID_PROXY => "The proxy value is invalid. Expected a mobile phone number or tax ID, found '???'.",
+        self::ERROR_ID_GENERAL_INVALID_FIELD => "The field ???1 is invalid, expected the value of type ???2, found '???3'.",
         // ERROR GENERATOR
         self::ERROR_ID_MISSING_FIELD => "The field ID ??? has never been set.",
         // WARNING
