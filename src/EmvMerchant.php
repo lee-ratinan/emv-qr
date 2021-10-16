@@ -639,6 +639,7 @@ class EmvMerchant {
        | PAYNOW (PREFERABLY 26)
        | -------------------------------------------------------------------------------------------------------- */
     const PAYNOW_CHANNEL = 'SG.PAYNOW';
+    const PAYNOW_CHANNEL_NAME = 'PayNow';
     const PAYNOW_ID_CHANNEL = '00';
     const PAYNOW_ID_PROXY_TYPE = '01';
     const PAYNOW_ID_PROXY_VALUE = '02';
@@ -692,6 +693,18 @@ class EmvMerchant {
     ];
 
     /* | --------------------------------------------------------------------------------------------------------
+       | AIRPAY (ANY)
+       | -------------------------------------------------------------------------------------------------------- */
+    const AIRPAY_CHANNEL = 'SG.AIRPAY';
+    const AIRPAY_CHANNEL_NAME = 'AirPay';
+    const AIRPAY_ID_REVERSE_DOMAIN = '00';
+    const AIRPAY_ID_MERCHANT_ACCOUNT_INFORMATION = '01';
+    protected $airpay_keys = [
+        '00' => 'reverse_domain',
+        '01' => 'merchant_account_information'
+    ];
+
+    /* | --------------------------------------------------------------------------------------------------------
        | NETS (ANY)
        | -------------------------------------------------------------------------------------------------------- */
     const NETS_CHANNEL = 'SG.COM.NETS';
@@ -715,6 +728,7 @@ class EmvMerchant {
        | SGQR (51 FIXED)
        | -------------------------------------------------------------------------------------------------------- */
     const SGQR_CHANNEL = 'SG.SGQR';
+    const SGQR_CHANNEL_NAME = 'SGQR';
     const SGQR_ID_REVERSE_DOMAIN = '00';
     const SGQR_ID_IDENTIFICATION_NUMBER = '01';
     const SGQR_ID_VERSION = '02';
