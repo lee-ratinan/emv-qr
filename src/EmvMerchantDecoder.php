@@ -445,6 +445,9 @@ class EmvMerchantDecoder extends EmvMerchant {
             case parent::FAVE_CHANNEL:
                 $this->process_favepay($account_raw, $intId);
                 break;
+            case parent::ALIPAY_CHANNEL:
+                $this->process_alipay($account_raw, $intId);
+                break;
             case parent::NETS_CHANNEL:
                 $this->process_nets($account_raw, $intId);
                 break;
@@ -568,6 +571,28 @@ class EmvMerchantDecoder extends EmvMerchant {
             $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->favepay_keys[parent::FAVE_ID_URL], 'URL', $account_raw[parent::FAVE_ID_URL]]);
         }
         $this->accounts[parent::FAVE_CHANNEL_NAME] = $account;
+    }
+
+    /**
+     * Process AliPay
+     * @param string[] $account_raw
+     * @param int $intId
+     */
+    private function process_alipay($account_raw, $intId)
+    {
+        $account[parent::ID_ORIGINAL_LABEL] = $intId;
+        $account[parent::STR_CHANNEL] = parent::ALIPAY_CHANNEL_NAME;
+        // REVERSE DOMAIN
+        $account[$this->alipay_keys[parent::ALIPAY_ID_REVERSE_DOMAIN]] = $account_raw[parent::ALIPAY_ID_REVERSE_DOMAIN];
+        // URL todo: check this is right?
+        if (filter_var($account_raw[parent::ALIPAY_ID_URL], FILTER_VALIDATE_URL))
+        {
+            $account[$this->alipay_keys[parent::ALIPAY_ID_URL]] = $account_raw[parent::ALIPAY_ID_URL];
+        } else
+        {
+            $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->alipay_keys[parent::ALIPAY_ID_URL], 'URL', $account_raw[parent::ALIPAY_ID_URL]]);
+        }
+        $this->accounts[parent::ALIPAY_CHANNEL_NAME] = $account;
     }
 
     /**
