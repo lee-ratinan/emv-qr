@@ -618,7 +618,6 @@ class EmvMerchantDecoder extends EmvMerchant {
     }
 
     /**
-     * todo: verify inputs
      * Process NETS
      * @param string[] $account_raw
      * @param int $intId
@@ -628,11 +627,41 @@ class EmvMerchantDecoder extends EmvMerchant {
         $account[parent::ID_ORIGINAL_LABEL] = $intId;
         $account[parent::STR_CHANNEL] = parent::NETS_CHANNEL_NAME;
         $account[$this->nets_keys[parent::NETS_ID_REVERSE_DOMAIN]] = $account_raw[parent::NETS_ID_REVERSE_DOMAIN];
-        $account[$this->nets_keys[parent::NETS_ID_QR_METADATA]] = $account_raw[parent::NETS_ID_QR_METADATA];
-        $account[$this->nets_keys[parent::NETS_ID_MERCHANT_ID]] = $account_raw[parent::NETS_ID_MERCHANT_ID];
-        $account[$this->nets_keys[parent::NETS_ID_TERMINAL_ID]] = $account_raw[parent::NETS_ID_TERMINAL_ID];
-        $account[$this->nets_keys[parent::NETS_ID_TRANSACTION_AMOUNT_MODIFIER]] = $account_raw[parent::NETS_ID_TRANSACTION_AMOUNT_MODIFIER];
-        $account[$this->nets_keys[parent::NETS_ID_SIGNATURE]] = $account_raw[parent::NETS_ID_SIGNATURE];
+        if (preg_match('/\d{23}/', $account_raw[parent::NETS_ID_QR_METADATA]))
+        {
+            $account[$this->nets_keys[parent::NETS_ID_QR_METADATA]] = $account_raw[parent::NETS_ID_QR_METADATA];
+        } else
+        {
+            $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->nets_keys[parent::NETS_ID_QR_METADATA], 'NETS QR Metadata', $account_raw[parent::NETS_ID_QR_METADATA]]);
+        }
+        if (preg_match('/\d{15}/', $account_raw[parent::NETS_ID_MERCHANT_ID]))
+        {
+            $account[$this->nets_keys[parent::NETS_ID_MERCHANT_ID]] = $account_raw[parent::NETS_ID_MERCHANT_ID];
+        } else
+        {
+            $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->nets_keys[parent::NETS_ID_MERCHANT_ID], 'NETS Merchant ID', $account_raw[parent::NETS_ID_MERCHANT_ID]]);
+        }
+        if (preg_match('/\d{8}/', $account_raw[parent::NETS_ID_TERMINAL_ID]))
+        {
+            $account[$this->nets_keys[parent::NETS_ID_TERMINAL_ID]] = $account_raw[parent::NETS_ID_TERMINAL_ID];
+        } else
+        {
+            $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->nets_keys[parent::NETS_ID_TERMINAL_ID], 'NETS Terminal ID', $account_raw[parent::NETS_ID_TERMINAL_ID]]);
+        }
+        if (preg_match('/\d/', $account_raw[parent::NETS_ID_TRANSACTION_AMOUNT_MODIFIER]))
+        {
+            $account[$this->nets_keys[parent::NETS_ID_TRANSACTION_AMOUNT_MODIFIER]] = $account_raw[parent::NETS_ID_TRANSACTION_AMOUNT_MODIFIER];
+        } else
+        {
+            $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->nets_keys[parent::NETS_ID_TRANSACTION_AMOUNT_MODIFIER], 'NETS Transaction Amount Modifier', $account_raw[parent::NETS_ID_TRANSACTION_AMOUNT_MODIFIER]]);
+        }
+        if (preg_match('/[A-Z0-9]{8}/', $account_raw[parent::NETS_ID_SIGNATURE]))
+        {
+            $account[$this->nets_keys[parent::NETS_ID_SIGNATURE]] = $account_raw[parent::NETS_ID_SIGNATURE];
+        } else
+        {
+            $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->nets_keys[parent::NETS_ID_SIGNATURE], 'NETS Signature', $account_raw[parent::NETS_ID_SIGNATURE]]);
+        }
         $this->accounts[parent::NETS_CHANNEL_NAME] = $account;
     }
 
