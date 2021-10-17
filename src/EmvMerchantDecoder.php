@@ -565,7 +565,6 @@ class EmvMerchantDecoder extends EmvMerchant {
         $account[parent::STR_CHANNEL] = parent::FAVE_CHANNEL_NAME;
         // REVERSE DOMAIN
         $account[$this->favepay_keys[parent::FAVE_ID_REVERSE_DOMAIN]] = $account_raw[parent::FAVE_ID_REVERSE_DOMAIN];
-        // URL todo: check this is right?
         if (filter_var($account_raw[parent::FAVE_ID_URL], FILTER_VALIDATE_URL))
         {
             $account[$this->favepay_keys[parent::FAVE_ID_URL]] = $account_raw[parent::FAVE_ID_URL];
@@ -587,7 +586,6 @@ class EmvMerchantDecoder extends EmvMerchant {
         $account[parent::STR_CHANNEL] = parent::ALIPAY_CHANNEL_NAME;
         // REVERSE DOMAIN
         $account[$this->alipay_keys[parent::ALIPAY_ID_REVERSE_DOMAIN]] = $account_raw[parent::ALIPAY_ID_REVERSE_DOMAIN];
-        // URL todo: check this is right?
         if (filter_var($account_raw[parent::ALIPAY_ID_URL], FILTER_VALIDATE_URL))
         {
             $account[$this->alipay_keys[parent::ALIPAY_ID_URL]] = $account_raw[parent::ALIPAY_ID_URL];
@@ -720,7 +718,7 @@ class EmvMerchantDecoder extends EmvMerchant {
      */
     private function process_promptpay($account_raw, $intId)
     {
-        // MOSTLY 29
+        // 29
         $account[parent::ID_ORIGINAL_LABEL] = $intId;
         $account[$this->promptpay_keys[99]] = parent::PROMPTPAY_CHANNEL_NAME;
         $account[$this->promptpay_keys[parent::PROMPTPAY_ID_APP_ID]] = $account_raw[parent::PROMPTPAY_ID_APP_ID];
@@ -763,8 +761,33 @@ class EmvMerchantDecoder extends EmvMerchant {
      */
     private function process_promptpay_bill($account_raw, $intId)
     {
-        // todo: implement it
-        $account = [];
+        $account[parent::ID_ORIGINAL_LABEL] = $intId;
+        $account[parent::STR_CHANNEL] = parent::PROMPTPAY_BILL_CHANNEL_NAME;
+        $account[$this->promptpay_bill_keys[parent::PROMPTPAY_BILL_APP_ID]] = $account_raw[parent::PROMPTPAY_BILL_APP_ID];
+        if (preg_match('/\d{15}/', $account_raw[parent::PROMPTPAY_BILL_BILLER_ID]))
+        {
+            $account[$this->promptpay_bill_keys[parent::PROMPTPAY_BILL_BILLER_ID]] = $account_raw[parent::PROMPTPAY_BILL_BILLER_ID];
+        } else
+        {
+            $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->promptpay_bill_keys[parent::PROMPTPAY_BILL_BILLER_ID], 'Biller ID', $account_raw[parent::PROMPTPAY_BILL_BILLER_ID]]);
+        }
+        if ($this->validate_ans_charset_len($account_raw[parent::PROMPTPAY_BILL_REF_1], 20))
+        {
+            $account[$this->promptpay_bill_keys[parent::PROMPTPAY_BILL_REF_1]] = $account_raw[parent::PROMPTPAY_BILL_REF_1];
+        } else
+        {
+            $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->promptpay_bill_keys[parent::PROMPTPAY_BILL_REF_1], 'Reference ID 1', $account_raw[parent::PROMPTPAY_BILL_REF_1]]);
+        }
+        if ( ! empty($account_raw[parent::PROMPTPAY_BILL_REF_2]))
+        {
+            if ($this->validate_ans_charset_len($account_raw[parent::PROMPTPAY_BILL_REF_2], 20))
+            {
+                $account[$this->promptpay_bill_keys[parent::PROMPTPAY_BILL_REF_2]] = $account_raw[parent::PROMPTPAY_BILL_REF_2];
+            } else
+            {
+                $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->promptpay_bill_keys[parent::PROMPTPAY_BILL_REF_2], 'Reference ID 2', $account_raw[parent::PROMPTPAY_BILL_REF_2]]);
+            }
+        }
         $this->accounts[parent::PROMPTPAY_BILL_CHANNEL_NAME] = $account;
     }
 
