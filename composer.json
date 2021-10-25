@@ -1,5 +1,5 @@
 {
-    "name": "lee-ratinan/emvQr",
+    "name": "lee-ratinan/emv-qr",
     "type": "library",
     "description": "This PHP class is for reading and generating EMV QR codes, which is the QR code for making payments via mobile payment platforms.",
     "keywords": ["EMVCo","QR","payment-gateway","QR-code"],
