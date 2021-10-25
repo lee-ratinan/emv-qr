@@ -1,0 +1,16 @@
+{
+    "name": "lee-ratinan/emvQr",
+    "type": "library",
+    "description": "This PHP class is for reading and generating EMV QR codes, which is the QR code for making payments via mobile payment platforms.",
+    "keywords": ["EMVCo","QR","payment-gateway","QR-code"],
+    "homepage": "https://lee.rongq.in",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ratinan Lee",
+            "email": "lee@rongq.in",
+            "homepage": "https://lee.rongq.in",
+            "role": "Developer"
+        }
+    ],
+}
