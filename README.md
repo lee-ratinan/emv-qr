@@ -1,9 +1,9 @@
-# emvQr
+# emv-qr
 
-[![GitHub last commit](https://img.shields.io/github/last-commit/lee-ratinan/emvQr)](https://github.com/lee-ratinan/emvQr/commits/main)
-[![GitHub](https://img.shields.io/github/license/lee-ratinan/emvQr)](https://github.com/lee-ratinan/emvQr/blob/main/LICENSE)
-[![GitHub all releases](https://img.shields.io/github/downloads/lee-ratinan/emvQr/total)](https://github.com/lee-ratinan/emvQr/releases)
-[![GitHub issues](https://img.shields.io/github/issues/lee-ratinan/emvQr)](https://github.com/lee-ratinan/emvQr/issues)
+[![GitHub last commit](https://img.shields.io/github/last-commit/lee-ratinan/emv-qr)](https://github.com/lee-ratinan/emv-qr/commits/main)
+[![GitHub](https://img.shields.io/github/license/lee-ratinan/emv-qr)](https://github.com/lee-ratinan/emv-qr/blob/main/LICENSE)
+[![GitHub all releases](https://img.shields.io/github/downloads/lee-ratinan/emv-qr/total)](https://github.com/lee-ratinan/emv-qr/releases)
+[![GitHub issues](https://img.shields.io/github/issues/lee-ratinan/emv-qr)](https://github.com/lee-ratinan/emv-qr/issues)
 
 This repo is for reading and generating EMV QR Code for various countries, currently supports:
 
