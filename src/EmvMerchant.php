@@ -597,6 +597,7 @@ class EmvMerchant {
      */
     const ID_CRC = '63';
     const CRC_LENGTH = '04';
+    const CRC_MARKED = '****';
 
     /**
      * MERCHANT INFORMATION - LANGUAGE TEMPLATE (64)
@@ -895,11 +896,30 @@ class EmvMerchant {
     public $errors = [];
     public $warnings = [];
 
+    /* | --------------------------------------------------------------------------------------------------------
+       | ENVIRONMENT
+       | -------------------------------------------------------------------------------------------------------- */
+    const ENV_PROD = 'PRODUCTION';
+    const ENV_DEV = 'DEVELOPMENT';
+    protected $environment = 'PRODUCTION';
     /**
      * EmvMerchant constructor.
      */
     public function __construct()
     {
+    }
+
+    /**
+     * Set the environment of the class
+     * For development environment, some of the security features are removed, showing more details to the error messages
+     * @param string $environment
+     */
+    public function set_environment($environment)
+    {
+        if (in_array($environment, [self::ENV_DEV, self::ENV_PROD]))
+        {
+            $this->environment = $environment;
+        }
     }
 
     /* | --------------------------------------------------------------------------------------------------------

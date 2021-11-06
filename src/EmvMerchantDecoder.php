@@ -410,6 +410,10 @@ class EmvMerchantDecoder extends EmvMerchant {
         $newCrc = $this->CRC16HexDigest($checkData);
         if ($strValue != $newCrc)
         {
+            if (self::ENV_PROD == $this->environment)
+            {
+                $newCrc = self::CRC_MARKED;
+            }
             $this->add_message(parent::ID_CRC, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_CRC_INVALID, [$newCrc, $strValue]);
         }
     }
@@ -505,8 +509,9 @@ class EmvMerchantDecoder extends EmvMerchant {
                  * Businesses registered with ACRA: nnnnnnnnX
                  * Local companies registered with ACRA: yyyynnnnnX
                  * All other entities which will be issued new UEN: TyyPQnnnnX
+                 * Suffix: [0-9A-Z]{2,4} optional
                  */
-                if (preg_match('/^(\d{8}[A-Z]|(19|20)\d{7}[A-Z]|(S|T)\d{2}[A-Z]{2}\d{4}[A-Z])(\d{2,4}){0,1}$/', $proxy_value))
+                if (preg_match('/^(\d{8}[A-Z]|(19|20)\d{7}[A-Z]|(S|T)\d{2}[A-Z]{2}\d{4}[A-Z])([0-9A-Z]{2,4})?$/', $proxy_value))
                 {
                     $account[$this->paynow_keys[parent::PAYNOW_ID_PROXY_VALUE]] = $proxy_value;
                 } else
