@@ -410,6 +410,10 @@ class EmvMerchantDecoder extends EmvMerchant {
         $newCrc = $this->CRC16HexDigest($checkData);
         if ($strValue != $newCrc)
         {
+            if (self::ENV_PROD == $this->environment)
+            {
+                $newCrc = self::CRC_MARKED;
+            }
             $this->add_message(parent::ID_CRC, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_CRC_INVALID, [$newCrc, $strValue]);
         }
     }
