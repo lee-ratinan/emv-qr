@@ -780,7 +780,7 @@ class EmvMerchantDecoder extends EmvMerchant {
         } else if ( ! empty($account_raw[parent::PROMPTPAY_ID_EWALLET_ID]))
         {
             $account[$this->promptpay_keys[97]] = parent::PROMPTPAY_PROXY_EWALLET_ID;
-            $account[$this->promptpay_keys[98]] = $account_raw[parent::PROMPTPAY_ID_TAX_ID];
+            $account[$this->promptpay_keys[98]] = $account_raw[parent::PROMPTPAY_ID_EWALLET_ID];
         } else
         {
             $this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PROMPTPAY_MISSING_PROXY);
