@@ -469,7 +469,25 @@ class EmvMerchantDecoder extends EmvMerchant {
                 $this->process_promptpay_bill($account_raw, $intId);
                 break;
             default:
-                $this->accounts[$account_raw['00']] = array_merge([parent::ID_ORIGINAL_LABEL => $intId], $account_raw);
+                $this->process_unknown_accounts($account_raw, $intId);
+                break;
+        }
+    }
+
+    /**
+     * Process accounts in the reserved area
+     * Ignore if it's undefined in $reserved_ids so it won't cause errors
+     * @param string[] $account_raw
+     * @param int $intId
+     */
+    private function process_unknown_accounts($account_raw, $intId)
+    {
+        if (parent::ID_ACCOUNT_START_INDEX <= $intId)
+        {
+            $this->accounts[$account_raw['00']] = array_merge([parent::ID_ORIGINAL_LABEL => $intId], $account_raw);
+        } elseif (isset($this->reserved_ids[$intId]))
+        {
+            $this->accounts[$this->reserved_ids[$intId]] = array_merge([parent::ID_ORIGINAL_LABEL => $intId], $account_raw);
         }
     }
 
@@ -509,9 +527,9 @@ class EmvMerchantDecoder extends EmvMerchant {
                  * Businesses registered with ACRA: nnnnnnnnX
                  * Local companies registered with ACRA: yyyynnnnnX
                  * All other entities which will be issued new UEN: TyyPQnnnnX
-                 * Suffix: [0-9A-Z]{2,4} optional
+                 * Suffix: [0-9A-Z]{2,10} optional (Just allow it up to 10 characters)
                  */
-                if (preg_match('/^(\d{8}[A-Z]|(19|20)\d{7}[A-Z]|(S|T)\d{2}[A-Z]{2}\d{4}[A-Z])([0-9A-Z]{2,4})?$/', $proxy_value))
+                if (preg_match('/^(\d{8}[A-Z]|(19|20)\d{7}[A-Z]|(S|T)\d{2}[A-Z]{2}\d{4}[A-Z])([0-9A-Z]{2,10})?$/', $proxy_value))
                 {
                     $account[$this->paynow_keys[parent::PAYNOW_ID_PROXY_VALUE]] = $proxy_value;
                 } else
