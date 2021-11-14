@@ -488,7 +488,10 @@ class EmvMerchantDecoder extends EmvMerchant {
         {
             if (isset($account_raw['00']) && ! empty($account_raw['00']))
             {
-                $this->accounts[$account_raw['00']] = array_merge([parent::ID_ORIGINAL_LABEL => $intId], $account_raw);
+                $this->accounts[$account_raw['00']] = array_merge([
+                    parent::ID_ORIGINAL_LABEL => $intId,
+                    parent::ID_PLAIN_VALUE_LABEL => $origStrValue
+                ], $account_raw);
             } else
             {
                 $this->accounts[$intId] = array_merge([
