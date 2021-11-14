@@ -430,6 +430,7 @@ class EmvMerchantDecoder extends EmvMerchant {
             $this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_ACCOUNT_OUT_OF_BOUND, $intId);
             return;
         }
+        $origStrValue = $strValue;
         $account_raw = [];
         while ( ! empty($strValue))
         {
@@ -469,7 +470,7 @@ class EmvMerchantDecoder extends EmvMerchant {
                 $this->process_promptpay_bill($account_raw, $intId);
                 break;
             default:
-                $this->process_unknown_accounts($account_raw, $intId);
+                $this->process_unknown_accounts($account_raw, $intId, $origStrValue);
                 break;
         }
     }
@@ -479,15 +480,28 @@ class EmvMerchantDecoder extends EmvMerchant {
      * Ignore if it's undefined in $reserved_ids so it won't cause errors
      * @param string[] $account_raw
      * @param int $intId
+     * @param string $origStrValue
      */
-    private function process_unknown_accounts($account_raw, $intId)
+    private function process_unknown_accounts($account_raw, $intId, $origStrValue)
     {
         if (parent::ID_ACCOUNT_START_INDEX <= $intId)
         {
-            $this->accounts[$account_raw['00']] = array_merge([parent::ID_ORIGINAL_LABEL => $intId], $account_raw);
+            if (isset($account_raw['00']) && ! empty($account_raw['00']))
+            {
+                $this->accounts[$account_raw['00']] = array_merge([parent::ID_ORIGINAL_LABEL => $intId], $account_raw);
+            } else
+            {
+                $this->accounts[$intId] = array_merge([
+                    parent::ID_ORIGINAL_LABEL => $intId,
+                    parent::ID_PLAIN_VALUE_LABEL => $origStrValue
+                ], $account_raw);
+            }
         } elseif (isset($this->reserved_ids[$intId]))
         {
-            $this->accounts[$this->reserved_ids[$intId]] = array_merge([parent::ID_ORIGINAL_LABEL => $intId], $account_raw);
+            $this->accounts[$this->reserved_ids[$intId]] = [
+                parent::ID_ORIGINAL_LABEL => $intId,
+                parent::ID_PLAIN_VALUE_LABEL => $origStrValue
+            ];
         }
     }
 

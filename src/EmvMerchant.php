@@ -36,6 +36,7 @@ class EmvMerchant {
     const ID_ACCOUNT_START_INDEX = 26;
     const ID_ACCOUNT_UPPER_BOUNDARY = 51;
     const ID_ORIGINAL_LABEL = 'original_id';
+    const ID_PLAIN_VALUE_LABEL = 'value';
 
     /**
      * RESERVED AREA IDS
