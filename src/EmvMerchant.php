@@ -657,7 +657,8 @@ class EmvMerchant {
         '01' => 'proxy_type',
         '02' => 'proxy_value',
         '03' => 'amount_editable',
-        '04' => 'expiry_date'
+        '04' => 'expiry_date',
+        '05' => '??' // unknown key, found in one QR code
     ];
     protected $paynow_proxy_type = [
         '0' => 'MOBILE',
