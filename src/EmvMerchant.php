@@ -629,6 +629,7 @@ class EmvMerchant {
      */
     const TIMEZONE_SINGAPORE = 'Asia/Singapore';
     const FORMAT_DATE = 'Y-m-d';
+    const FORMAT_DATE_READABLE = 'd-M-Y';
     const EMPTY_STRING = '';
     const STR_CHANNEL = 'channel';
 
@@ -663,8 +664,8 @@ class EmvMerchant {
         '2' => 'UEN'
     ];
     protected $paynow_amount_editable = [
-        '1' => TRUE,
-        '0' => FALSE
+        '1' => 'EDITABLE',
+        '0' => 'NOT-EDITABLE'
     ];
 
     /* | --------------------------------------------------------------------------------------------------------
@@ -817,6 +818,8 @@ class EmvMerchant {
     const ERROR_ID_PAYNOW_INVALID_PROXY_VALUE = 'E013';
     const ERROR_ID_PAYNOW_MISSING_PROXY_TYPE = 'E014';
     const ERROR_ID_PAYNOW_EDITABLE_FALSE_BUT_STATIC = 'E015';
+    const ERROR_ID_PAYNOW_EDITABLE_TRUE_BUT_DYNAMIC = 'E015.1';
+    const ERROR_ID_PAYNOW_EDITABLE_INVALID = 'E015.2';
     const ERROR_ID_PAYNOW_EXPIRED_QR = 'E016';
     const ERROR_ID_PAYNOW_EXPIRY_DATE_INVALID = 'E017';
     const ERROR_ID_PROMPTPAY_MISSING_PROXY = 'E018';
@@ -850,6 +853,8 @@ class EmvMerchant {
         self::ERROR_ID_PAYNOW_INVALID_PROXY_VALUE => "Proxy value is invalid. Expected the value of type ???1, found '???2'.",
         self::ERROR_ID_PAYNOW_MISSING_PROXY_TYPE => "Proxy type is missing.",
         self::ERROR_ID_PAYNOW_EDITABLE_FALSE_BUT_STATIC => "PayNow transaction value is set to not editable but the point of initiation is static.",
+        self::ERROR_ID_PAYNOW_EDITABLE_TRUE_BUT_DYNAMIC => "PayNow transaction value is set to editable but the point of initiation is dynamic.",
+        self::ERROR_ID_PAYNOW_EDITABLE_INVALID => "Invalid editable flag. Expected 0 or 1, found '???'.",
         self::ERROR_ID_PAYNOW_EXPIRED_QR => "This QR code is already expired. The expiry date was ???.",
         self::ERROR_ID_PAYNOW_EXPIRY_DATE_INVALID => "The expiry date of this QR code is invalid. Expected the date in 'yyyymmdd' format, found '???'.",
         self::ERROR_ID_PROMPTPAY_MISSING_PROXY => "The proxy value (mobile number, tax ID, or eWallet ID) is missing.",

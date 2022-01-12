@@ -9,6 +9,11 @@ require_once 'EmvMerchant.php';
  */
 class EmvMerchantDecoder extends EmvMerchant {
 
+    const LABEL_ACCOUNT_ID          = 'id';
+    const LABEL_ACCOUNT_KEY         = 'key';
+    const LABEL_ACCOUNT_VALUE       = 'value';
+    const LABEL_ACCOUNT_DESCRIPTION = 'description';
+
     /**
      * EmvMerchantDecoder constructor.
      * If $string is given, the constructor automatically call decode() and proceed to decode the QR code string.
@@ -468,8 +473,19 @@ class EmvMerchantDecoder extends EmvMerchant {
             case parent::PROMPTPAY_BILL_CHANNEL:
                 $this->process_promptpay_bill($account_raw, $intId);
                 break;
+            // DEFAULT
             default:
-                $this->accounts[$account_raw['00']] = array_merge([parent::ID_ORIGINAL_LABEL => $intId], $account_raw);
+                $account_data = [];
+                foreach ($account_raw as $key => $value)
+                {
+                    $account_data[$key] = [
+                        self::LABEL_ACCOUNT_ID          => $key,
+                        self::LABEL_ACCOUNT_KEY         => '',
+                        self::LABEL_ACCOUNT_VALUE       => $value,
+                        self::LABEL_ACCOUNT_DESCRIPTION => ''
+                    ];
+                }
+                $this->accounts[$intId] = $account_data;
         }
     }
 
@@ -484,21 +500,16 @@ class EmvMerchantDecoder extends EmvMerchant {
      */
     private function process_paynow($account_raw, $intId)
     {
-        $account[parent::ID_ORIGINAL_LABEL] = $intId;
-        $account[$this->paynow_keys[parent::PAYNOW_ID_CHANNEL]] = $account_raw[parent::PAYNOW_ID_CHANNEL];
-        // PROXY TYPE AND VALUE
-        $proxy_type = $account_raw[parent::PAYNOW_ID_PROXY_TYPE];
+        $account_info[parent::ID_ORIGINAL_LABEL] = $intId;
+        // CHECK ERROR - PROXY TYPE/VALUE
+        $proxy_type  = $account_raw[parent::PAYNOW_ID_PROXY_TYPE];
         $proxy_value = $account_raw[parent::PAYNOW_ID_PROXY_VALUE];
         if (isset($this->paynow_proxy_type[$proxy_type]))
         {
-            $account[$this->paynow_keys[parent::PAYNOW_ID_PROXY_TYPE]] = $this->paynow_proxy_type[$proxy_type];
             if (parent::PAYNOW_PROXY_MOBILE == $proxy_type)
             {
                 // Accept all country's phone number with country code (E.164 format)
-                if (preg_match('/^\+(\d){8,15}$/', $proxy_value))
-                {
-                    $account[$this->paynow_keys[parent::PAYNOW_ID_PROXY_VALUE]] = $proxy_value;
-                } else
+                if (! preg_match('/^\+(\d){8,15}$/', $proxy_value))
                 {
                     $this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_INVALID_PROXY_VALUE, [$this->paynow_proxy_type[parent::PAYNOW_PROXY_MOBILE], $proxy_value]);
                 }
@@ -511,10 +522,7 @@ class EmvMerchantDecoder extends EmvMerchant {
                  * All other entities which will be issued new UEN: TyyPQnnnnX
                  * Suffix: [0-9A-Z]{2,4} optional
                  */
-                if (preg_match('/^(\d{8}[A-Z]|(19|20)\d{7}[A-Z]|(S|T)\d{2}[A-Z]{2}\d{4}[A-Z])([0-9A-Z]{2,4})?$/', $proxy_value))
-                {
-                    $account[$this->paynow_keys[parent::PAYNOW_ID_PROXY_VALUE]] = $proxy_value;
-                } else
+                if (! preg_match('/^(\d{8}[A-Z]|(19|20)\d{7}[A-Z]|(S|T)\d{2}[A-Z]{2}\d{4}[A-Z])([0-9A-Z]{2,4})?$/', $proxy_value))
                 {
                     $this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_INVALID_PROXY_VALUE, [$this->paynow_proxy_type[parent::PAYNOW_PROXY_UEN], $proxy_value]);
                 }
@@ -523,20 +531,26 @@ class EmvMerchantDecoder extends EmvMerchant {
         {
             $this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_MISSING_PROXY_TYPE);
         }
-        // EDITABLE
+        // CHECK ERROR - EDITABLE
         if (isset($account_raw[parent::PAYNOW_ID_AMOUNT_EDITABLE]))
         {
             $editable = $account_raw[parent::PAYNOW_ID_AMOUNT_EDITABLE];
             if (isset($this->paynow_amount_editable[$editable]))
             {
-                $account[$this->paynow_keys[parent::PAYNOW_ID_AMOUNT_EDITABLE]] = $this->paynow_amount_editable[$editable];
                 if ($editable == parent::PAYNOW_AMOUNT_EDITABLE_FALSE && $this->point_of_initiation == parent::POINT_OF_INITIATION_STATIC_VALUE)
                 {
                     $this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_EDITABLE_FALSE_BUT_STATIC);
+                } else if ($editable == parent::PAYNOW_AMOUNT_EDITABLE_TRUE && $this->point_of_initiation == parent::POINT_OF_INITIATION_DYNAMIC_VALUE)
+                {
+                    $this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_EDITABLE_TRUE_BUT_DYNAMIC);
                 }
+            } else
+            {
+                $this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_EDITABLE_INVALID, $editable);
             }
         }
-        // EXPIRY DATE
+        // CHECK ERROR - EXPIRY DATE
+        $expiry_date = '';
         if (isset($account_raw[parent::PAYNOW_ID_EXPIRY_DATE]))
         {
             $expiry_date = $this->parse_date_yyyymmdd($account_raw[parent::PAYNOW_ID_EXPIRY_DATE]);
@@ -547,16 +561,35 @@ class EmvMerchantDecoder extends EmvMerchant {
                 if ($expiry_date < $now)
                 {
                     $this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_EXPIRED_QR, $expiry_date);
-                } else
-                {
-                    $account[$this->paynow_keys[parent::PAYNOW_ID_EXPIRY_DATE]] = $expiry_date;
                 }
             } else
             {
                 $this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_EXPIRY_DATE_INVALID, $account_raw[parent::PAYNOW_ID_EXPIRY_DATE]);
             }
         }
-        $this->accounts[parent::PAYNOW_CHANNEL_NAME] = $account;
+        // GENERATE DATA
+        foreach ($account_raw as $id => $value)
+        {
+            $key = $this->paynow_keys[$id];
+            $description = '';
+            if (parent::PAYNOW_ID_PROXY_TYPE == $id)
+            {
+                $description = $this->paynow_proxy_type[$value];
+            } else if (parent::PAYNOW_ID_AMOUNT_EDITABLE == $id)
+            {
+                $description = $this->paynow_amount_editable[$value];
+            } else if (parent::PAYNOW_ID_EXPIRY_DATE == $id)
+            {
+                $description = date(parent::FORMAT_DATE_READABLE, strtotime($expiry_date));
+            }
+            $account_info[$this->paynow_keys[$id]] = [
+                self::LABEL_ACCOUNT_ID          => $id,
+                self::LABEL_ACCOUNT_KEY         => $key,
+                self::LABEL_ACCOUNT_VALUE       => $value,
+                self::LABEL_ACCOUNT_DESCRIPTION => $description
+            ];
+        }
+        $this->accounts[parent::PAYNOW_CHANNEL_NAME] = $account_info;
     }
 
     /**
