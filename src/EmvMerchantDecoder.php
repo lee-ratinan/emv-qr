@@ -447,9 +447,9 @@ class EmvMerchantDecoder extends EmvMerchant {
         $account_raw['00'] = strtoupper($account_raw['00']);
         switch ($account_raw['00'])
         {
-            // SINGAPORE
+            // SINGAPORE - NEW FORMAT
             case parent::PAYNOW_CHANNEL:
-                $this->process_paynow($account_raw, $intId); // updated
+                $this->process_paynow($account_raw, $intId);
                 break;
             case parent::FAVE_CHANNEL:
                 $this->process_favepay($account_raw, $intId);
@@ -458,22 +458,24 @@ class EmvMerchantDecoder extends EmvMerchant {
                 $this->process_alipay($account_raw, $intId);
                 break;
             case parent::AIRPAY_CHANNEL:
-                $this->process_airpay($account_raw, $intId); // updated
+                $this->process_airpay($account_raw, $intId);
                 break;
             case parent::NETS_CHANNEL:
                 $this->process_nets($account_raw, $intId);
                 break;
             case parent::SGQR_CHANNEL:
-                $this->process_sgqr($account_raw, $intId); // updated
+                $this->process_sgqr($account_raw, $intId);
                 break;
-            // THAILAND
+            // THAILAND - TO BE UPDATED
             case parent::PROMPTPAY_CHANNEL:
                 $this->process_promptpay($account_raw, $intId);
                 break;
             case parent::PROMPTPAY_BILL_CHANNEL:
                 $this->process_promptpay_bill($account_raw, $intId);
                 break;
-            // DEFAULT
+            // INDONESIA - TO DO
+            
+            // DEFAULT - NEW FORMAT
             default:
                 $account_data = [];
                 foreach ($account_raw as $key => $value)
@@ -680,45 +682,39 @@ class EmvMerchantDecoder extends EmvMerchant {
      */
     private function process_nets($account_raw, $intId)
     {
-        $account[parent::ID_ORIGINAL_LABEL] = $intId;
-        $account[parent::STR_CHANNEL] = parent::NETS_CHANNEL_NAME;
-        $account[$this->nets_keys[parent::NETS_ID_REVERSE_DOMAIN]] = $account_raw[parent::NETS_ID_REVERSE_DOMAIN];
-        if (preg_match('/\d{23}/', $account_raw[parent::NETS_ID_QR_METADATA]))
-        {
-            $account[$this->nets_keys[parent::NETS_ID_QR_METADATA]] = $account_raw[parent::NETS_ID_QR_METADATA];
-        } else
+        $account_info[parent::ID_ORIGINAL_LABEL] = $intId;
+        if (! preg_match('/\d{23}/', $account_raw[parent::NETS_ID_QR_METADATA]))
         {
             $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->nets_keys[parent::NETS_ID_QR_METADATA], 'NETS QR Metadata', $account_raw[parent::NETS_ID_QR_METADATA]]);
         }
-        if (preg_match('/\d{15}/', $account_raw[parent::NETS_ID_MERCHANT_ID]))
-        {
-            $account[$this->nets_keys[parent::NETS_ID_MERCHANT_ID]] = $account_raw[parent::NETS_ID_MERCHANT_ID];
-        } else
+        if (! preg_match('/\d{15}/', $account_raw[parent::NETS_ID_MERCHANT_ID]))
         {
             $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->nets_keys[parent::NETS_ID_MERCHANT_ID], 'NETS Merchant ID', $account_raw[parent::NETS_ID_MERCHANT_ID]]);
         }
-        if (preg_match('/\d{8}/', $account_raw[parent::NETS_ID_TERMINAL_ID]))
-        {
-            $account[$this->nets_keys[parent::NETS_ID_TERMINAL_ID]] = $account_raw[parent::NETS_ID_TERMINAL_ID];
-        } else
+        if (! preg_match('/\d{8}/', $account_raw[parent::NETS_ID_TERMINAL_ID]))
         {
             $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->nets_keys[parent::NETS_ID_TERMINAL_ID], 'NETS Terminal ID', $account_raw[parent::NETS_ID_TERMINAL_ID]]);
         }
-        if (preg_match('/\d/', $account_raw[parent::NETS_ID_TRANSACTION_AMOUNT_MODIFIER]))
-        {
-            $account[$this->nets_keys[parent::NETS_ID_TRANSACTION_AMOUNT_MODIFIER]] = $account_raw[parent::NETS_ID_TRANSACTION_AMOUNT_MODIFIER];
-        } else
+        if (! preg_match('/\d/', $account_raw[parent::NETS_ID_TRANSACTION_AMOUNT_MODIFIER]))
         {
             $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->nets_keys[parent::NETS_ID_TRANSACTION_AMOUNT_MODIFIER], 'NETS Transaction Amount Modifier', $account_raw[parent::NETS_ID_TRANSACTION_AMOUNT_MODIFIER]]);
         }
-        if (preg_match('/[A-Z0-9]{8}/', $account_raw[parent::NETS_ID_SIGNATURE]))
-        {
-            $account[$this->nets_keys[parent::NETS_ID_SIGNATURE]] = $account_raw[parent::NETS_ID_SIGNATURE];
-        } else
+        if (! preg_match('/[A-Z0-9]{8}/', $account_raw[parent::NETS_ID_SIGNATURE]))
         {
             $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->nets_keys[parent::NETS_ID_SIGNATURE], 'NETS Signature', $account_raw[parent::NETS_ID_SIGNATURE]]);
         }
-        $this->accounts[parent::NETS_CHANNEL_NAME] = $account;
+        // GENERATE DATA
+        foreach ($account_raw as $id => $value)
+        {
+            $key = $this->nets_keys[$id];
+            $account_info[$this->nets_keys[$id]] = [
+                self::LABEL_ACCOUNT_ID          => $id,
+                self::LABEL_ACCOUNT_KEY         => $key,
+                self::LABEL_ACCOUNT_VALUE       => $value,
+                self::LABEL_ACCOUNT_DESCRIPTION => parent::EMPTY_STRING
+            ];
+        }
+        $this->accounts[parent::NETS_CHANNEL_NAME] = $account_info;
     }
 
     /**

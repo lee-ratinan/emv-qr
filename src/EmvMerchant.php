@@ -437,7 +437,7 @@ class EmvMerchant {
      */
     protected $currency_codes = [
         //self::CURRENCY_HKD_NUMERIC => self::CURRENCY_HKD,
-        //self::CURRENCY_IDR_NUMERIC => self::CURRENCY_IDR,
+        self::CURRENCY_IDR_NUMERIC => self::CURRENCY_IDR,
         //self::CURRENCY_INR_NUMERIC => self::CURRENCY_INR,
         //self::CURRENCY_MYR_NUMERIC => self::CURRENCY_MYR,
         self::CURRENCY_SGD_NUMERIC => self::CURRENCY_SGD,
@@ -482,7 +482,7 @@ class EmvMerchant {
      */
     protected $country_codes = [
         //self::COUNTRY_HK,
-        //self::COUNTRY_ID,
+        self::COUNTRY_ID,
         //self::COUNTRY_IN,
         //self::COUNTRY_MY,
         self::COUNTRY_SG,
@@ -908,6 +908,7 @@ class EmvMerchant {
     const ENV_PROD = 'PRODUCTION';
     const ENV_DEV = 'DEVELOPMENT';
     protected $environment = 'PRODUCTION';
+
     /**
      * EmvMerchant constructor.
      */
