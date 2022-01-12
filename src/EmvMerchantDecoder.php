@@ -449,7 +449,7 @@ class EmvMerchantDecoder extends EmvMerchant {
         {
             // SINGAPORE
             case parent::PAYNOW_CHANNEL:
-                $this->process_paynow($account_raw, $intId);
+                $this->process_paynow($account_raw, $intId); // updated
                 break;
             case parent::FAVE_CHANNEL:
                 $this->process_favepay($account_raw, $intId);
@@ -458,7 +458,7 @@ class EmvMerchantDecoder extends EmvMerchant {
                 $this->process_alipay($account_raw, $intId);
                 break;
             case parent::AIRPAY_CHANNEL:
-                $this->process_airpay($account_raw, $intId);
+                $this->process_airpay($account_raw, $intId); // updated
                 break;
             case parent::NETS_CHANNEL:
                 $this->process_nets($account_raw, $intId);
@@ -641,18 +641,23 @@ class EmvMerchantDecoder extends EmvMerchant {
      */
     private function process_airpay($account_raw, $intId)
     {
-        $account[parent::ID_ORIGINAL_LABEL] = $intId;
-        $account[parent::STR_CHANNEL] = parent::AIRPAY_CHANNEL_NAME;
-        // REVERSE DOMAIN
-        $account[$this->airpay_keys[parent::AIRPAY_ID_REVERSE_DOMAIN]] = $account_raw[parent::AIRPAY_ID_REVERSE_DOMAIN];
-        if ($this->validate_ans_charset($account_raw[parent::AIRPAY_ID_MERCHANT_ACCOUNT_INFORMATION], parent::MODE_SANITIZER))
-        {
-            $account[$this->airpay_keys[parent::AIRPAY_ID_MERCHANT_ACCOUNT_INFORMATION]] = $account_raw[parent::AIRPAY_ID_MERCHANT_ACCOUNT_INFORMATION];
-        } else
+        $account_info[parent::ID_ORIGINAL_LABEL] = $intId;
+        // CHECK ERROR - ACCOUNT INFO
+        if (! $this->validate_ans_charset($account_raw[parent::AIRPAY_ID_MERCHANT_ACCOUNT_INFORMATION], parent::MODE_SANITIZER))
         {
             $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->airpay_keys[parent::AIRPAY_ID_MERCHANT_ACCOUNT_INFORMATION], 'Merchant Account Information', $account_raw[parent::AIRPAY_ID_MERCHANT_ACCOUNT_INFORMATION]]);
         }
-        $this->accounts[parent::AIRPAY_CHANNEL_NAME] = $account;
+        // GENERATE DATA
+        foreach ($account_raw as $id => $value)
+        {
+            $key = $this->airpay_keys[$id];
+            $account_info[$this->airpay_keys[$id]] = [
+                self::LABEL_ACCOUNT_ID          => $id,
+                self::LABEL_ACCOUNT_KEY         => $key,
+                self::LABEL_ACCOUNT_VALUE       => $value
+            ];
+        }
+        $this->accounts[parent::AIRPAY_CHANNEL_NAME] = $account_info;
     }
 
     /**
