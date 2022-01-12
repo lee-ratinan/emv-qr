@@ -629,7 +629,7 @@ class EmvMerchant {
      */
     const TIMEZONE_SINGAPORE = 'Asia/Singapore';
     const FORMAT_DATE = 'Y-m-d';
-    const FORMAT_DATE_READABLE = 'd-M-Y';
+    const FORMAT_DATE_READABLE = 'd M Y';
     const EMPTY_STRING = '';
     const STR_CHANNEL = 'channel';
 
