@@ -599,18 +599,24 @@ class EmvMerchantDecoder extends EmvMerchant {
      */
     private function process_favepay($account_raw, $intId)
     {
-        $account[parent::ID_ORIGINAL_LABEL] = $intId;
-        $account[parent::STR_CHANNEL] = parent::FAVE_CHANNEL_NAME;
+        $account_info[parent::ID_ORIGINAL_LABEL] = $intId;
         // REVERSE DOMAIN
-        $account[$this->favepay_keys[parent::FAVE_ID_REVERSE_DOMAIN]] = $account_raw[parent::FAVE_ID_REVERSE_DOMAIN];
-        if (filter_var($account_raw[parent::FAVE_ID_URL], FILTER_VALIDATE_URL))
-        {
-            $account[$this->favepay_keys[parent::FAVE_ID_URL]] = $account_raw[parent::FAVE_ID_URL];
-        } else
+        if (! filter_var($account_raw[parent::FAVE_ID_URL], FILTER_VALIDATE_URL))
         {
             $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->favepay_keys[parent::FAVE_ID_URL], 'URL', $account_raw[parent::FAVE_ID_URL]]);
         }
-        $this->accounts[parent::FAVE_CHANNEL_NAME] = $account;
+        // GENERATE DATA
+        foreach ($account_raw as $id => $value)
+        {
+            $key = $this->favepay_keys[$id];
+            $account_info[$this->favepay_keys[$id]] = [
+                self::LABEL_ACCOUNT_ID          => $id,
+                self::LABEL_ACCOUNT_KEY         => $key,
+                self::LABEL_ACCOUNT_VALUE       => $value,
+                self::LABEL_ACCOUNT_DESCRIPTION => parent::EMPTY_STRING
+            ];
+        }
+        $this->accounts[parent::FAVE_CHANNEL_NAME] = $account_info;
     }
 
     /**
@@ -620,18 +626,24 @@ class EmvMerchantDecoder extends EmvMerchant {
      */
     private function process_alipay($account_raw, $intId)
     {
-        $account[parent::ID_ORIGINAL_LABEL] = $intId;
-        $account[parent::STR_CHANNEL] = parent::ALIPAY_CHANNEL_NAME;
+        $account_info[parent::ID_ORIGINAL_LABEL] = $intId;
         // REVERSE DOMAIN
-        $account[$this->alipay_keys[parent::ALIPAY_ID_REVERSE_DOMAIN]] = $account_raw[parent::ALIPAY_ID_REVERSE_DOMAIN];
-        if (filter_var($account_raw[parent::ALIPAY_ID_URL], FILTER_VALIDATE_URL))
-        {
-            $account[$this->alipay_keys[parent::ALIPAY_ID_URL]] = $account_raw[parent::ALIPAY_ID_URL];
-        } else
+        if (! filter_var($account_raw[parent::ALIPAY_ID_URL], FILTER_VALIDATE_URL))
         {
             $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->alipay_keys[parent::ALIPAY_ID_URL], 'URL', $account_raw[parent::ALIPAY_ID_URL]]);
         }
-        $this->accounts[parent::ALIPAY_CHANNEL_NAME] = $account;
+        // GENERATE DATA
+        foreach ($account_raw as $id => $value)
+        {
+            $key = $this->alipay_keys[$id];
+            $account_info[$this->alipay_keys[$id]] = [
+                self::LABEL_ACCOUNT_ID          => $id,
+                self::LABEL_ACCOUNT_KEY         => $key,
+                self::LABEL_ACCOUNT_VALUE       => $value,
+                self::LABEL_ACCOUNT_DESCRIPTION => parent::EMPTY_STRING
+            ];
+        }
+        $this->accounts[parent::ALIPAY_CHANNEL_NAME] = $account_info;
     }
 
     /**
