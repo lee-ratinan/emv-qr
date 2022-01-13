@@ -29,6 +29,7 @@ class EmvMerchant {
     const POINT_OF_INITIATION_STATIC_VALUE = 'STATIC';
     const POINT_OF_INITIATION_DYNAMIC = '12';
     const POINT_OF_INITIATION_DYNAMIC_VALUE = 'DYNAMIC';
+    const POINT_OF_INITIATION_KEY = 'point_of_initiation';
 
     /**
      * ACCOUNTS (02-51)
@@ -73,6 +74,7 @@ class EmvMerchant {
      * MERCHANT CATEGORY CODE (52)
      */
     const ID_MERCHANT_CATEGORY_CODE = '52';
+    const MERCHANT_CATEGORY_CODE_KEY = 'merchant_category_code';
     const MERCHANT_CATEGORY_CODE_GENERIC = '0000';
     const MERCHANT_CATEGORY_UNKNOWN = 'UNKNOWN';
     /**

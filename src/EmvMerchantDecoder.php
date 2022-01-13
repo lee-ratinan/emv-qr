@@ -112,9 +112,10 @@ class EmvMerchantDecoder extends EmvMerchant {
         if (parent::PAYLOAD_FORMAT_INDICATOR_VALUE == $strValue)
         {
             $this->payload_format_indicator = [
-                self::LABEL_ACCOUNT_ID    => parent::ID_PAYLOAD_FORMAT_INDICATOR,
-                self::LABEL_ACCOUNT_KEY   => parent::PAYLOAD_FORMAT_INDICATOR_KEY,
-                self::LABEL_ACCOUNT_VALUE => $strValue
+                self::LABEL_ACCOUNT_ID          => parent::ID_PAYLOAD_FORMAT_INDICATOR,
+                self::LABEL_ACCOUNT_KEY         => parent::PAYLOAD_FORMAT_INDICATOR_KEY,
+                self::LABEL_ACCOUNT_VALUE       => $strValue,
+                self::LABEL_ACCOUNT_DESCRIPTION => parent::EMPTY_STRING
             ];
         } else
         {
@@ -128,16 +129,17 @@ class EmvMerchantDecoder extends EmvMerchant {
      */
     private function process_point_of_initiation($strValue)
     {
-        switch ($strValue)
+        if (in_array($strValue, [parent::POINT_OF_INITIATION_STATIC, parent::POINT_OF_INITIATION_DYNAMIC]))
         {
-            case parent::POINT_OF_INITIATION_STATIC:
-                $this->point_of_initiation = parent::POINT_OF_INITIATION_STATIC_VALUE;
-                break;
-            case parent::POINT_OF_INITIATION_DYNAMIC:
-                $this->point_of_initiation = parent::POINT_OF_INITIATION_DYNAMIC_VALUE;
-                break;
-            default:
-                $this->add_message(parent::ID_POINT_OF_INITIATION, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_TYPE_OF_INITIATION_INVALID, $strValue);
+            $this->point_of_initiation = [
+                self::LABEL_ACCOUNT_ID          => parent::ID_POINT_OF_INITIATION,
+                self::LABEL_ACCOUNT_KEY         => parent::POINT_OF_INITIATION_KEY,
+                self::LABEL_ACCOUNT_VALUE       => $strValue,
+                self::LABEL_ACCOUNT_DESCRIPTION => ($strValue == parent::POINT_OF_INITIATION_STATIC ? parent::POINT_OF_INITIATION_STATIC_VALUE : parent::POINT_OF_INITIATION_DYNAMIC_VALUE)
+            ];
+        } else
+        {
+            $this->add_message(parent::ID_POINT_OF_INITIATION, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_TYPE_OF_INITIATION_INVALID, $strValue);
         }
     }
 
@@ -147,13 +149,13 @@ class EmvMerchantDecoder extends EmvMerchant {
      */
     private function process_merchant_category_code($strValue)
     {
-        $this->merchant_category_code['code'] = $strValue;
+        $strDescription = parent::EMPTY_STRING;
         if (isset($this->merchant_category_codes[$strValue]))
         {
-            $this->merchant_category_code['value'] = $this->merchant_category_codes[$strValue];
+            $strDescription = $this->merchant_category_codes[$strValue];
         } else
         {
-            $this->merchant_category_code['value'] = parent::MERCHANT_CATEGORY_UNKNOWN;
+            $strValue = parent::MERCHANT_CATEGORY_UNKNOWN;
             if (preg_match('/\d{4}/', $strValue))
             {
                 $this->add_message(parent::ID_MERCHANT_CATEGORY_CODE, parent::MESSAGE_TYPE_WARNING, parent::WARNING_ID_MCC_INVALID, $strValue);
@@ -162,6 +164,12 @@ class EmvMerchantDecoder extends EmvMerchant {
                 $this->add_message(parent::ID_MERCHANT_CATEGORY_CODE, parent::MESSAGE_TYPE_WARNING, parent::WARNING_ID_MCC_UNKNOWN, $strValue);
             }
         }
+        $this->merchant_category_code = [
+            self::LABEL_ACCOUNT_ID          => parent::ID_MERCHANT_CATEGORY_CODE,
+            self::LABEL_ACCOUNT_KEY         => parent::MERCHANT_CATEGORY_CODE_KEY,
+            self::LABEL_ACCOUNT_VALUE       => $strValue,
+            self::LABEL_ACCOUNT_DESCRIPTION => $strDescription
+        ];
     }
 
     /**
