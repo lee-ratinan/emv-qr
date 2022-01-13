@@ -180,7 +180,13 @@ class EmvMerchantDecoder extends EmvMerchant {
     {
         if (isset($this->currency_codes[$strValue]))
         {
-            $this->transaction_currency = $this->currency_codes[$strValue];
+//            $this->transaction_currency = $this->currency_codes[$strValue];
+            $this->transaction_currency = [
+                self::LABEL_ACCOUNT_ID          => parent::ID_TRANSACTION_CURRENCY,
+                self::LABEL_ACCOUNT_KEY         => parent::TRANSACTION_CURRENCY_KEY,
+                self::LABEL_ACCOUNT_VALUE       => $strValue,
+                self::LABEL_ACCOUNT_DESCRIPTION => $this->currency_codes[$strValue]
+            ];
         } else
         {
             $this->add_message(parent::ID_TRANSACTION_CURRENCY, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_CURRENCY_NOT_SUPPORTED, $strValue);
@@ -203,7 +209,12 @@ class EmvMerchantDecoder extends EmvMerchant {
             $this->add_message(parent::ID_TRANSACTION_AMOUNT, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_AMOUNT_INVALID, $strValue);
         } else
         {
-            $this->transaction_amount = number_format($value, 2, parent::EMPTY_STRING, parent::EMPTY_STRING);
+            $this->transaction_amount = [
+                self::LABEL_ACCOUNT_ID          => parent::ID_TRANSACTION_AMOUNT,
+                self::LABEL_ACCOUNT_KEY         => parent::TRANSACTION_AMOUNT_KEY,
+                self::LABEL_ACCOUNT_VALUE       => $strValue,
+                self::LABEL_ACCOUNT_DESCRIPTION => number_format($value, 2, parent::STRING_DOT, parent::STRING_COMMA)
+            ];
             if (parent::POINT_OF_INITIATION_STATIC_VALUE == $this->point_of_initiation)
             {
                 $this->point_of_initiation = parent::POINT_OF_INITIATION_DYNAMIC_VALUE;

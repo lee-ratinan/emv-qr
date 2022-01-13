@@ -454,6 +454,7 @@ class EmvMerchant {
      * CURRENCY (53)
      */
     const ID_TRANSACTION_CURRENCY = '53';
+    const TRANSACTION_CURRENCY_KEY = 'transaction_currency';
     const CURRENCY_HKD = 'HKD';
     const CURRENCY_HKD_NUMERIC = '344';
     const CURRENCY_IDR = 'IDR';
@@ -482,6 +483,7 @@ class EmvMerchant {
      * TRANSACTION AMOUNT (54)
      */
     const ID_TRANSACTION_AMOUNT = '54';
+    const TRANSACTION_AMOUNT_KEY = 'transaction_amount';
 
     /**
      * TIP OR CONVENIENCE FEE (55-57)
@@ -665,6 +667,8 @@ class EmvMerchant {
     const FORMAT_DATE = 'Y-m-d';
     const FORMAT_DATE_READABLE = 'd M Y';
     const EMPTY_STRING = '';
+    const STRING_DOT = '.';
+    const STRING_COMMA = ',';
     const STR_CHANNEL = 'channel';
 
     /* | --------------------------------------------------------------------------------------------------------
