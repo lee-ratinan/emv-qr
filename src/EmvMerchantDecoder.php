@@ -111,7 +111,11 @@ class EmvMerchantDecoder extends EmvMerchant {
     {
         if (parent::PAYLOAD_FORMAT_INDICATOR_VALUE == $strValue)
         {
-            $this->payload_format_indicator = $strValue;
+            $this->payload_format_indicator = [
+                self::LABEL_ACCOUNT_ID    => parent::ID_PAYLOAD_FORMAT_INDICATOR,
+                self::LABEL_ACCOUNT_KEY   => parent::PAYLOAD_FORMAT_INDICATOR_KEY,
+                self::LABEL_ACCOUNT_VALUE => $strValue
+            ];
         } else
         {
             $this->add_message(parent::ID_PAYLOAD_FORMAT_INDICATOR, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYLOAD_FORMAT_INDICATOR_INVALID, $strValue);
@@ -474,7 +478,7 @@ class EmvMerchantDecoder extends EmvMerchant {
                 $this->process_promptpay_bill($account_raw, $intId);
                 break;
             // INDONESIA - TO DO
-            
+
             // DEFAULT - NEW FORMAT
             default:
                 $account_data = [];

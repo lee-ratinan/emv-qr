@@ -19,6 +19,7 @@ class EmvMerchant {
      */
     const ID_PAYLOAD_FORMAT_INDICATOR = '00';
     const PAYLOAD_FORMAT_INDICATOR_VALUE = '01';
+    const PAYLOAD_FORMAT_INDICATOR_KEY = 'payload_format_indicator';
 
     /**
      * POINT OF INITIATION (01)
