@@ -439,6 +439,7 @@ class EmvMerchantDecoder extends EmvMerchant {
             $this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_ACCOUNT_OUT_OF_BOUND, $intId);
             return;
         }
+        $origStrValue = $strValue;
         $account_raw = [];
         while ( ! empty($strValue))
         {
@@ -481,17 +482,41 @@ class EmvMerchantDecoder extends EmvMerchant {
 
             // DEFAULT - NEW FORMAT
             default:
-                $account_data = [];
-                foreach ($account_raw as $key => $value)
-                {
-                    $account_data[$key] = [
-                        self::LABEL_ACCOUNT_ID          => $key,
-                        self::LABEL_ACCOUNT_KEY         => parent::EMPTY_STRING,
-                        self::LABEL_ACCOUNT_VALUE       => $value,
-                        self::LABEL_ACCOUNT_DESCRIPTION => parent::EMPTY_STRING
-                    ];
-                }
-                $this->accounts[$intId] = $account_data;
+                $this->process_unknown_accounts($account_raw, $intId, $origStrValue);
+                break;
+        }
+    }
+
+    /**
+     * Process accounts in the reserved area
+     * Ignore if it's undefined in $reserved_ids so it won't cause errors
+     * @param string[] $account_raw
+     * @param int $intId
+     * @param string $origStrValue
+     */
+    private function process_unknown_accounts($account_raw, $intId, $origStrValue)
+    {
+        if (parent::ID_ACCOUNT_START_INDEX <= $intId)
+        {
+            if (isset($account_raw['00']) && ! empty($account_raw['00']))
+            {
+                $this->accounts[$account_raw['00']] = array_merge([
+                    parent::ID_ORIGINAL_LABEL => $intId,
+                    parent::ID_PLAIN_VALUE_LABEL => $origStrValue
+                ], $account_raw);
+            } else
+            {
+                $this->accounts[$intId] = array_merge([
+                    parent::ID_ORIGINAL_LABEL => $intId,
+                    parent::ID_PLAIN_VALUE_LABEL => $origStrValue
+                ], $account_raw);
+            }
+        } elseif (isset($this->reserved_ids[$intId]))
+        {
+            $this->accounts[$this->reserved_ids[$intId]] = [
+                parent::ID_ORIGINAL_LABEL => $intId,
+                parent::ID_PLAIN_VALUE_LABEL => $origStrValue
+            ];
         }
     }
 
