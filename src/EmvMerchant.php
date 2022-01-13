@@ -36,6 +36,37 @@ class EmvMerchant {
     const ID_ACCOUNT_START_INDEX = 26;
     const ID_ACCOUNT_UPPER_BOUNDARY = 51;
     const ID_ORIGINAL_LABEL = 'original_id';
+    const ID_PLAIN_VALUE_LABEL = 'value';
+
+    /**
+     * RESERVED AREA IDS
+     */
+    protected $reserved_ids = [
+        2 => 'Visa',
+        3 => 'Visa',
+        4 => 'MasterCard',
+        5 => 'MasterCard',
+        6 => 'EMVCo',
+        7 => 'EMVCo',
+        8 => 'EMVCo',
+        9 => 'Discover',
+        10 => 'Discover',
+        11 => 'AMEX',
+        12 => 'AMEX',
+        13 => 'JCB',
+        14 => 'JCB',
+        15 => 'UnionPay',
+        16 => 'UnionPay',
+        17 => 'EMVCo',
+        18 => 'EMVCo',
+        19 => 'EMVCo',
+        20 => 'EMVCo',
+        21 => 'EMVCo',
+        22 => 'EMVCo',
+        23 => 'EMVCo',
+        24 => 'EMVCo',
+        25 => 'EMVCo',
+    ];
 
     /**
      * MERCHANT CATEGORY CODE (52)
