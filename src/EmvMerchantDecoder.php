@@ -83,7 +83,7 @@ class EmvMerchantDecoder extends EmvMerchant {
                 case parent::ID_TRANSACTION_CURRENCY:
                     $this->process_currency($strValue);
                     break;
-                case parent::ID_TRANSACTION_AMOUNT: // todo
+                case parent::ID_TRANSACTION_AMOUNT:
                     $this->process_amount($strValue);
                     break;
                 case parent::ID_TIP_OR_CONVENIENCE_FEE_INDICATOR: // todo
@@ -195,7 +195,7 @@ class EmvMerchantDecoder extends EmvMerchant {
      */
     private function process_merchant_category_code($strValue)
     {
-        $strDescription = parent::EMPTY_STRING;
+        $strDescription = parent::MERCHANT_CATEGORY_UNKNOWN;
         if (isset($this->merchant_category_codes[$strValue]))
         {
             $this->process_status[parent::MERCHANT_CATEGORY_CODE_KEY] = self::PROCESS_STATUS_SUCCESS;
@@ -203,7 +203,6 @@ class EmvMerchantDecoder extends EmvMerchant {
         } else
         {
             $this->process_status[parent::MERCHANT_CATEGORY_CODE_KEY] = self::PROCESS_STATUS_WARNING;
-            $strDescription = parent::MERCHANT_CATEGORY_UNKNOWN;
             if (preg_match('/\d{4}/', $strValue))
             {
                 $this->add_message(parent::ID_MERCHANT_CATEGORY_CODE, parent::MESSAGE_TYPE_WARNING, parent::WARNING_ID_MCC_UNKNOWN, $strValue);
@@ -228,6 +227,7 @@ class EmvMerchantDecoder extends EmvMerchant {
     {
         if (isset($this->currency_codes[$strValue]))
         {
+            $this->process_status[parent::TRANSACTION_CURRENCY_KEY] = self::PROCESS_STATUS_SUCCESS;
             $this->transaction_currency = [
                 self::LABEL_ACCOUNT_ID          => parent::ID_TRANSACTION_CURRENCY,
                 self::LABEL_ACCOUNT_KEY         => parent::TRANSACTION_CURRENCY_KEY,
@@ -236,6 +236,7 @@ class EmvMerchantDecoder extends EmvMerchant {
             ];
         } else
         {
+            $this->transaction_currency = $this->build_error_array(parent::ID_TRANSACTION_CURRENCY, parent::TRANSACTION_CURRENCY_KEY);
             $this->add_message(parent::ID_TRANSACTION_CURRENCY, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_CURRENCY_NOT_SUPPORTED, $strValue);
         }
     }
@@ -253,6 +254,7 @@ class EmvMerchantDecoder extends EmvMerchant {
         $value = $this->parse_money_amount($strValue);
         if (FALSE == $value)
         {
+            $this->transaction_amount = $this->build_error_array(parent::ID_TRANSACTION_AMOUNT, parent::TRANSACTION_AMOUNT_KEY);
             $this->add_message(parent::ID_TRANSACTION_AMOUNT, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_AMOUNT_INVALID, $strValue);
         } else
         {
@@ -260,7 +262,7 @@ class EmvMerchantDecoder extends EmvMerchant {
                 self::LABEL_ACCOUNT_ID          => parent::ID_TRANSACTION_AMOUNT,
                 self::LABEL_ACCOUNT_KEY         => parent::TRANSACTION_AMOUNT_KEY,
                 self::LABEL_ACCOUNT_VALUE       => $strValue,
-                self::LABEL_ACCOUNT_DESCRIPTION => number_format($value, 2, parent::STRING_DOT, parent::STRING_COMMA)
+                self::LABEL_ACCOUNT_DESCRIPTION => number_format($value, parent::INTEGER_TWO, parent::STRING_DOT, parent::STRING_COMMA)
             ];
             if (parent::POINT_OF_INITIATION_STATIC_VALUE == $this->point_of_initiation)
             {
