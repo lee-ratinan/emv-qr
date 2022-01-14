@@ -939,6 +939,7 @@ class EmvMerchant {
     public $crc;
     public $errors = [];
     public $warnings = [];
+    public $statuses = [];
 
     /* | --------------------------------------------------------------------------------------------------------
        | ENVIRONMENT
