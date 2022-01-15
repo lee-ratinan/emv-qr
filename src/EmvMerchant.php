@@ -600,6 +600,7 @@ class EmvMerchant {
      * ADDITIONAL DATA (62)
      */
     const ID_ADDITIONAL_DATA_FIELDS = '62';
+    const ADDITIONAL_DATA_FIELDS_KEY = 'additional_fields';
     const ID_ADDITIONAL_DATA_BILL_NUMBER = '01';
     const ID_ADDITIONAL_DATA_BILL_NUMBER_KEY = 'bill_number';
     const ID_ADDITIONAL_DATA_MOBILE_NUMBER = '02';

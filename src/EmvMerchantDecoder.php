@@ -447,6 +447,7 @@ class EmvMerchantDecoder extends EmvMerchant {
             }
             $string = substr($string, parent::LENGTH_FOUR + $intLength);
         }
+        $this->process_status[parent::ADDITIONAL_DATA_FIELDS_KEY] = self::PROCESS_STATUS_SUCCESS;
     }
 
     /**
