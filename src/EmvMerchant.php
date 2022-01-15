@@ -708,7 +708,7 @@ class EmvMerchant {
        | PAYNOW (PREFERABLY 26)
        | -------------------------------------------------------------------------------------------------------- */
     const PAYNOW_CHANNEL = 'SG.PAYNOW';
-    const PAYNOW_CHANNEL_NAME = 'PayNow';
+    const PAYNOW_CHANNEL_NAME = 'PAYNOW';
     const PAYNOW_ID_CHANNEL = '00';
     const PAYNOW_ID_PROXY_TYPE = '01';
     const PAYNOW_ID_PROXY_VALUE = '02';
@@ -725,7 +725,7 @@ class EmvMerchant {
         '02' => 'proxy_value',
         '03' => 'amount_editable',
         '04' => 'expiry_date',
-        '05' => '??' // unknown key, found in one QR code
+        '05' => '05' // unknown key, found in one QR code
     ];
     protected $paynow_proxy_type = [
         '0' => 'MOBILE',
@@ -740,7 +740,7 @@ class EmvMerchant {
        | FAVEPAY (ANY)
        | -------------------------------------------------------------------------------------------------------- */
     const FAVE_CHANNEL = 'COM.MYFAVE';
-    const FAVE_CHANNEL_NAME = 'FavePay';
+    const FAVE_CHANNEL_NAME = 'FAVEPAY';
     const FAVE_URL = 'https://myfave.com/qr/';
     const FAVE_ID_REVERSE_DOMAIN = '00';
     const FAVE_ID_URL = '01';
@@ -753,7 +753,7 @@ class EmvMerchant {
        | ALIPAY (ANY)
        | -------------------------------------------------------------------------------------------------------- */
     const ALIPAY_CHANNEL = 'COM.ALIPAY';
-    const ALIPAY_CHANNEL_NAME = 'AliPay';
+    const ALIPAY_CHANNEL_NAME = 'ALIPAY';
     const ALIPAY_URL = 'https://qr.alipay.com/';
     const ALIPAY_ID_REVERSE_DOMAIN = '00';
     const ALIPAY_ID_URL = '01';
@@ -766,7 +766,7 @@ class EmvMerchant {
        | AIRPAY (ANY)
        | -------------------------------------------------------------------------------------------------------- */
     const AIRPAY_CHANNEL = 'SG.AIRPAY';
-    const AIRPAY_CHANNEL_NAME = 'AirPay';
+    const AIRPAY_CHANNEL_NAME = 'SHOPEEPAY';
     const AIRPAY_ID_REVERSE_DOMAIN = '00';
     const AIRPAY_ID_MERCHANT_ACCOUNT_INFORMATION = '01';
     protected $airpay_keys = [

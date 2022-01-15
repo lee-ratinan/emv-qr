@@ -613,17 +613,17 @@ class EmvMerchantDecoder extends EmvMerchant {
             case parent::AIRPAY_CHANNEL:
                 $this->process_airpay($account_raw, $intId);
                 break;
-            case parent::NETS_CHANNEL:
+            case parent::NETS_CHANNEL: // NOT YET TESTED todo: test
                 $this->process_nets($account_raw, $intId);
                 break;
             case parent::SGQR_CHANNEL:
                 $this->process_sgqr($account_raw, $intId);
                 break;
             // THAILAND - TO BE UPDATED
-            case parent::PROMPTPAY_CHANNEL:
+            case parent::PROMPTPAY_CHANNEL: // todo
                 $this->process_promptpay($account_raw, $intId);
                 break;
-            case parent::PROMPTPAY_BILL_CHANNEL:
+            case parent::PROMPTPAY_BILL_CHANNEL: // todo
                 $this->process_promptpay_bill($account_raw, $intId);
                 break;
             // INDONESIA - TO DO
@@ -759,7 +759,7 @@ class EmvMerchantDecoder extends EmvMerchant {
                 $description = $this->paynow_amount_editable[$value];
             } else if (parent::PAYNOW_ID_EXPIRY_DATE == $id)
             {
-                $description = date(parent::FORMAT_DATE_READABLE, strtotime($expiry_date));
+                $description = strtoupper(date(parent::FORMAT_DATE_READABLE, strtotime($expiry_date)));
             }
             $account_info[$this->paynow_keys[$id]] = [
                 self::LABEL_ACCOUNT_ID          => $id,
