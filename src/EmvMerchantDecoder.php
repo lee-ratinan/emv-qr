@@ -25,6 +25,7 @@ class EmvMerchantDecoder extends EmvMerchant {
     private $process_status = [
         'payload_format_indicator'         => self::PROCESS_STATUS_PENDING,
         'point_of_initiation'              => self::PROCESS_STATUS_PENDING,
+        'accounts'                         => self::PROCESS_STATUS_PENDING,
         'merchant_category_code'           => self::PROCESS_STATUS_PENDING,
         'transaction_currency'             => self::PROCESS_STATUS_PENDING,
         'transaction_amount'               => self::PROCESS_STATUS_PENDING,
@@ -86,34 +87,52 @@ class EmvMerchantDecoder extends EmvMerchant {
                 case parent::ID_TRANSACTION_AMOUNT:
                     $this->process_amount($strValue);
                     break;
-                case parent::ID_TIP_OR_CONVENIENCE_FEE_INDICATOR: // todo
+                case parent::ID_TIP_OR_CONVENIENCE_FEE_INDICATOR:
                     $this->process_fee_indicator($strValue);
                     break;
-                case parent::ID_VALUE_OF_FEE_FIXED: // todo
+                case parent::ID_VALUE_OF_FEE_FIXED:
                     $this->process_fee_value_fixed($strValue);
                     break;
-                case parent::ID_VALUE_OF_FEE_PERCENTAGE: // todo
+                case parent::ID_VALUE_OF_FEE_PERCENTAGE:
                     $this->process_fee_value_percentage($strValue);
                     break;
-                case parent::ID_COUNTRY_CODE: // todo
+                case parent::ID_COUNTRY_CODE:
                     $this->process_country_code($strValue);
                     break;
-                case parent::ID_MERCHANT_NAME: // todo
-                    $this->merchant_name = $this->validate_ans_charset($strValue, parent::MODE_SANITIZER);
+                case parent::ID_MERCHANT_NAME:
+                    $this->process_status[parent::MERCHANT_NAME_KEY] = self::PROCESS_STATUS_SUCCESS;
+                    $this->merchant_name = [
+                        self::LABEL_ACCOUNT_ID          => parent::ID_MERCHANT_NAME,
+                        self::LABEL_ACCOUNT_KEY         => parent::MERCHANT_NAME_KEY,
+                        self::LABEL_ACCOUNT_VALUE       => $this->validate_ans_charset($strValue, parent::MODE_SANITIZER),
+                        self::LABEL_ACCOUNT_DESCRIPTION => parent::EMPTY_STRING
+                    ];
                     break;
-                case parent::ID_MERCHANT_CITY: // todo
-                    $this->merchant_city = $this->validate_ans_charset($strValue, parent::MODE_SANITIZER);
+                case parent::ID_MERCHANT_CITY:
+                    $this->process_status[parent::MERCHANT_CITY_KEY] = self::PROCESS_STATUS_SUCCESS;
+                    $this->merchant_city = [
+                        self::LABEL_ACCOUNT_ID          => parent::ID_MERCHANT_CITY,
+                        self::LABEL_ACCOUNT_KEY         => parent::MERCHANT_CITY_KEY,
+                        self::LABEL_ACCOUNT_VALUE       => $this->validate_ans_charset($strValue, parent::MODE_SANITIZER),
+                        self::LABEL_ACCOUNT_DESCRIPTION => parent::EMPTY_STRING
+                    ];
                     break;
-                case parent::ID_MERCHANT_POSTAL_CODE: // todo
-                    $this->merchant_postal_code = $this->validate_ans_charset($strValue, parent::MODE_SANITIZER);
+                case parent::ID_MERCHANT_POSTAL_CODE:
+                    $this->process_status[parent::MERCHANT_POSTAL_CODE_KEY] = self::PROCESS_STATUS_SUCCESS;
+                    $this->merchant_postal_code = [
+                        self::LABEL_ACCOUNT_ID          => parent::ID_MERCHANT_POSTAL_CODE,
+                        self::LABEL_ACCOUNT_KEY         => parent::MERCHANT_POSTAL_CODE_KEY,
+                        self::LABEL_ACCOUNT_VALUE       => $this->validate_ans_charset($strValue, parent::MODE_SANITIZER),
+                        self::LABEL_ACCOUNT_DESCRIPTION => parent::EMPTY_STRING
+                    ];
                     break;
                 case parent::ID_ADDITIONAL_DATA_FIELDS: // todo
                     $this->process_additional_data($strValue);
                     break;
-                case parent::ID_CRC: // todo
+                case parent::ID_CRC:
                     $this->process_crc($strValue);
                     break;
-                case parent::ID_MERCHANT_INFORMATION_LANGUAGE_TEMPLATE: // todo
+                case parent::ID_MERCHANT_INFORMATION_LANGUAGE_TEMPLATE:
                     $this->add_message(parent::ID_MERCHANT_INFORMATION_LANGUAGE_TEMPLATE, parent::MESSAGE_TYPE_WARNING, parent::WARNING_ID_LANGUAGE_TEMPLATE_NOT_SUPPORTED);
                     break;
                 default: // todo
@@ -215,7 +234,7 @@ class EmvMerchantDecoder extends EmvMerchant {
             self::LABEL_ACCOUNT_ID          => parent::ID_MERCHANT_CATEGORY_CODE,
             self::LABEL_ACCOUNT_KEY         => parent::MERCHANT_CATEGORY_CODE_KEY,
             self::LABEL_ACCOUNT_VALUE       => $strValue,
-            self::LABEL_ACCOUNT_DESCRIPTION => $strDescription
+            self::LABEL_ACCOUNT_DESCRIPTION => strtoupper($strDescription)
         ];
     }
 
@@ -258,6 +277,7 @@ class EmvMerchantDecoder extends EmvMerchant {
             $this->add_message(parent::ID_TRANSACTION_AMOUNT, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_AMOUNT_INVALID, $strValue);
         } else
         {
+            $this->process_status[parent::TRANSACTION_AMOUNT_KEY] = self::PROCESS_STATUS_SUCCESS;
             $this->transaction_amount = [
                 self::LABEL_ACCOUNT_ID          => parent::ID_TRANSACTION_AMOUNT,
                 self::LABEL_ACCOUNT_KEY         => parent::TRANSACTION_AMOUNT_KEY,
@@ -280,9 +300,16 @@ class EmvMerchantDecoder extends EmvMerchant {
     {
         if (isset($this->tip_or_convenience_fee_indicators[$strValue]))
         {
-            $this->tip_or_convenience_fee_indicator = $this->tip_or_convenience_fee_indicators[$strValue];
+            $this->process_status[parent::TIP_OR_CONVENIENCE_FEE_INDICATOR_KEY] = self::PROCESS_STATUS_SUCCESS;
+            $this->tip_or_convenience_fee_indicator = [
+                self::LABEL_ACCOUNT_ID          => parent::ID_TIP_OR_CONVENIENCE_FEE_INDICATOR,
+                self::LABEL_ACCOUNT_KEY         => parent::TIP_OR_CONVENIENCE_FEE_INDICATOR_KEY,
+                self::LABEL_ACCOUNT_VALUE       => $strValue,
+                self::LABEL_ACCOUNT_DESCRIPTION => $this->tip_or_convenience_fee_indicators[$strValue]
+            ];
         } else
         {
+            $this->tip_or_convenience_fee_indicator = $this->build_error_array(parent::ID_TIP_OR_CONVENIENCE_FEE_INDICATOR, parent::TIP_OR_CONVENIENCE_FEE_INDICATOR_KEY);
             $this->add_message(parent::ID_TIP_OR_CONVENIENCE_FEE_INDICATOR, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_FEE_INDICATOR_INVALID, $strValue);
         }
     }
@@ -293,19 +320,27 @@ class EmvMerchantDecoder extends EmvMerchant {
      */
     private function process_fee_value_fixed($strValue)
     {
-        if (self::FEE_INDICATOR_CONVENIENCE_FEE_FIXED_VALUE == $this->tip_or_convenience_fee_indicator)
+        if (self::FEE_INDICATOR_CONVENIENCE_FEE_FIXED == $this->tip_or_convenience_fee_indicator[self::LABEL_ACCOUNT_VALUE])
         {
             $value = $this->parse_money_amount($strValue);
             if (FALSE == $value)
             {
+                $this->convenience_fee_fixed = $this->build_error_array(parent::ID_VALUE_OF_FEE_FIXED, parent::VALUE_OF_FEE_FIXED_KEY);
                 $this->add_message(parent::ID_VALUE_OF_FEE_FIXED, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_CONVENIENT_FEE_INVALID, $strValue);
             } else
             {
-                $this->convenience_fee_fixed = number_format($value, 2, parent::EMPTY_STRING, parent::EMPTY_STRING);
+                $this->process_status[parent::VALUE_OF_FEE_FIXED_KEY] = self::PROCESS_STATUS_SUCCESS;
+                $this->convenience_fee_fixed = [
+                    self::LABEL_ACCOUNT_ID          => parent::ID_VALUE_OF_FEE_FIXED,
+                    self::LABEL_ACCOUNT_KEY         => parent::VALUE_OF_FEE_FIXED_KEY,
+                    self::LABEL_ACCOUNT_VALUE       => $strValue,
+                    self::LABEL_ACCOUNT_DESCRIPTION => number_format($value, parent::INTEGER_TWO, parent::STRING_DOT, parent::EMPTY_STRING)
+                ];
             }
         } else
         {
-            $this->add_message(parent::ID_VALUE_OF_FEE_FIXED, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_FEE2_EXIST_BUT_INDICATOR_INVALID, $strValue);
+            $this->convenience_fee_fixed = $this->build_error_array(parent::ID_VALUE_OF_FEE_FIXED, parent::VALUE_OF_FEE_FIXED_KEY);
+            $this->add_message(parent::ID_VALUE_OF_FEE_FIXED, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_FEE2_EXIST_BUT_INDICATOR_INVALID, $this->tip_or_convenience_fee_indicator[self::LABEL_ACCOUNT_VALUE]);
         }
     }
 
@@ -315,19 +350,27 @@ class EmvMerchantDecoder extends EmvMerchant {
      */
     private function process_fee_value_percentage($strValue)
     {
-        if (self::FEE_INDICATOR_CONVENIENCE_FEE_PERCENTAGE_VALUE == $this->tip_or_convenience_fee_indicator)
+        if (self::FEE_INDICATOR_CONVENIENCE_FEE_PERCENTAGE == $this->tip_or_convenience_fee_indicator[self::LABEL_ACCOUNT_VALUE])
         {
             $value = $this->parse_percentage_amount($strValue);
             if (FALSE == $value)
             {
+                $this->convenience_fee_percentage = $this->build_error_array(parent::ID_VALUE_OF_FEE_PERCENTAGE, parent::VALUE_OF_FEE_PERCENTAGE_KEY);
                 $this->add_message(parent::ID_VALUE_OF_FEE_PERCENTAGE, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_CONVENIENT_FEE_INVALID, $strValue);
             } else
             {
-                $this->convenience_fee_percentage = number_format($value, self::LENGTH_TWO, parent::EMPTY_STRING, parent::EMPTY_STRING);
+                $this->process_status[parent::VALUE_OF_FEE_PERCENTAGE_KEY] = self::PROCESS_STATUS_SUCCESS;
+                $this->convenience_fee_percentage = [
+                    self::LABEL_ACCOUNT_ID          => parent::ID_VALUE_OF_FEE_PERCENTAGE,
+                    self::LABEL_ACCOUNT_KEY         => parent::VALUE_OF_FEE_PERCENTAGE_KEY,
+                    self::LABEL_ACCOUNT_VALUE       => $strValue,
+                    self::LABEL_ACCOUNT_DESCRIPTION => number_format($value, self::INTEGER_TWO, parent::STRING_DOT, parent::EMPTY_STRING)
+                ];
             }
         } else
         {
-            $this->add_message(parent::ID_VALUE_OF_FEE_PERCENTAGE, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_FEE3_EXIST_BUT_INDICATOR_INVALID, $strValue);
+            $this->convenience_fee_percentage = $this->build_error_array(parent::ID_VALUE_OF_FEE_PERCENTAGE, parent::VALUE_OF_FEE_PERCENTAGE_KEY);
+            $this->add_message(parent::ID_VALUE_OF_FEE_PERCENTAGE, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_FEE3_EXIST_BUT_INDICATOR_INVALID, $this->tip_or_convenience_fee_indicator[self::LABEL_ACCOUNT_VALUE]);
         }
     }
 
@@ -339,9 +382,16 @@ class EmvMerchantDecoder extends EmvMerchant {
     {
         if (in_array($strValue, $this->country_codes))
         {
-            $this->country_code = $strValue;
+            $this->process_status[parent::COUNTRY_CODE_KEY] = self::PROCESS_STATUS_SUCCESS;
+            $this->country_code = [
+                self::LABEL_ACCOUNT_ID          => parent::ID_COUNTRY_CODE,
+                self::LABEL_ACCOUNT_KEY         => parent::COUNTRY_CODE_KEY,
+                self::LABEL_ACCOUNT_VALUE       => $strValue,
+                self::LABEL_ACCOUNT_DESCRIPTION => $this->country_names[$strValue]
+            ];
         } else
         {
+            $this->country_code = $this->build_error_array(parent::ID_COUNTRY_CODE, parent::COUNTRY_CODE_KEY);
             $this->add_message(parent::ID_COUNTRY_CODE, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_COUNTRY_CODE_INVALID, $strValue);
         }
     }
@@ -482,16 +532,26 @@ class EmvMerchantDecoder extends EmvMerchant {
      */
     private function process_crc($strValue)
     {
-        $this->crc = $strValue;
+        // $this->crc = $strValue;
         $checkData = substr($this->qr_string, parent::POS_ZERO, parent::POS_MINUS_FOUR);
         $newCrc = $this->CRC16HexDigest($checkData);
         if ($strValue != $newCrc)
         {
+            $this->crc = $this->build_error_array(parent::ID_CRC, parent::CRC_KEY);
             if (self::ENV_PROD == $this->environment)
             {
                 $newCrc = self::CRC_MARKED;
             }
             $this->add_message(parent::ID_CRC, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_CRC_INVALID, [$newCrc, $strValue]);
+        } else
+        {
+            $this->process_status[parent::CRC_KEY] = self::PROCESS_STATUS_SUCCESS;
+            $this->crc = [
+                self::LABEL_ACCOUNT_ID          => parent::ID_CRC,
+                self::LABEL_ACCOUNT_KEY         => parent::CRC_KEY,
+                self::LABEL_ACCOUNT_VALUE       => $strValue,
+                self::LABEL_ACCOUNT_DESCRIPTION => parent::EMPTY_STRING
+            ];
         }
     }
 

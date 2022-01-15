@@ -39,6 +39,7 @@ class EmvMerchant {
     const ID_ACCOUNT_UPPER_BOUNDARY = 51;
     const ID_ORIGINAL_LABEL = 'original_id';
     const ID_PLAIN_VALUE_LABEL = 'value';
+    const ACCOUNT_KEY = 'accounts';
 
     /**
      * RESERVED AREA IDS
@@ -489,8 +490,11 @@ class EmvMerchant {
      * TIP OR CONVENIENCE FEE (55-57)
      */
     const ID_TIP_OR_CONVENIENCE_FEE_INDICATOR = '55';
+    const TIP_OR_CONVENIENCE_FEE_INDICATOR_KEY = 'tip_or_convenience_fee_indicator';
     const ID_VALUE_OF_FEE_FIXED = '56';
+    const VALUE_OF_FEE_FIXED_KEY = 'convenience_fee_fixed';
     const ID_VALUE_OF_FEE_PERCENTAGE = '57';
+    const VALUE_OF_FEE_PERCENTAGE_KEY = 'convenience_fee_percentage';
     const FEE_INDICATOR_TIP = '01';
     const FEE_INDICATOR_TIP_VALUE = 'TIP';
     const FEE_INDICATOR_CONVENIENCE_FEE_FIXED = '02';
@@ -507,12 +511,19 @@ class EmvMerchant {
      * COUNTRY (58)
      */
     const ID_COUNTRY_CODE = '58';
+    const COUNTRY_CODE_KEY = 'country_code';
     const COUNTRY_HK = 'HK';
+    const COUNTRY_HK_NAME = 'HONG KONG';
     const COUNTRY_ID = 'ID';
+    const COUNTRY_ID_NAME = 'INDONESIA';
     const COUNTRY_IN = 'IN';
+    const COUNTRY_IN_NAME = 'INDIA';
     const COUNTRY_MY = 'MY';
+    const COUNTRY_MY_NAME = 'MALAYSIA';
     const COUNTRY_SG = 'SG';
+    const COUNTRY_SG_NAME = 'SINGAPORE';
     const COUNTRY_TH = 'TH';
+    const COUNTRY_TH_NAME = 'THAILAND';
     /**
      * @var string[] ISO3166
      */
@@ -526,14 +537,28 @@ class EmvMerchant {
     ];
 
     /**
+     * @var string[] COUNTRY NAMES
+     */
+    protected $country_names = [
+        //self::COUNTRY_HK => self::COUNTRY_HK_NAME,
+        self::COUNTRY_ID => self::COUNTRY_ID_NAME,
+        //self::COUNTRY_IN => self::COUNTRY_IN_NAME,
+        //self::COUNTRY_MY => self::COUNTRY_MY_NAME,
+        self::COUNTRY_SG => self::COUNTRY_SG_NAME,
+        self::COUNTRY_TH => self::COUNTRY_TH_NAME
+    ];
+
+    /**
      * MERCHANT NAME (59)
      */
     const ID_MERCHANT_NAME = '59';
+    const MERCHANT_NAME_KEY = 'merchant_name';
 
     /**
      * CITY (60)
      */
     const ID_MERCHANT_CITY = '60';
+    const MERCHANT_CITY_KEY = 'merchant_city';
     const MERCHANT_CITY_SINGAPORE = 'SINGAPORE';
     const MERCHANT_CITY_HONG_KONG = 'HONG KONG';
     // THAILAND
@@ -569,6 +594,7 @@ class EmvMerchant {
      * POSTAL CODE (61)
      */
     const ID_MERCHANT_POSTAL_CODE = '61';
+    const MERCHANT_POSTAL_CODE_KEY = 'merchant_postal_code';
 
     /**
      * ADDITIONAL DATA (62)
@@ -632,6 +658,7 @@ class EmvMerchant {
      * CRC (63)
      */
     const ID_CRC = '63';
+    const CRC_KEY = 'crc';
     const CRC_LENGTH = '04';
     const CRC_MARKED = '****';
 
@@ -947,7 +974,7 @@ class EmvMerchant {
        | -------------------------------------------------------------------------------------------------------- */
     const ENV_PROD = 'PRODUCTION';
     const ENV_DEV = 'DEVELOPMENT';
-    protected $environment = 'PRODUCTION';
+    protected $environment = 'DEVELOPMENT';
 
     /**
      * EmvMerchant constructor.
