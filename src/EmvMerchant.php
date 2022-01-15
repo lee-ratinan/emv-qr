@@ -632,26 +632,26 @@ class EmvMerchant {
     const MERCHANT_CHANNEL_CHAR_LOCATION_KEY = 'transaction_location';
     const MERCHANT_CHANNEL_CHAR_PRESENCE_KEY = 'merchant_presence';
     protected $merchant_channel_medias = [
-        '0' => 'Print - Merchant sticker',
-        '1' => 'Print - Bill/Invoice',
-        '2' => 'Print - Magazine/Poster',
-        '3' => 'Print - Other',
-        '4' => 'Screen/Electronic - Merchant POS/POI',
-        '5' => 'Screen/Electronic - Website',
-        '6' => 'Screen/Electronic - App',
-        '7' => 'Screen/Electronic - Other',
+        '0' => 'PRINT - MERCHANT STICKER',
+        '1' => 'PRINT - BILL/INVOICE',
+        '2' => 'PRINT - MAGAZINE/POSTER',
+        '3' => 'PRINT - OTHER',
+        '4' => 'SCREEN/ELECTRONIC - MERCHANT POS/POI',
+        '5' => 'SCREEN/ELECTRONIC - WEBSITE',
+        '6' => 'SCREEN/ELECTRONIC - APP',
+        '7' => 'SCREEN/ELECTRONIC - OTHER',
     ];
     protected $merchant_channel_locations = [
-        '0' => 'At Merchant premises/registered address',
-        '1' => 'Not at Merchant premises/registered address',
-        '2' => 'Remote Commerce',
-        '3' => 'Other',
+        '0' => 'AT MERCHANT PREMISES/REGISTERED ADDRESS',
+        '1' => 'NOT AT MERCHANT PREMISES/REGISTERED ADDRESS',
+        '2' => 'REMOTE COMMERCE',
+        '3' => 'OTHER',
     ];
     protected $merchant_channel_presences = [
-        '0' => 'Attended POI',
-        '1' => 'Unattended',
-        '2' => 'Semi-attended (self-checkout)',
-        '3' => 'Other',
+        '0' => 'ATTENDED POI',
+        '1' => 'UNATTENDED',
+        '2' => 'SEMI-ATTENDED (SELF-CHECKOUT)',
+        '3' => 'OTHER',
     ];
 
     /**

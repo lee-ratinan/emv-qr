@@ -126,7 +126,7 @@ class EmvMerchantDecoder extends EmvMerchant {
                         self::LABEL_ACCOUNT_DESCRIPTION => parent::EMPTY_STRING
                     ];
                     break;
-                case parent::ID_ADDITIONAL_DATA_FIELDS: // todo
+                case parent::ID_ADDITIONAL_DATA_FIELDS:
                     $this->process_additional_data($strValue);
                     break;
                 case parent::ID_CRC:
@@ -443,7 +443,7 @@ class EmvMerchantDecoder extends EmvMerchant {
                     $this->process_additional_data_channel($strValue);
                     break;
                 default:
-                    $this->additional_fields[$strId] = $this->validate_ans_charset($strValue, parent::MODE_SANITIZER);
+                    $this->process_additional_data_field($strValue, parent::LENGTH_TWENTY_FIVE, $strId, $strId);
             }
             $string = substr($string, parent::LENGTH_FOUR + $intLength);
         }
@@ -460,7 +460,12 @@ class EmvMerchantDecoder extends EmvMerchant {
     {
         if ($this->validate_ans_charset_len($strValue, $length))
         {
-            $this->additional_fields[$field_name] = $strValue;
+            $this->additional_fields[$field_name] = [
+                self::LABEL_ACCOUNT_ID          => $field_id,
+                self::LABEL_ACCOUNT_KEY         => $field_name,
+                self::LABEL_ACCOUNT_VALUE       => $strValue,
+                self::LABEL_ACCOUNT_DESCRIPTION => parent::EMPTY_STRING
+            ];
         } else
         {
             $this->add_message(parent::ID_ADDITIONAL_DATA_FIELDS . '.' . $field_id, parent::MESSAGE_TYPE_WARNING, parent::WARNING_ID_ADDITIONAL_DATA_INVALID, [$field_name, $strValue]);
@@ -473,25 +478,32 @@ class EmvMerchantDecoder extends EmvMerchant {
      */
     private function process_additional_customer_data_request($string)
     {
+        $data = [];
         while ( ! empty($string))
         {
             $key = substr($string, parent::POS_ZERO, parent::LENGTH_ONE);
             switch ($key)
             {
                 case parent::ID_ADDITIONAL_DATA_CUSTOMER_DATA_REQUEST_MOBILE_ID:
-                    $this->additional_fields[parent::ID_ADDITIONAL_DATA_ADDITIONAL_CUSTOMER_DATA_REQUEST_KEY][] = parent::ID_ADDITIONAL_DATA_CUSTOMER_DATA_REQUEST_MOBILE_LABEL;
+                    $data[] = parent::ID_ADDITIONAL_DATA_CUSTOMER_DATA_REQUEST_MOBILE_LABEL;
                     break;
                 case parent::ID_ADDITIONAL_DATA_CUSTOMER_DATA_REQUEST_ADDRESS_ID:
-                    $this->additional_fields[parent::ID_ADDITIONAL_DATA_ADDITIONAL_CUSTOMER_DATA_REQUEST_KEY][] = parent::ID_ADDITIONAL_DATA_CUSTOMER_DATA_REQUEST_ADDRESS_LABEL;
+                    $data[] = parent::ID_ADDITIONAL_DATA_CUSTOMER_DATA_REQUEST_ADDRESS_LABEL;
                     break;
                 case parent::ID_ADDITIONAL_DATA_CUSTOMER_DATA_REQUEST_EMAIL_ID:
-                    $this->additional_fields[parent::ID_ADDITIONAL_DATA_ADDITIONAL_CUSTOMER_DATA_REQUEST_KEY][] = parent::ID_ADDITIONAL_DATA_CUSTOMER_DATA_REQUEST_EMAIL_LABEL;
+                    $data[] = parent::ID_ADDITIONAL_DATA_CUSTOMER_DATA_REQUEST_EMAIL_LABEL;
                     break;
                 default:
                     $this->add_message(parent::ID_ADDITIONAL_DATA_FIELDS . '.' . parent::ID_ADDITIONAL_DATA_ADDITIONAL_CUSTOMER_DATA_REQUEST, parent::MESSAGE_TYPE_WARNING, parent::WARNING_ID_INVALID_CUSTOMER_REQUEST_TYPE, $key);
             }
             $string = substr($string, parent::POS_ONE);
         }
+        $this->additional_fields[parent::ID_ADDITIONAL_DATA_ADDITIONAL_CUSTOMER_DATA_REQUEST_KEY] = [
+            self::LABEL_ACCOUNT_ID          => parent::ID_ADDITIONAL_DATA_ADDITIONAL_CUSTOMER_DATA_REQUEST,
+            self::LABEL_ACCOUNT_KEY         => parent::ID_ADDITIONAL_DATA_ADDITIONAL_CUSTOMER_DATA_REQUEST_KEY,
+            self::LABEL_ACCOUNT_VALUE       => $data,
+            self::LABEL_ACCOUNT_DESCRIPTION => parent::EMPTY_STRING
+        ];
     }
 
     /**
@@ -503,27 +515,34 @@ class EmvMerchantDecoder extends EmvMerchant {
         $media = substr($string, parent::POS_ZERO, parent::LENGTH_ONE);
         $location = substr($string, parent::POS_ONE, parent::LENGTH_ONE);
         $presence = substr($string, parent::POS_TWO, parent::LENGTH_ONE);
+        $data = [];
         if (isset($this->merchant_channel_medias[$media]))
         {
-            $this->additional_fields[parent::ID_ADDITIONAL_DATA_MERCHANT_CHANNEL_KEY][parent::MERCHANT_CHANNEL_CHAR_MEDIA_KEY] = $this->merchant_channel_medias[$media];
+            $data[parent::MERCHANT_CHANNEL_CHAR_MEDIA_KEY] = $this->merchant_channel_medias[$media];
         } else
         {
             $this->add_message(parent::ID_ADDITIONAL_DATA_FIELDS . '.' . parent::ID_ADDITIONAL_DATA_MERCHANT_CHANNEL, parent::MESSAGE_TYPE_WARNING, parent::WARNING_ID_INVALID_MERCHANT_CHANNEL, [parent::MERCHANT_CHANNEL_CHAR_MEDIA_KEY, $media]);
         }
         if (isset($this->merchant_channel_locations[$location]))
         {
-            $this->additional_fields[parent::ID_ADDITIONAL_DATA_MERCHANT_CHANNEL_KEY][parent::MERCHANT_CHANNEL_CHAR_LOCATION_KEY] = $this->merchant_channel_locations[$location];
+            $data[parent::MERCHANT_CHANNEL_CHAR_LOCATION_KEY] = $this->merchant_channel_locations[$location];
         } else
         {
             $this->add_message(parent::ID_ADDITIONAL_DATA_FIELDS . '.' . parent::ID_ADDITIONAL_DATA_MERCHANT_CHANNEL, parent::MESSAGE_TYPE_WARNING, parent::WARNING_ID_INVALID_MERCHANT_CHANNEL, [parent::MERCHANT_CHANNEL_CHAR_LOCATION_KEY, $location]);
         }
         if (isset($this->merchant_channel_presences[$presence]))
         {
-            $this->additional_fields[parent::ID_ADDITIONAL_DATA_MERCHANT_CHANNEL_KEY][parent::MERCHANT_CHANNEL_CHAR_PRESENCE_KEY] = $this->merchant_channel_presences[$presence];
+            $data[parent::MERCHANT_CHANNEL_CHAR_PRESENCE_KEY] = $this->merchant_channel_presences[$presence];
         } else
         {
             $this->add_message(parent::ID_ADDITIONAL_DATA_FIELDS . '.' . parent::ID_ADDITIONAL_DATA_MERCHANT_CHANNEL, parent::MESSAGE_TYPE_WARNING, parent::WARNING_ID_INVALID_MERCHANT_CHANNEL, [parent::MERCHANT_CHANNEL_CHAR_PRESENCE_KEY, $presence]);
         }
+        $this->additional_fields[parent::ID_ADDITIONAL_DATA_MERCHANT_CHANNEL_KEY] = [
+            self::LABEL_ACCOUNT_ID          => parent::ID_ADDITIONAL_DATA_MERCHANT_CHANNEL,
+            self::LABEL_ACCOUNT_KEY         => parent::ID_ADDITIONAL_DATA_MERCHANT_CHANNEL_KEY,
+            self::LABEL_ACCOUNT_VALUE       => $data,
+            self::LABEL_ACCOUNT_DESCRIPTION => parent::EMPTY_STRING
+        ];
     }
 
     /**
