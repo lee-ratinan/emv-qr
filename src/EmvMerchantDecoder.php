@@ -615,7 +615,7 @@ class EmvMerchantDecoder extends EmvMerchant {
             case parent::AIRPAY_CHANNEL:
                 $this->process_airpay($account_raw, $intId);
                 break;
-            case parent::NETS_CHANNEL: // todo: TEST
+            case parent::NETS_CHANNEL: // todo: TEST (no good example to test)
                 $this->process_nets($account_raw, $intId);
                 break;
             case parent::SGQR_CHANNEL:
@@ -625,7 +625,7 @@ class EmvMerchantDecoder extends EmvMerchant {
             case parent::PROMPTPAY_CHANNEL:
                 $this->process_promptpay($account_raw, $intId);
                 break;
-            case parent::PROMPTPAY_BILL_CHANNEL: // todo
+            case parent::PROMPTPAY_BILL_CHANNEL: // todo: TEST (no good example to test)
                 $this->process_promptpay_bill($account_raw, $intId);
                 break;
             // DEFAULT - NEW FORMAT
