@@ -19,6 +19,7 @@ class EmvMerchant {
      */
     const ID_PAYLOAD_FORMAT_INDICATOR = '00';
     const PAYLOAD_FORMAT_INDICATOR_VALUE = '01';
+    const PAYLOAD_FORMAT_INDICATOR_KEY = 'payload_format_indicator';
 
     /**
      * POINT OF INITIATION (01)
@@ -28,6 +29,7 @@ class EmvMerchant {
     const POINT_OF_INITIATION_STATIC_VALUE = 'STATIC';
     const POINT_OF_INITIATION_DYNAMIC = '12';
     const POINT_OF_INITIATION_DYNAMIC_VALUE = 'DYNAMIC';
+    const POINT_OF_INITIATION_KEY = 'point_of_initiation';
 
     /**
      * ACCOUNTS (02-51)
@@ -37,6 +39,7 @@ class EmvMerchant {
     const ID_ACCOUNT_UPPER_BOUNDARY = 51;
     const ID_ORIGINAL_LABEL = 'original_id';
     const ID_PLAIN_VALUE_LABEL = 'value';
+    const ACCOUNT_KEY = 'accounts';
 
     /**
      * RESERVED AREA IDS
@@ -72,6 +75,7 @@ class EmvMerchant {
      * MERCHANT CATEGORY CODE (52)
      */
     const ID_MERCHANT_CATEGORY_CODE = '52';
+    const MERCHANT_CATEGORY_CODE_KEY = 'merchant_category_code';
     const MERCHANT_CATEGORY_CODE_GENERIC = '0000';
     const MERCHANT_CATEGORY_UNKNOWN = 'UNKNOWN';
     /**
@@ -451,6 +455,7 @@ class EmvMerchant {
      * CURRENCY (53)
      */
     const ID_TRANSACTION_CURRENCY = '53';
+    const TRANSACTION_CURRENCY_KEY = 'transaction_currency';
     const CURRENCY_HKD = 'HKD';
     const CURRENCY_HKD_NUMERIC = '344';
     const CURRENCY_IDR = 'IDR';
@@ -479,13 +484,17 @@ class EmvMerchant {
      * TRANSACTION AMOUNT (54)
      */
     const ID_TRANSACTION_AMOUNT = '54';
+    const TRANSACTION_AMOUNT_KEY = 'transaction_amount';
 
     /**
      * TIP OR CONVENIENCE FEE (55-57)
      */
     const ID_TIP_OR_CONVENIENCE_FEE_INDICATOR = '55';
+    const TIP_OR_CONVENIENCE_FEE_INDICATOR_KEY = 'tip_or_convenience_fee_indicator';
     const ID_VALUE_OF_FEE_FIXED = '56';
+    const VALUE_OF_FEE_FIXED_KEY = 'convenience_fee_fixed';
     const ID_VALUE_OF_FEE_PERCENTAGE = '57';
+    const VALUE_OF_FEE_PERCENTAGE_KEY = 'convenience_fee_percentage';
     const FEE_INDICATOR_TIP = '01';
     const FEE_INDICATOR_TIP_VALUE = 'TIP';
     const FEE_INDICATOR_CONVENIENCE_FEE_FIXED = '02';
@@ -502,12 +511,19 @@ class EmvMerchant {
      * COUNTRY (58)
      */
     const ID_COUNTRY_CODE = '58';
+    const COUNTRY_CODE_KEY = 'country_code';
     const COUNTRY_HK = 'HK';
+    const COUNTRY_HK_NAME = 'HONG KONG';
     const COUNTRY_ID = 'ID';
+    const COUNTRY_ID_NAME = 'INDONESIA';
     const COUNTRY_IN = 'IN';
+    const COUNTRY_IN_NAME = 'INDIA';
     const COUNTRY_MY = 'MY';
+    const COUNTRY_MY_NAME = 'MALAYSIA';
     const COUNTRY_SG = 'SG';
+    const COUNTRY_SG_NAME = 'SINGAPORE';
     const COUNTRY_TH = 'TH';
+    const COUNTRY_TH_NAME = 'THAILAND';
     /**
      * @var string[] ISO3166
      */
@@ -521,14 +537,28 @@ class EmvMerchant {
     ];
 
     /**
+     * @var string[] COUNTRY NAMES
+     */
+    protected $country_names = [
+        //self::COUNTRY_HK => self::COUNTRY_HK_NAME,
+        //self::COUNTRY_ID => self::COUNTRY_ID_NAME,
+        //self::COUNTRY_IN => self::COUNTRY_IN_NAME,
+        //self::COUNTRY_MY => self::COUNTRY_MY_NAME,
+        self::COUNTRY_SG => self::COUNTRY_SG_NAME,
+        self::COUNTRY_TH => self::COUNTRY_TH_NAME
+    ];
+
+    /**
      * MERCHANT NAME (59)
      */
     const ID_MERCHANT_NAME = '59';
+    const MERCHANT_NAME_KEY = 'merchant_name';
 
     /**
      * CITY (60)
      */
     const ID_MERCHANT_CITY = '60';
+    const MERCHANT_CITY_KEY = 'merchant_city';
     const MERCHANT_CITY_SINGAPORE = 'SINGAPORE';
     const MERCHANT_CITY_HONG_KONG = 'HONG KONG';
     // THAILAND
@@ -552,6 +582,7 @@ class EmvMerchant {
     // MALAYSIA
     const MERCHANT_CITY_KUALA_LUMPUR = 'KUALA LUMPUR';
     const MERCHANT_CITY_GEORGE_TOWN = 'GEORGE TOWN';
+    const MERCHANT_CITY_PENANG = 'PENANG';
     const MERCHANT_CITY_IPOH = 'IPOH';
     const MERCHANT_CITY_KUCHING = 'KUCHING';
     const MERCHANT_CITY_JOHOR_BAHRU = 'JOHOR BAHRU';
@@ -564,11 +595,13 @@ class EmvMerchant {
      * POSTAL CODE (61)
      */
     const ID_MERCHANT_POSTAL_CODE = '61';
+    const MERCHANT_POSTAL_CODE_KEY = 'merchant_postal_code';
 
     /**
      * ADDITIONAL DATA (62)
      */
     const ID_ADDITIONAL_DATA_FIELDS = '62';
+    const ADDITIONAL_DATA_FIELDS_KEY = 'additional_fields';
     const ID_ADDITIONAL_DATA_BILL_NUMBER = '01';
     const ID_ADDITIONAL_DATA_BILL_NUMBER_KEY = 'bill_number';
     const ID_ADDITIONAL_DATA_MOBILE_NUMBER = '02';
@@ -601,32 +634,33 @@ class EmvMerchant {
     const MERCHANT_CHANNEL_CHAR_LOCATION_KEY = 'transaction_location';
     const MERCHANT_CHANNEL_CHAR_PRESENCE_KEY = 'merchant_presence';
     protected $merchant_channel_medias = [
-        '0' => 'Print - Merchant sticker',
-        '1' => 'Print - Bill/Invoice',
-        '2' => 'Print - Magazine/Poster',
-        '3' => 'Print - Other',
-        '4' => 'Screen/Electronic - Merchant POS/POI',
-        '5' => 'Screen/Electronic - Website',
-        '6' => 'Screen/Electronic - App',
-        '7' => 'Screen/Electronic - Other',
+        '0' => 'PRINT - MERCHANT STICKER',
+        '1' => 'PRINT - BILL/INVOICE',
+        '2' => 'PRINT - MAGAZINE/POSTER',
+        '3' => 'PRINT - OTHER',
+        '4' => 'SCREEN/ELECTRONIC - MERCHANT POS/POI',
+        '5' => 'SCREEN/ELECTRONIC - WEBSITE',
+        '6' => 'SCREEN/ELECTRONIC - APP',
+        '7' => 'SCREEN/ELECTRONIC - OTHER',
     ];
     protected $merchant_channel_locations = [
-        '0' => 'At Merchant premises/registered address',
-        '1' => 'Not at Merchant premises/registered address',
-        '2' => 'Remote Commerce',
-        '3' => 'Other',
+        '0' => 'AT MERCHANT PREMISES/REGISTERED ADDRESS',
+        '1' => 'NOT AT MERCHANT PREMISES/REGISTERED ADDRESS',
+        '2' => 'REMOTE COMMERCE',
+        '3' => 'OTHER',
     ];
     protected $merchant_channel_presences = [
-        '0' => 'Attended POI',
-        '1' => 'Unattended',
-        '2' => 'Semi-attended (self-checkout)',
-        '3' => 'Other',
+        '0' => 'ATTENDED POI',
+        '1' => 'UNATTENDED',
+        '2' => 'SEMI-ATTENDED (SELF-CHECKOUT)',
+        '3' => 'OTHER',
     ];
 
     /**
      * CRC (63)
      */
     const ID_CRC = '63';
+    const CRC_KEY = 'crc';
     const CRC_LENGTH = '04';
     const CRC_MARKED = '****';
 
@@ -654,13 +688,17 @@ class EmvMerchant {
     const LENGTH_TEN = 10;
     const LENGTH_TWENTY = 20;
     const LENGTH_TWENTY_FIVE = 25;
+    const INTEGER_TWO = 2;
 
     /**
      * Others
      */
     const TIMEZONE_SINGAPORE = 'Asia/Singapore';
     const FORMAT_DATE = 'Y-m-d';
+    const FORMAT_DATE_READABLE = 'd M Y';
     const EMPTY_STRING = '';
+    const STRING_DOT = '.';
+    const STRING_COMMA = ',';
     const STR_CHANNEL = 'channel';
 
     /* | --------------------------------------------------------------------------------------------------------
@@ -671,7 +709,7 @@ class EmvMerchant {
        | PAYNOW (PREFERABLY 26)
        | -------------------------------------------------------------------------------------------------------- */
     const PAYNOW_CHANNEL = 'SG.PAYNOW';
-    const PAYNOW_CHANNEL_NAME = 'PayNow';
+    const PAYNOW_CHANNEL_NAME = 'PAYNOW';
     const PAYNOW_ID_CHANNEL = '00';
     const PAYNOW_ID_PROXY_TYPE = '01';
     const PAYNOW_ID_PROXY_VALUE = '02';
@@ -687,22 +725,23 @@ class EmvMerchant {
         '01' => 'proxy_type',
         '02' => 'proxy_value',
         '03' => 'amount_editable',
-        '04' => 'expiry_date'
+        '04' => 'expiry_date',
+        '05' => '05' // unknown key, found in one QR code
     ];
     protected $paynow_proxy_type = [
         '0' => 'MOBILE',
         '2' => 'UEN'
     ];
     protected $paynow_amount_editable = [
-        '1' => TRUE,
-        '0' => FALSE
+        '1' => 'EDITABLE',
+        '0' => 'NOT-EDITABLE'
     ];
 
     /* | --------------------------------------------------------------------------------------------------------
        | FAVEPAY (ANY)
        | -------------------------------------------------------------------------------------------------------- */
     const FAVE_CHANNEL = 'COM.MYFAVE';
-    const FAVE_CHANNEL_NAME = 'FavePay';
+    const FAVE_CHANNEL_NAME = 'FAVEPAY';
     const FAVE_URL = 'https://myfave.com/qr/';
     const FAVE_ID_REVERSE_DOMAIN = '00';
     const FAVE_ID_URL = '01';
@@ -715,7 +754,7 @@ class EmvMerchant {
        | ALIPAY (ANY)
        | -------------------------------------------------------------------------------------------------------- */
     const ALIPAY_CHANNEL = 'COM.ALIPAY';
-    const ALIPAY_CHANNEL_NAME = 'AliPay';
+    const ALIPAY_CHANNEL_NAME = 'ALIPAY';
     const ALIPAY_URL = 'https://qr.alipay.com/';
     const ALIPAY_ID_REVERSE_DOMAIN = '00';
     const ALIPAY_ID_URL = '01';
@@ -728,7 +767,7 @@ class EmvMerchant {
        | AIRPAY (ANY)
        | -------------------------------------------------------------------------------------------------------- */
     const AIRPAY_CHANNEL = 'SG.AIRPAY';
-    const AIRPAY_CHANNEL_NAME = 'AirPay';
+    const AIRPAY_CHANNEL_NAME = 'SHOPEEPAY';
     const AIRPAY_ID_REVERSE_DOMAIN = '00';
     const AIRPAY_ID_MERCHANT_ACCOUNT_INFORMATION = '01';
     protected $airpay_keys = [
@@ -801,10 +840,10 @@ class EmvMerchant {
     const PROMPTPAY_PROXY_BANK_ACCT_NO = 'BANK_ACCOUNT_NO';
     protected $promptpay_keys = [
         '00' => 'guid',
-        '96' => 'mobile_number',
-        '97' => 'proxy_type',
-        '98' => 'proxy_value',
-        '99' => 'channel_name'
+        '01' => 'mobile_number',
+        '02' => 'tax_id',
+        '03' => 'ewallet_id',
+        '04' => 'bank_account_number'
     ];
 
     /* | --------------------------------------------------------------------------------------------------------
@@ -848,11 +887,16 @@ class EmvMerchant {
     const ERROR_ID_PAYNOW_INVALID_PROXY_VALUE = 'E013';
     const ERROR_ID_PAYNOW_MISSING_PROXY_TYPE = 'E014';
     const ERROR_ID_PAYNOW_EDITABLE_FALSE_BUT_STATIC = 'E015';
+    const ERROR_ID_PAYNOW_EDITABLE_TRUE_BUT_DYNAMIC = 'E015.1';
+    const ERROR_ID_PAYNOW_EDITABLE_INVALID = 'E015.2';
     const ERROR_ID_PAYNOW_EXPIRED_QR = 'E016';
     const ERROR_ID_PAYNOW_EXPIRY_DATE_INVALID = 'E017';
     const ERROR_ID_PROMPTPAY_MISSING_PROXY = 'E018';
     const ERROR_ID_PROMPTPAY_INVALID_PROXY = 'E019';
     const ERROR_ID_GENERAL_INVALID_FIELD = 'E020';
+    const ERROR_ID_PROMPTPAY_INVALID_ID = 'E021';
+    const ERROR_ID_PROMPTPAY_BILL_INVALID_ID = 'E022';
+
     const ERROR_ID_MISSING_FIELD = 'E999';
     // WARNING CODES
     const WARNING_ID_MCC_INVALID = 'W001';
@@ -881,11 +925,15 @@ class EmvMerchant {
         self::ERROR_ID_PAYNOW_INVALID_PROXY_VALUE => "Proxy value is invalid. Expected the value of type ???1, found '???2'.",
         self::ERROR_ID_PAYNOW_MISSING_PROXY_TYPE => "Proxy type is missing.",
         self::ERROR_ID_PAYNOW_EDITABLE_FALSE_BUT_STATIC => "PayNow transaction value is set to not editable but the point of initiation is static.",
+        self::ERROR_ID_PAYNOW_EDITABLE_TRUE_BUT_DYNAMIC => "PayNow transaction value is set to editable but the point of initiation is dynamic.",
+        self::ERROR_ID_PAYNOW_EDITABLE_INVALID => "Invalid editable flag. Expected 0 or 1, found '???'.",
         self::ERROR_ID_PAYNOW_EXPIRED_QR => "This QR code is already expired. The expiry date was ???.",
         self::ERROR_ID_PAYNOW_EXPIRY_DATE_INVALID => "The expiry date of this QR code is invalid. Expected the date in 'yyyymmdd' format, found '???'.",
-        self::ERROR_ID_PROMPTPAY_MISSING_PROXY => "The proxy value (mobile number, tax ID, or eWallet ID) is missing.",
-        self::ERROR_ID_PROMPTPAY_INVALID_PROXY => "The proxy value is invalid. Expected a mobile phone number or tax ID, found '???'.",
+        self::ERROR_ID_PROMPTPAY_MISSING_PROXY => "The proxy value (mobile number, tax ID, eWallet ID, or bank account number) is missing.",
+        self::ERROR_ID_PROMPTPAY_INVALID_PROXY => "The proxy value is invalid. Expected a mobile phone number, tax ID, e-wallet ID, or bank account number, found '???'.",
         self::ERROR_ID_GENERAL_INVALID_FIELD => "The field ???1 is invalid, expected the value of type ???2, found '???3'.",
+        self::ERROR_ID_PROMPTPAY_INVALID_ID => "The ID for PromptPay is invalid, expected 29, found '???'.",
+        self::ERROR_ID_PROMPTPAY_BILL_INVALID_ID => "The ID for PromptPay is invalid, expected 30, found '???'.",
         // ERROR GENERATOR
         self::ERROR_ID_MISSING_FIELD => "The field ID ??? has never been set.",
         // WARNING
@@ -926,13 +974,15 @@ class EmvMerchant {
     public $crc;
     public $errors = [];
     public $warnings = [];
+    public $statuses = [];
 
     /* | --------------------------------------------------------------------------------------------------------
        | ENVIRONMENT
        | -------------------------------------------------------------------------------------------------------- */
     const ENV_PROD = 'PRODUCTION';
     const ENV_DEV = 'DEVELOPMENT';
-    protected $environment = 'PRODUCTION';
+    protected $environment = 'DEVELOPMENT';
+
     /**
      * EmvMerchant constructor.
      */
