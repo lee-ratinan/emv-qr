@@ -622,14 +622,12 @@ class EmvMerchantDecoder extends EmvMerchant {
                 $this->process_sgqr($account_raw, $intId);
                 break;
             // THAILAND - TO BE UPDATED
-            case parent::PROMPTPAY_CHANNEL: // todo
+            case parent::PROMPTPAY_CHANNEL:
                 $this->process_promptpay($account_raw, $intId);
                 break;
             case parent::PROMPTPAY_BILL_CHANNEL: // todo
                 $this->process_promptpay_bill($account_raw, $intId);
                 break;
-            // INDONESIA - TO DO
-
             // DEFAULT - NEW FORMAT
             default:
                 $this->process_unknown_accounts($account_raw, $intId, $origStrValue);
@@ -1012,40 +1010,89 @@ class EmvMerchantDecoder extends EmvMerchant {
      */
     private function process_promptpay($account_raw, $intId)
     {
-        // 29
-        $account[parent::ID_ORIGINAL_LABEL] = $intId;
-        $account[$this->promptpay_keys[99]] = parent::PROMPTPAY_CHANNEL_NAME;
-        $account[$this->promptpay_keys[parent::PROMPTPAY_ID_APP_ID]] = $account_raw[parent::PROMPTPAY_ID_APP_ID];
+        // MUST BE 29
+        $status_error = FALSE;
+        if ($intId != parent::PROMPTPAY_ID)
+        {
+            $status_error = TRUE;
+            $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PROMPTPAY_INVALID_ID, $intId);
+        }
+        $account_info[parent::ID_ORIGINAL_LABEL] = $intId;
+        // 00 GUID
+        $account_info[$this->promptpay_keys[parent::PROMPTPAY_ID_APP_ID]] = [
+            self::LABEL_ACCOUNT_ID          => parent::PROMPTPAY_ID_APP_ID,
+            self::LABEL_ACCOUNT_KEY         => parent::PROMPTPAY_ID_APP_ID_KEY,
+            self::LABEL_ACCOUNT_VALUE       => $account_raw[parent::PROMPTPAY_ID_APP_ID],
+            self::LABEL_ACCOUNT_DESCRIPTION => parent::PROMPTPAY_CHANNEL_NAME
+        ];
+        // 01-04 PROXY
         if ( ! empty($account_raw[parent::PROMPTPAY_ID_MOBILE]))
         {
-            if (preg_match('/^0066(6|8|9)(\d{8})$/', $account_raw[parent::PROMPTPAY_ID_MOBILE]))
+            $mobile = $account_raw[parent::PROMPTPAY_ID_MOBILE];
+            if (! preg_match('/^0066(6|8|9)(\d{8})$/', $mobile))
             {
-                $account[$this->promptpay_keys[97]] = parent::PROMPTPAY_PROXY_MOBILE;
-                $account[$this->promptpay_keys[98]] = $account_raw[parent::PROMPTPAY_ID_MOBILE];
-                $account[$this->promptpay_keys[96]] = '+66' . substr($account_raw[parent::PROMPTPAY_ID_MOBILE], parent::POS_FOUR);
-            } else
-            {
+                $status_error = TRUE;
+                $mobile = self::PROCESS_STATUS_ERROR;
                 $this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PROMPTPAY_INVALID_PROXY, $account_raw[parent::PROMPTPAY_ID_MOBILE]);
             }
+            $account_info[$this->promptpay_keys[parent::PROMPTPAY_ID_MOBILE]] = [
+                self::LABEL_ACCOUNT_ID          => parent::PROMPTPAY_ID_MOBILE,
+                self::LABEL_ACCOUNT_KEY         => $this->promptpay_keys[parent::PROMPTPAY_ID_MOBILE],
+                self::LABEL_ACCOUNT_VALUE       => $mobile,
+                self::LABEL_ACCOUNT_DESCRIPTION => parent::EMPTY_STRING
+            ];
         } else if ( ! empty($account_raw[parent::PROMPTPAY_ID_TAX_ID]))
         {
-            if (preg_match('/^\d{13}$/', $account_raw[parent::PROMPTPAY_ID_TAX_ID]))
+            $tax_id = $account_raw[parent::PROMPTPAY_ID_TAX_ID];
+            if (! preg_match('/^\d{13}$/', $tax_id))
             {
-                $account[$this->promptpay_keys[97]] = parent::PROMPTPAY_PROXY_TAX_ID;
-                $account[$this->promptpay_keys[98]] = $account_raw[parent::PROMPTPAY_ID_TAX_ID];
-            } else
-            {
+                $status_error = TRUE;
+                $tax_id = self::PROCESS_STATUS_ERROR;
                 $this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PROMPTPAY_INVALID_PROXY, $account_raw[parent::PROMPTPAY_ID_TAX_ID]);
             }
+            $account_info[$this->promptpay_keys[parent::PROMPTPAY_ID_TAX_ID]] = [
+                self::LABEL_ACCOUNT_ID          => parent::PROMPTPAY_ID_TAX_ID,
+                self::LABEL_ACCOUNT_KEY         => $this->promptpay_keys[parent::PROMPTPAY_ID_TAX_ID],
+                self::LABEL_ACCOUNT_VALUE       => $tax_id,
+                self::LABEL_ACCOUNT_DESCRIPTION => parent::EMPTY_STRING
+            ];
         } else if ( ! empty($account_raw[parent::PROMPTPAY_ID_EWALLET_ID]))
         {
-            $account[$this->promptpay_keys[97]] = parent::PROMPTPAY_PROXY_EWALLET_ID;
-            $account[$this->promptpay_keys[98]] = $account_raw[parent::PROMPTPAY_ID_EWALLET_ID];
+            $ewallet_id = $account_raw[parent::PROMPTPAY_ID_EWALLET_ID];
+            if (! preg_match('/^\d{15}$/', $ewallet_id))
+            {
+                $status_error = TRUE;
+                $ewallet_id = self::PROCESS_STATUS_ERROR;
+                $this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PROMPTPAY_INVALID_PROXY, $account_raw[parent::PROMPTPAY_ID_EWALLET_ID]);
+            }
+            $account_info[$this->promptpay_keys[parent::PROMPTPAY_ID_EWALLET_ID]] = [
+                self::LABEL_ACCOUNT_ID          => parent::PROMPTPAY_ID_EWALLET_ID,
+                self::LABEL_ACCOUNT_KEY         => $this->promptpay_keys[parent::PROMPTPAY_ID_EWALLET_ID],
+                self::LABEL_ACCOUNT_VALUE       => $ewallet_id,
+                self::LABEL_ACCOUNT_DESCRIPTION => parent::EMPTY_STRING
+            ];
+        } else if ( ! empty($account_raw[parent::PROMPTPAY_ID_BANK_ACCT_NO]))
+        {
+            $bank_acct = $account_raw[parent::PROMPTPAY_ID_BANK_ACCT_NO];
+            if (! preg_match('/^\d{43}$/', $bank_acct))
+            {
+                $status_error = TRUE;
+                $bank_acct = self::PROCESS_STATUS_ERROR;
+                $this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PROMPTPAY_INVALID_PROXY, $account_raw[parent::PROMPTPAY_ID_BANK_ACCT_NO]);
+            }
+            $account_info[$this->promptpay_keys[parent::PROMPTPAY_ID_BANK_ACCT_NO]] = [
+                self::LABEL_ACCOUNT_ID          => parent::PROMPTPAY_ID_BANK_ACCT_NO,
+                self::LABEL_ACCOUNT_KEY         => $this->promptpay_keys[parent::PROMPTPAY_ID_BANK_ACCT_NO],
+                self::LABEL_ACCOUNT_VALUE       => $bank_acct,
+                self::LABEL_ACCOUNT_DESCRIPTION => parent::EMPTY_STRING
+            ];
         } else
         {
+            $status_error = TRUE;
             $this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PROMPTPAY_MISSING_PROXY);
         }
-        $this->accounts[parent::PROMPTPAY_CHANNEL_NAME] = $account;
+        $this->process_status[parent::ACCOUNT_KEY][parent::PROMPTPAY_CHANNEL_NAME] = ($status_error ? self::PROCESS_STATUS_ERROR : self::PROCESS_STATUS_SUCCESS);
+        $this->accounts[parent::PROMPTPAY_CHANNEL_NAME] = $account_info;
     }
 
     /**

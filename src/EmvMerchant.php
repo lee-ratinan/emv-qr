@@ -473,7 +473,7 @@ class EmvMerchant {
      */
     protected $currency_codes = [
         //self::CURRENCY_HKD_NUMERIC => self::CURRENCY_HKD,
-        self::CURRENCY_IDR_NUMERIC => self::CURRENCY_IDR,
+        //self::CURRENCY_IDR_NUMERIC => self::CURRENCY_IDR,
         //self::CURRENCY_INR_NUMERIC => self::CURRENCY_INR,
         //self::CURRENCY_MYR_NUMERIC => self::CURRENCY_MYR,
         self::CURRENCY_SGD_NUMERIC => self::CURRENCY_SGD,
@@ -529,7 +529,7 @@ class EmvMerchant {
      */
     protected $country_codes = [
         //self::COUNTRY_HK,
-        self::COUNTRY_ID,
+        //self::COUNTRY_ID,
         //self::COUNTRY_IN,
         //self::COUNTRY_MY,
         self::COUNTRY_SG,
@@ -541,7 +541,7 @@ class EmvMerchant {
      */
     protected $country_names = [
         //self::COUNTRY_HK => self::COUNTRY_HK_NAME,
-        self::COUNTRY_ID => self::COUNTRY_ID_NAME,
+        //self::COUNTRY_ID => self::COUNTRY_ID_NAME,
         //self::COUNTRY_IN => self::COUNTRY_IN_NAME,
         //self::COUNTRY_MY => self::COUNTRY_MY_NAME,
         self::COUNTRY_SG => self::COUNTRY_SG_NAME,
@@ -582,6 +582,7 @@ class EmvMerchant {
     // MALAYSIA
     const MERCHANT_CITY_KUALA_LUMPUR = 'KUALA LUMPUR';
     const MERCHANT_CITY_GEORGE_TOWN = 'GEORGE TOWN';
+    const MERCHANT_CITY_PENANG = 'PENANG';
     const MERCHANT_CITY_IPOH = 'IPOH';
     const MERCHANT_CITY_KUCHING = 'KUCHING';
     const MERCHANT_CITY_JOHOR_BAHRU = 'JOHOR BAHRU';
@@ -829,6 +830,7 @@ class EmvMerchant {
     const PROMPTPAY_CHANNEL_NAME = 'TH.PROMPTPAY';
     const PROMPTPAY_ID = '29';
     const PROMPTPAY_ID_APP_ID = '00';
+    const PROMPTPAY_ID_APP_ID_KEY = 'guid';
     const PROMPTPAY_ID_MOBILE = '01';
     const PROMPTPAY_ID_TAX_ID = '02';
     const PROMPTPAY_ID_EWALLET_ID = '03';
@@ -839,10 +841,10 @@ class EmvMerchant {
     const PROMPTPAY_PROXY_BANK_ACCT_NO = 'BANK_ACCOUNT_NO';
     protected $promptpay_keys = [
         '00' => 'guid',
-        '96' => 'mobile_number',
-        '97' => 'proxy_type',
-        '98' => 'proxy_value',
-        '99' => 'channel_name'
+        '01' => 'mobile_number',
+        '02' => 'tax_id',
+        '03' => 'ewallet_Id',
+        '04' => 'bank_account'
     ];
 
     /* | --------------------------------------------------------------------------------------------------------
@@ -893,6 +895,8 @@ class EmvMerchant {
     const ERROR_ID_PROMPTPAY_MISSING_PROXY = 'E018';
     const ERROR_ID_PROMPTPAY_INVALID_PROXY = 'E019';
     const ERROR_ID_GENERAL_INVALID_FIELD = 'E020';
+    const ERROR_ID_PROMPTPAY_INVALID_ID = 'E021';
+
     const ERROR_ID_MISSING_FIELD = 'E999';
     // WARNING CODES
     const WARNING_ID_MCC_INVALID = 'W001';
@@ -925,9 +929,10 @@ class EmvMerchant {
         self::ERROR_ID_PAYNOW_EDITABLE_INVALID => "Invalid editable flag. Expected 0 or 1, found '???'.",
         self::ERROR_ID_PAYNOW_EXPIRED_QR => "This QR code is already expired. The expiry date was ???.",
         self::ERROR_ID_PAYNOW_EXPIRY_DATE_INVALID => "The expiry date of this QR code is invalid. Expected the date in 'yyyymmdd' format, found '???'.",
-        self::ERROR_ID_PROMPTPAY_MISSING_PROXY => "The proxy value (mobile number, tax ID, or eWallet ID) is missing.",
-        self::ERROR_ID_PROMPTPAY_INVALID_PROXY => "The proxy value is invalid. Expected a mobile phone number or tax ID, found '???'.",
+        self::ERROR_ID_PROMPTPAY_MISSING_PROXY => "The proxy value (mobile number, tax ID, eWallet ID, or bank account number) is missing.",
+        self::ERROR_ID_PROMPTPAY_INVALID_PROXY => "The proxy value is invalid. Expected a mobile phone number, tax ID, e-wallet ID, or bank account number, found '???'.",
         self::ERROR_ID_GENERAL_INVALID_FIELD => "The field ???1 is invalid, expected the value of type ???2, found '???3'.",
+        self::ERROR_ID_PROMPTPAY_INVALID_ID => "The ID for PromptPay is invalid, expected 29, found '???'.",
         // ERROR GENERATOR
         self::ERROR_ID_MISSING_FIELD => "The field ID ??? has never been set.",
         // WARNING
