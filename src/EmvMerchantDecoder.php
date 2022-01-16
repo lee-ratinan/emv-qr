@@ -650,12 +650,14 @@ class EmvMerchantDecoder extends EmvMerchant {
         {
             if (isset($account_raw['00']) && ! empty($account_raw['00']))
             {
+                $this->process_status[parent::ACCOUNT_KEY][$account_raw['00']] = self::PROCESS_STATUS_SUCCESS;
                 $this->accounts[$account_raw['00']] = array_merge([
                     parent::ID_ORIGINAL_LABEL => $intId,
                     parent::ID_PLAIN_VALUE_LABEL => $origStrValue
                 ], $account_raw);
             } else
             {
+                $this->process_status[parent::ACCOUNT_KEY][$intId] = self::PROCESS_STATUS_SUCCESS;
                 $this->accounts[$intId] = array_merge([
                     parent::ID_ORIGINAL_LABEL => $intId,
                     parent::ID_PLAIN_VALUE_LABEL => $origStrValue
@@ -663,6 +665,7 @@ class EmvMerchantDecoder extends EmvMerchant {
             }
         } elseif (isset($this->reserved_ids[$intId]))
         {
+            $this->process_status[parent::ACCOUNT_KEY][$this->reserved_ids[$intId]] = self::PROCESS_STATUS_SUCCESS;
             $this->accounts[$this->reserved_ids[$intId]] = [
                 parent::ID_ORIGINAL_LABEL => $intId,
                 parent::ID_PLAIN_VALUE_LABEL => $origStrValue
