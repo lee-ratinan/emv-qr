@@ -613,7 +613,7 @@ class EmvMerchantDecoder extends EmvMerchant {
             case parent::AIRPAY_CHANNEL:
                 $this->process_airpay($account_raw, $intId);
                 break;
-            case parent::NETS_CHANNEL: // NOT YET TESTED todo: test
+            case parent::NETS_CHANNEL: // todo: TEST
                 $this->process_nets($account_raw, $intId);
                 break;
             case parent::SGQR_CHANNEL:
@@ -860,24 +860,35 @@ class EmvMerchantDecoder extends EmvMerchant {
     private function process_nets($account_raw, $intId)
     {
         $account_info[parent::ID_ORIGINAL_LABEL] = $intId;
+        $status_error = FALSE;
         if (! preg_match('/\d{23}/', $account_raw[parent::NETS_ID_QR_METADATA]))
         {
+            $status_error = TRUE;
+            $account_raw[parent::NETS_ID_QR_METADATA] = self::PROCESS_STATUS_ERROR;
             $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->nets_keys[parent::NETS_ID_QR_METADATA], 'NETS QR Metadata', $account_raw[parent::NETS_ID_QR_METADATA]]);
         }
         if (! preg_match('/\d{15}/', $account_raw[parent::NETS_ID_MERCHANT_ID]))
         {
+            $status_error = TRUE;
+            $account_raw[parent::NETS_ID_MERCHANT_ID] = self::PROCESS_STATUS_ERROR;
             $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->nets_keys[parent::NETS_ID_MERCHANT_ID], 'NETS Merchant ID', $account_raw[parent::NETS_ID_MERCHANT_ID]]);
         }
         if (! preg_match('/\d{8}/', $account_raw[parent::NETS_ID_TERMINAL_ID]))
         {
+            $status_error = TRUE;
+            $account_raw[parent::NETS_ID_TERMINAL_ID] = self::PROCESS_STATUS_ERROR;
             $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->nets_keys[parent::NETS_ID_TERMINAL_ID], 'NETS Terminal ID', $account_raw[parent::NETS_ID_TERMINAL_ID]]);
         }
         if (! preg_match('/\d/', $account_raw[parent::NETS_ID_TRANSACTION_AMOUNT_MODIFIER]))
         {
+            $status_error = TRUE;
+            $account_raw[parent::NETS_ID_TRANSACTION_AMOUNT_MODIFIER] = self::PROCESS_STATUS_ERROR;
             $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->nets_keys[parent::NETS_ID_TRANSACTION_AMOUNT_MODIFIER], 'NETS Transaction Amount Modifier', $account_raw[parent::NETS_ID_TRANSACTION_AMOUNT_MODIFIER]]);
         }
         if (! preg_match('/[A-Z0-9]{8}/', $account_raw[parent::NETS_ID_SIGNATURE]))
         {
+            $status_error = TRUE;
+            $account_raw[parent::NETS_ID_SIGNATURE] = self::PROCESS_STATUS_ERROR;
             $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->nets_keys[parent::NETS_ID_SIGNATURE], 'NETS Signature', $account_raw[parent::NETS_ID_SIGNATURE]]);
         }
         // GENERATE DATA
@@ -891,6 +902,7 @@ class EmvMerchantDecoder extends EmvMerchant {
                 self::LABEL_ACCOUNT_DESCRIPTION => parent::EMPTY_STRING
             ];
         }
+        $this->process_status[parent::ACCOUNT_KEY][parent::NETS_CHANNEL_NAME] = self::PROCESS_STATUS_ERROR;
         $this->accounts[parent::NETS_CHANNEL_NAME] = $account_info;
     }
 
