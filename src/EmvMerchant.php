@@ -830,7 +830,6 @@ class EmvMerchant {
     const PROMPTPAY_CHANNEL_NAME = 'TH.PROMPTPAY';
     const PROMPTPAY_ID = '29';
     const PROMPTPAY_ID_APP_ID = '00';
-    const PROMPTPAY_ID_APP_ID_KEY = 'guid';
     const PROMPTPAY_ID_MOBILE = '01';
     const PROMPTPAY_ID_TAX_ID = '02';
     const PROMPTPAY_ID_EWALLET_ID = '03';
@@ -843,8 +842,8 @@ class EmvMerchant {
         '00' => 'guid',
         '01' => 'mobile_number',
         '02' => 'tax_id',
-        '03' => 'ewallet_Id',
-        '04' => 'bank_account'
+        '03' => 'ewallet_id',
+        '04' => 'bank_account_number'
     ];
 
     /* | --------------------------------------------------------------------------------------------------------
@@ -896,6 +895,7 @@ class EmvMerchant {
     const ERROR_ID_PROMPTPAY_INVALID_PROXY = 'E019';
     const ERROR_ID_GENERAL_INVALID_FIELD = 'E020';
     const ERROR_ID_PROMPTPAY_INVALID_ID = 'E021';
+    const ERROR_ID_PROMPTPAY_BILL_INVALID_ID = 'E022';
 
     const ERROR_ID_MISSING_FIELD = 'E999';
     // WARNING CODES
@@ -933,6 +933,7 @@ class EmvMerchant {
         self::ERROR_ID_PROMPTPAY_INVALID_PROXY => "The proxy value is invalid. Expected a mobile phone number, tax ID, e-wallet ID, or bank account number, found '???'.",
         self::ERROR_ID_GENERAL_INVALID_FIELD => "The field ???1 is invalid, expected the value of type ???2, found '???3'.",
         self::ERROR_ID_PROMPTPAY_INVALID_ID => "The ID for PromptPay is invalid, expected 29, found '???'.",
+        self::ERROR_ID_PROMPTPAY_BILL_INVALID_ID => "The ID for PromptPay is invalid, expected 30, found '???'.",
         // ERROR GENERATOR
         self::ERROR_ID_MISSING_FIELD => "The field ID ??? has never been set.",
         // WARNING

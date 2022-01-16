@@ -1021,7 +1021,7 @@ class EmvMerchantDecoder extends EmvMerchant {
         // 00 GUID
         $account_info[$this->promptpay_keys[parent::PROMPTPAY_ID_APP_ID]] = [
             self::LABEL_ACCOUNT_ID          => parent::PROMPTPAY_ID_APP_ID,
-            self::LABEL_ACCOUNT_KEY         => parent::PROMPTPAY_ID_APP_ID_KEY,
+            self::LABEL_ACCOUNT_KEY         => $this->promptpay_keys[parent::PROMPTPAY_ID_APP_ID],
             self::LABEL_ACCOUNT_VALUE       => $account_raw[parent::PROMPTPAY_ID_APP_ID],
             self::LABEL_ACCOUNT_DESCRIPTION => parent::PROMPTPAY_CHANNEL_NAME
         ];
@@ -1074,7 +1074,7 @@ class EmvMerchantDecoder extends EmvMerchant {
         } else if ( ! empty($account_raw[parent::PROMPTPAY_ID_BANK_ACCT_NO]))
         {
             $bank_acct = $account_raw[parent::PROMPTPAY_ID_BANK_ACCT_NO];
-            if (! preg_match('/^\d{43}$/', $bank_acct))
+            if (! preg_match('/^\d{10,43}$/', $bank_acct))
             {
                 $status_error = TRUE;
                 $bank_acct = self::PROCESS_STATUS_ERROR;
@@ -1102,34 +1102,67 @@ class EmvMerchantDecoder extends EmvMerchant {
      */
     private function process_promptpay_bill($account_raw, $intId)
     {
-        $account[parent::ID_ORIGINAL_LABEL] = $intId;
-        $account[parent::STR_CHANNEL] = parent::PROMPTPAY_BILL_CHANNEL_NAME;
-        $account[$this->promptpay_bill_keys[parent::PROMPTPAY_BILL_APP_ID]] = $account_raw[parent::PROMPTPAY_BILL_APP_ID];
-        if (preg_match('/\d{15}/', $account_raw[parent::PROMPTPAY_BILL_BILLER_ID]))
+        // MUST BE 30
+        $status_error = FALSE;
+        if ($intId != parent::PROMPTPAY_BILL_ID)
         {
-            $account[$this->promptpay_bill_keys[parent::PROMPTPAY_BILL_BILLER_ID]] = $account_raw[parent::PROMPTPAY_BILL_BILLER_ID];
-        } else
+            $status_error = TRUE;
+            $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PROMPTPAY_BILL_INVALID_ID, $intId);
+        }
+        $account_info[parent::ID_ORIGINAL_LABEL] = $intId;
+        // 00 GUID
+        $account_info[$this->promptpay_bill_keys[parent::PROMPTPAY_BILL_APP_ID]] = [
+            self::LABEL_ACCOUNT_ID          => parent::PROMPTPAY_BILL_APP_ID,
+            self::LABEL_ACCOUNT_KEY         => $this->promptpay_bill_keys[parent::PROMPTPAY_BILL_APP_ID],
+            self::LABEL_ACCOUNT_VALUE       => $account_raw[parent::PROMPTPAY_BILL_APP_ID],
+            self::LABEL_ACCOUNT_DESCRIPTION => parent::PROMPTPAY_BILL_CHANNEL_NAME
+        ];
+        // 01 TAX_ID + SUFFIX (15-char)
+        $tax_id = $account_raw[parent::PROMPTPAY_BILL_BILLER_ID];
+        if (! preg_match('/^\d{15}$/', $tax_id))
         {
+            $status_error = TRUE;
+            $tax_id = self::PROCESS_STATUS_ERROR;
             $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->promptpay_bill_keys[parent::PROMPTPAY_BILL_BILLER_ID], 'Biller ID', $account_raw[parent::PROMPTPAY_BILL_BILLER_ID]]);
         }
-        if ($this->validate_ans_charset_len($account_raw[parent::PROMPTPAY_BILL_REF_1], 20))
+        $account_info[$this->promptpay_bill_keys[parent::PROMPTPAY_BILL_BILLER_ID]] = [
+            self::LABEL_ACCOUNT_ID          => parent::PROMPTPAY_BILL_BILLER_ID,
+            self::LABEL_ACCOUNT_KEY         => $this->promptpay_bill_keys[parent::PROMPTPAY_BILL_BILLER_ID],
+            self::LABEL_ACCOUNT_VALUE       => $tax_id,
+            self::LABEL_ACCOUNT_DESCRIPTION => parent::EMPTY_STRING
+        ];
+        // 02 REF NO
+        $ref_no_1 = $account_raw[parent::PROMPTPAY_BILL_REF_1];
+        if (! $this->validate_ans_charset_len($ref_no_1, parent::LENGTH_TWENTY))
         {
-            $account[$this->promptpay_bill_keys[parent::PROMPTPAY_BILL_REF_1]] = $account_raw[parent::PROMPTPAY_BILL_REF_1];
-        } else
-        {
+            $status_error = TRUE;
+            $ref_no_1 = self::PROCESS_STATUS_ERROR;
             $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->promptpay_bill_keys[parent::PROMPTPAY_BILL_REF_1], 'Reference ID 1', $account_raw[parent::PROMPTPAY_BILL_REF_1]]);
         }
-        if ( ! empty($account_raw[parent::PROMPTPAY_BILL_REF_2]))
+        $account_info[$this->promptpay_bill_keys[parent::PROMPTPAY_BILL_REF_1]] = [
+            self::LABEL_ACCOUNT_ID          => parent::PROMPTPAY_BILL_REF_1,
+            self::LABEL_ACCOUNT_KEY         => $this->promptpay_bill_keys[parent::PROMPTPAY_BILL_REF_1],
+            self::LABEL_ACCOUNT_VALUE       => $ref_no_1,
+            self::LABEL_ACCOUNT_DESCRIPTION => parent::EMPTY_STRING
+        ];
+        // 03 REF NO 2
+        $ref_no_2 = $account_raw[parent::PROMPTPAY_BILL_REF_2];
+        if (! empty($ref_no_2))
         {
-            if ($this->validate_ans_charset_len($account_raw[parent::PROMPTPAY_BILL_REF_2], 20))
+            if (! $this->validate_ans_charset_len($ref_no_2, parent::LENGTH_TWENTY))
             {
-                $account[$this->promptpay_bill_keys[parent::PROMPTPAY_BILL_REF_2]] = $account_raw[parent::PROMPTPAY_BILL_REF_2];
-            } else
-            {
+                $status_error = TRUE;
+                $ref_no_2 = self::PROCESS_STATUS_ERROR;
                 $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->promptpay_bill_keys[parent::PROMPTPAY_BILL_REF_2], 'Reference ID 2', $account_raw[parent::PROMPTPAY_BILL_REF_2]]);
             }
+            $account_info[$this->promptpay_bill_keys[parent::PROMPTPAY_BILL_REF_2]] = [
+                self::LABEL_ACCOUNT_ID          => parent::PROMPTPAY_BILL_REF_2,
+                self::LABEL_ACCOUNT_KEY         => $this->promptpay_bill_keys[parent::PROMPTPAY_BILL_REF_2],
+                self::LABEL_ACCOUNT_VALUE       => $ref_no_2,
+                self::LABEL_ACCOUNT_DESCRIPTION => parent::EMPTY_STRING
+            ];
         }
-        $this->accounts[parent::PROMPTPAY_BILL_CHANNEL_NAME] = $account;
+        $this->process_status[parent::ACCOUNT_KEY][parent::PROMPTPAY_BILL_CHANNEL_NAME] = ($status_error ? self::PROCESS_STATUS_ERROR : self::PROCESS_STATUS_SUCCESS);
+        $this->accounts[parent::PROMPTPAY_BILL_CHANNEL_NAME] = $account_info;
     }
-
 }
