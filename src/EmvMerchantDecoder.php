@@ -14,30 +14,30 @@ class EmvMerchantDecoder extends EmvMerchant {
     const LABEL_ACCOUNT_VALUE       = 'value';
     const LABEL_ACCOUNT_DESCRIPTION = 'description';
 
-    const PROCESS_STATUS_PENDING = 'pending';
-    const PROCESS_STATUS_SUCCESS = 'success';
-    const PROCESS_STATUS_ERROR   = 'error';
-    const PROCESS_STATUS_WARNING = 'warning';
+    const PROCESS_STATUS_PENDING = 'PENDING';
+    const PROCESS_STATUS_SUCCESS = 'SUCCESS';
+    const PROCESS_STATUS_ERROR   = 'ERROR';
+    const PROCESS_STATUS_WARNING = 'WARNING';
 
     /**
      * @var string[] Status of each fields to be processed
      */
     private $process_status = [
-        'payload_format_indicator'         => self::PROCESS_STATUS_PENDING,
-        'point_of_initiation'              => self::PROCESS_STATUS_PENDING,
-        'accounts'                         => self::PROCESS_STATUS_PENDING,
-        'merchant_category_code'           => self::PROCESS_STATUS_PENDING,
-        'transaction_currency'             => self::PROCESS_STATUS_PENDING,
-        'transaction_amount'               => self::PROCESS_STATUS_PENDING,
-        'tip_or_convenience_fee_indicator' => self::PROCESS_STATUS_PENDING,
-        'convenience_fee_fixed'            => self::PROCESS_STATUS_PENDING,
-        'convenience_fee_percentage'       => self::PROCESS_STATUS_PENDING,
-        'country_code'                     => self::PROCESS_STATUS_PENDING,
-        'merchant_name'                    => self::PROCESS_STATUS_PENDING,
-        'merchant_city'                    => self::PROCESS_STATUS_PENDING,
-        'merchant_postal_code'             => self::PROCESS_STATUS_PENDING,
-        'additional_fields'                => self::PROCESS_STATUS_PENDING,
-        'crc'                              => self::PROCESS_STATUS_PENDING,
+        parent::PAYLOAD_FORMAT_INDICATOR_KEY         => self::PROCESS_STATUS_PENDING,
+        parent::POINT_OF_INITIATION_KEY              => self::PROCESS_STATUS_PENDING,
+        parent::ACCOUNT_KEY                          => [],
+        parent::MERCHANT_CATEGORY_CODE_KEY           => self::PROCESS_STATUS_PENDING,
+        parent::TRANSACTION_CURRENCY_KEY             => self::PROCESS_STATUS_PENDING,
+        parent::TRANSACTION_AMOUNT_KEY               => self::PROCESS_STATUS_PENDING,
+        parent::TIP_OR_CONVENIENCE_FEE_INDICATOR_KEY => self::PROCESS_STATUS_PENDING,
+        parent::VALUE_OF_FEE_FIXED_KEY               => self::PROCESS_STATUS_PENDING,
+        parent::VALUE_OF_FEE_PERCENTAGE_KEY          => self::PROCESS_STATUS_PENDING,
+        parent::COUNTRY_CODE_KEY                     => self::PROCESS_STATUS_PENDING,
+        parent::MERCHANT_NAME_KEY                    => self::PROCESS_STATUS_PENDING,
+        parent::MERCHANT_CITY_KEY                    => self::PROCESS_STATUS_PENDING,
+        parent::MERCHANT_POSTAL_CODE_KEY             => self::PROCESS_STATUS_PENDING,
+        parent::ADDITIONAL_DATA_FIELDS_KEY           => self::PROCESS_STATUS_PENDING,
+        parent::CRC_KEY                              => self::PROCESS_STATUS_PENDING,
     ];
 
     /**
@@ -135,7 +135,7 @@ class EmvMerchantDecoder extends EmvMerchant {
                 case parent::ID_MERCHANT_INFORMATION_LANGUAGE_TEMPLATE:
                     $this->add_message(parent::ID_MERCHANT_INFORMATION_LANGUAGE_TEMPLATE, parent::MESSAGE_TYPE_WARNING, parent::WARNING_ID_LANGUAGE_TEMPLATE_NOT_SUPPORTED);
                     break;
-                default: // todo
+                default:
                     $this->process_accounts($intId, $strValue);
             }
             $string = substr($string, parent::LENGTH_FOUR + $intLength);
@@ -151,6 +151,8 @@ class EmvMerchantDecoder extends EmvMerchant {
 
     /**
      * Just return error array
+     * @param int $id
+     * @param string $key
      * @return array
      */
     private function build_error_array($id, $key)
@@ -679,6 +681,7 @@ class EmvMerchantDecoder extends EmvMerchant {
      */
     private function process_paynow($account_raw, $intId)
     {
+        $status_error = FALSE;
         $account_info[parent::ID_ORIGINAL_LABEL] = $intId;
         // CHECK ERROR - PROXY TYPE/VALUE
         $proxy_type  = $account_raw[parent::PAYNOW_ID_PROXY_TYPE];
@@ -690,6 +693,7 @@ class EmvMerchantDecoder extends EmvMerchant {
                 // Accept all country's phone number with country code (E.164 format)
                 if (! preg_match('/^\+(\d){8,15}$/', $proxy_value))
                 {
+                    $status_error = TRUE;
                     $this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_INVALID_PROXY_VALUE, [$this->paynow_proxy_type[parent::PAYNOW_PROXY_MOBILE], $proxy_value]);
                 }
             } else
@@ -703,11 +707,13 @@ class EmvMerchantDecoder extends EmvMerchant {
                  */
                 if (! preg_match('/^(\d{8}[A-Z]|(19|20)\d{7}[A-Z]|(S|T)\d{2}[A-Z]{2}\d{4}[A-Z])([0-9A-Z]{2,4})?$/', $proxy_value))
                 {
+                    $status_error = TRUE;
                     $this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_INVALID_PROXY_VALUE, [$this->paynow_proxy_type[parent::PAYNOW_PROXY_UEN], $proxy_value]);
                 }
             }
         } else
         {
+            $status_error = TRUE;
             $this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_MISSING_PROXY_TYPE);
         }
         // CHECK ERROR - EDITABLE
@@ -718,13 +724,16 @@ class EmvMerchantDecoder extends EmvMerchant {
             {
                 if ($editable == parent::PAYNOW_AMOUNT_EDITABLE_FALSE && $this->point_of_initiation == parent::POINT_OF_INITIATION_STATIC_VALUE)
                 {
+                    $status_error = TRUE;
                     $this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_EDITABLE_FALSE_BUT_STATIC);
                 } else if ($editable == parent::PAYNOW_AMOUNT_EDITABLE_TRUE && $this->point_of_initiation == parent::POINT_OF_INITIATION_DYNAMIC_VALUE)
                 {
+                    $status_error = TRUE;
                     $this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_EDITABLE_TRUE_BUT_DYNAMIC);
                 }
             } else
             {
+                $status_error = TRUE;
                 $this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_EDITABLE_INVALID, $editable);
             }
         }
@@ -739,10 +748,12 @@ class EmvMerchantDecoder extends EmvMerchant {
                 $now = date(parent::FORMAT_DATE);
                 if ($expiry_date < $now)
                 {
+                    $status_error = TRUE;
                     $this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_EXPIRED_QR, $expiry_date);
                 }
             } else
             {
+                $status_error = TRUE;
                 $this->add_message($intId, parent::MESSAGE_TYPE_ERROR, parent::ERROR_ID_PAYNOW_EXPIRY_DATE_INVALID, $account_raw[parent::PAYNOW_ID_EXPIRY_DATE]);
             }
         }
@@ -768,6 +779,7 @@ class EmvMerchantDecoder extends EmvMerchant {
                 self::LABEL_ACCOUNT_DESCRIPTION => $description
             ];
         }
+        $this->process_status[parent::ACCOUNT_KEY][parent::PAYNOW_CHANNEL_NAME] = ($status_error ? self::PROCESS_STATUS_ERROR : self::PROCESS_STATUS_SUCCESS);
         $this->accounts[parent::PAYNOW_CHANNEL_NAME] = $account_info;
     }
 
@@ -778,10 +790,12 @@ class EmvMerchantDecoder extends EmvMerchant {
      */
     private function process_favepay($account_raw, $intId)
     {
+        $status_error = FALSE;
         $account_info[parent::ID_ORIGINAL_LABEL] = $intId;
         // REVERSE DOMAIN
         if (! filter_var($account_raw[parent::FAVE_ID_URL], FILTER_VALIDATE_URL))
         {
+            $status_error = TRUE;
             $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->favepay_keys[parent::FAVE_ID_URL], 'URL', $account_raw[parent::FAVE_ID_URL]]);
         }
         // GENERATE DATA
@@ -795,6 +809,7 @@ class EmvMerchantDecoder extends EmvMerchant {
                 self::LABEL_ACCOUNT_DESCRIPTION => parent::EMPTY_STRING
             ];
         }
+        $this->process_status[parent::ACCOUNT_KEY][parent::FAVE_CHANNEL_NAME] = ($status_error ? self::PROCESS_STATUS_ERROR : self::PROCESS_STATUS_SUCCESS);
         $this->accounts[parent::FAVE_CHANNEL_NAME] = $account_info;
     }
 
@@ -805,10 +820,12 @@ class EmvMerchantDecoder extends EmvMerchant {
      */
     private function process_alipay($account_raw, $intId)
     {
+        $status_error = FALSE;
         $account_info[parent::ID_ORIGINAL_LABEL] = $intId;
         // REVERSE DOMAIN
         if (! filter_var($account_raw[parent::ALIPAY_ID_URL], FILTER_VALIDATE_URL))
         {
+            $status_error = TRUE;
             $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->alipay_keys[parent::ALIPAY_ID_URL], 'URL', $account_raw[parent::ALIPAY_ID_URL]]);
         }
         // GENERATE DATA
@@ -822,6 +839,7 @@ class EmvMerchantDecoder extends EmvMerchant {
                 self::LABEL_ACCOUNT_DESCRIPTION => parent::EMPTY_STRING
             ];
         }
+        $this->process_status[parent::ACCOUNT_KEY][parent::ALIPAY_CHANNEL_NAME] = ($status_error ? self::PROCESS_STATUS_ERROR : self::PROCESS_STATUS_SUCCESS);
         $this->accounts[parent::ALIPAY_CHANNEL_NAME] = $account_info;
     }
 
@@ -832,10 +850,12 @@ class EmvMerchantDecoder extends EmvMerchant {
      */
     private function process_airpay($account_raw, $intId)
     {
+        $status_error = FALSE;
         $account_info[parent::ID_ORIGINAL_LABEL] = $intId;
         // CHECK ERROR - ACCOUNT INFO
         if (! $this->validate_ans_charset($account_raw[parent::AIRPAY_ID_MERCHANT_ACCOUNT_INFORMATION], parent::MODE_SANITIZER))
         {
+            $status_error = TRUE;
             $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->airpay_keys[parent::AIRPAY_ID_MERCHANT_ACCOUNT_INFORMATION], 'Merchant Account Information', $account_raw[parent::AIRPAY_ID_MERCHANT_ACCOUNT_INFORMATION]]);
         }
         // GENERATE DATA
@@ -849,6 +869,7 @@ class EmvMerchantDecoder extends EmvMerchant {
                 self::LABEL_ACCOUNT_DESCRIPTION => parent::EMPTY_STRING
             ];
         }
+        $this->process_status[parent::ACCOUNT_KEY][parent::AIRPAY_CHANNEL_NAME] = ($status_error ? self::PROCESS_STATUS_ERROR : self::PROCESS_STATUS_SUCCESS);
         $this->accounts[parent::AIRPAY_CHANNEL_NAME] = $account_info;
     }
 
@@ -902,7 +923,7 @@ class EmvMerchantDecoder extends EmvMerchant {
                 self::LABEL_ACCOUNT_DESCRIPTION => parent::EMPTY_STRING
             ];
         }
-        $this->process_status[parent::ACCOUNT_KEY][parent::NETS_CHANNEL_NAME] = self::PROCESS_STATUS_ERROR;
+        $this->process_status[parent::ACCOUNT_KEY][parent::NETS_CHANNEL_NAME] = ($status_error ? self::PROCESS_STATUS_ERROR : self::PROCESS_STATUS_SUCCESS);
         $this->accounts[parent::NETS_CHANNEL_NAME] = $account_info;
     }
 
@@ -913,41 +934,49 @@ class EmvMerchantDecoder extends EmvMerchant {
      */
     private function process_sgqr($account_raw, $intId)
     {
+        $status_error = FALSE;
         $account_info[parent::ID_ORIGINAL_LABEL] = $intId;
         // 01 ID: 12-HEX
         if (! $this->validate_ans_charset_len($account_raw[parent::SGQR_ID_IDENTIFICATION_NUMBER], 12))
         {
+            $status_error = TRUE;
             $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->sgqr_keys[parent::SGQR_ID_IDENTIFICATION_NUMBER], 'ID', $account_raw[parent::SGQR_ID_IDENTIFICATION_NUMBER]]);
         }
         // 02 VERSION: NN.NNNN
         if (! preg_match('/\d{2}\.\d{4}/', $account_raw[parent::SGQR_ID_VERSION]))
         {
+            $status_error = TRUE;
             $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->sgqr_keys[parent::SGQR_ID_VERSION], 'Version', $account_raw[parent::SGQR_ID_VERSION]]);
         }
         // 03 POSTAL CODE: NNNNNN
         if (! preg_match('/\d{6}/', $account_raw[parent::SGQR_ID_POSTAL_CODE]))
         {
+            $status_error = TRUE;
             $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->sgqr_keys[parent::SGQR_ID_POSTAL_CODE], 'Postal Code', $account_raw[parent::SGQR_ID_POSTAL_CODE]]);
         }
         // 04 LEVEL
         if (! $this->validate_ans_charset_len($account_raw[parent::SGQR_ID_LEVEL], 3))
         {
+            $status_error = TRUE;
             $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->sgqr_keys[parent::SGQR_ID_LEVEL], 'Level', $account_raw[parent::SGQR_ID_LEVEL]]);
         }
         // 05 UNIT NUMBER
         if (! $this->validate_ans_charset_len($account_raw[parent::SGQR_ID_UNIT_NUMBER], 5))
         {
+            $status_error = TRUE;
             $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->sgqr_keys[parent::SGQR_ID_UNIT_NUMBER], 'Level', $account_raw[parent::SGQR_ID_UNIT_NUMBER]]);
         }
         // 06 MISC
         if (! $this->validate_ans_charset_len($account_raw[parent::SGQR_ID_MISC], 10))
         {
+            $status_error = TRUE;
             $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->sgqr_keys[parent::SGQR_ID_MISC], 'Misc.', $account_raw[parent::SGQR_ID_MISC]]);
         }
         // 07 NEW VERSION DATE
         $new_version_date = $this->parse_date_yyyymmdd($account_raw[parent::SGQR_ID_VERSION_DATE]);
         if (FALSE == $new_version_date)
         {
+            $status_error = TRUE;
             $this->add_message($intId, self::MESSAGE_TYPE_ERROR, parent::ERROR_ID_GENERAL_INVALID_FIELD, [$this->sgqr_keys[parent::SGQR_ID_VERSION_DATE], 'New Version Date.', $account_raw[parent::SGQR_ID_VERSION_DATE]]);
         }
         foreach ($account_raw as $id => $value)
@@ -965,6 +994,7 @@ class EmvMerchantDecoder extends EmvMerchant {
                 self::LABEL_ACCOUNT_DESCRIPTION => $description
             ];
         }
+        $this->process_status[parent::ACCOUNT_KEY][parent::SGQR_CHANNEL_NAME] = ($status_error ? self::PROCESS_STATUS_ERROR : self::PROCESS_STATUS_SUCCESS);
         $this->accounts[parent::SGQR_CHANNEL_NAME] = $account_info;
     }
 
