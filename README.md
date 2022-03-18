@@ -33,7 +33,7 @@ Table 1: Data Objects Under the Root of a QR Code
 
 | ID | Length  | Format | Description              | Presence | Notes |
 |----|---------|--------|--------------------------|----------|-------|
-| 00 | 02      | N      | Payload format indicator | M | A fixed value of '01' |
+| 00 | 02      | N      | Payload format indicator | M | A fixed value of '01' (or '00', as used by Singapore SGQR) |
 | 01 | 02      | N      | Point of initiation      | O | '11' for static QR code or '12' for dynamic QR code |
 | 02-51 | <=99 | ANS    | Merchant account information | M | At least 1 account for the payment to be made to, refer to Table 2 below for the allocation of the IDs, and Table 5 for the data objects under each account |
 | 52 | 04      | N      | Merchant category code   | M |  ISO 18245 code for retail financial services, use '0000' if unknown or not required |
