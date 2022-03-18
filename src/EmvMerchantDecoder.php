@@ -172,7 +172,8 @@ class EmvMerchantDecoder extends EmvMerchant {
      */
     private function process_payload_format_indicator($strValue)
     {
-        if (parent::PAYLOAD_FORMAT_INDICATOR_VALUE == $strValue)
+        if (parent::PAYLOAD_FORMAT_INDICATOR_VALUE == $strValue
+         || parent::PAYLOAD_FORMAT_INDICATOR_VALUE_ALT == $strValue)
         {
             $this->process_status[parent::PAYLOAD_FORMAT_INDICATOR_KEY] = self::PROCESS_STATUS_SUCCESS;
             $this->payload_format_indicator = [
@@ -663,8 +664,8 @@ class EmvMerchantDecoder extends EmvMerchant {
             }
         } elseif (isset($this->reserved_ids[$intId]))
         {
-            $this->process_status[parent::ACCOUNT_KEY][$this->reserved_ids[$intId]] = self::PROCESS_STATUS_SUCCESS;
-            $this->accounts[$this->reserved_ids[$intId]] = [
+            $this->process_status[parent::ACCOUNT_KEY][$this->reserved_ids[$intId] . "[$intId]"] = self::PROCESS_STATUS_SUCCESS;
+            $this->accounts[$this->reserved_ids[$intId] . "[$intId]"] = [
                 parent::ID_ORIGINAL_LABEL => $intId,
                 parent::ID_PLAIN_VALUE_LABEL => $origStrValue
             ];
