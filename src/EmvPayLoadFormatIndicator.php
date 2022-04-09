@@ -15,7 +15,7 @@ class EmvPayLoadFormatIndicator {
 
     /**
      * EmvPayLoadFormatIndicator constructor.
-     * @param null $string
+     * @param string|null $string
      */
     public function __construct($string = null)
     {
