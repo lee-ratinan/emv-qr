@@ -5,6 +5,7 @@ namespace EMVQR;
 require_once 'EmvPayLoadFormatIndicator.php';
 require_once 'EmvPointOfInitiation.php';
 require_once 'EmvMerchantCategoryCode.php';
+require_once 'EmvTransactionCurrency.php';
 
 /**
  * Class EmvMerchant
@@ -50,7 +51,7 @@ class EmvMerchant {
      * ID 53
      * @var
      */
-    private $transaction_currency;
+    public $transaction_currency;
 
     /**
      * ID 54
@@ -143,9 +144,9 @@ class EmvMerchant {
                 case self::ID_MERCHANT_CATEGORY_CODE:
                     $this->merchant_category_code = new EmvMerchantCategoryCode($strValue);
                     break;
-//                case self::ID_TRANSACTION_CURRENCY:
-//                    $this->process_currency($strValue);
-//                    break;
+                case self::ID_TRANSACTION_CURRENCY:
+                    $this->transaction_currency = new EmvTransactionCurrency($strValue);
+                    break;
 //                case self::ID_TRANSACTION_AMOUNT:
 ////                    $this->process_amount($strValue);
 //                    break;
@@ -206,12 +207,16 @@ class EmvMerchant {
 
     /**
      * WRITE QR CODE
+     * @param string $point_of_initiation_method
+     * @param string $merchant_category_code
+     * @param string $transaction_currency
      */
-    public function write($point_of_initiation_method)
+    public function write($point_of_initiation_method, $merchant_category_code, $transaction_currency)
     {
         $this->payload_format_indicator = (new EmvPayLoadFormatIndicator())->generate();
         $this->point_of_initiation_method = (new EmvPointOfInitiation())->generate($point_of_initiation_method);
-        $this->merchant_category_code = (new EmvMerchantCategoryCode())->generate('0742');
+        $this->merchant_category_code = (new EmvMerchantCategoryCode())->generate($merchant_category_code);
+        $this->transaction_currency = (new EmvTransactionCurrency())->generate($transaction_currency);
     }
 
 }

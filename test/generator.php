@@ -2,7 +2,7 @@
 use \EMVQR\EmvMerchant;
 require_once '../src/EmvMerchant.php';
 $emv = new EmvMerchant();
-$emv->write(\EMVQR\EmvPointOfInitiation::TYPE_DYNAMIC);
+$emv->write(\EMVQR\EmvPointOfInitiation::TYPE_DYNAMIC, '0000', 'SGD');
 $json = json_encode($emv, JSON_PRETTY_PRINT);
 ?>
 <html>
