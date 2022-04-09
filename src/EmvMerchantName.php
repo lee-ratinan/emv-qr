@@ -32,7 +32,6 @@ class EmvMerchantName {
             {
                 $this->error = TRUE;
             }
-
         }
     }
 

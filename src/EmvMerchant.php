@@ -11,6 +11,7 @@ require_once 'EmvTipFeeIndicator.php';
 require_once 'EmvConvenienceFee.php';
 require_once 'EmvCountryCode.php';
 require_once 'EmvMerchantName.php';
+require_once 'EmvMerchantCity.php';
 
 /**
  * Class EmvMerchant
@@ -110,7 +111,7 @@ class EmvMerchant {
      * ID 60
      * @var
      */
-    private $merchant_city;
+    public $merchant_city;
 
     /**
      * ID 61
@@ -184,15 +185,9 @@ class EmvMerchant {
                 case self::ID_MERCHANT_NAME:
                     $this->merchant_name = new EmvMerchantName($strValue);
                     break;
-//                case self::ID_MERCHANT_CITY:
-////                    $this->process_status[self::MERCHANT_CITY_KEY] = self::PROCESS_STATUS_SUCCESS;
-////                    $this->merchant_city = [
-////                        self::LABEL_ACCOUNT_ID          => self::ID_MERCHANT_CITY,
-////                        self::LABEL_ACCOUNT_KEY         => self::MERCHANT_CITY_KEY,
-////                        self::LABEL_ACCOUNT_VALUE       => $this->validate_ans_charset($strValue, self::MODE_SANITIZER),
-////                        self::LABEL_ACCOUNT_DESCRIPTION => self::EMPTY_STRING
-////                    ];
-//                    break;
+                case self::ID_MERCHANT_CITY:
+                    $this->merchant_city = new EmvMerchantCity($strValue);
+                    break;
 //                case self::ID_MERCHANT_POSTAL_CODE:
 ////                    $this->process_status[self::MERCHANT_POSTAL_CODE_KEY] = self::PROCESS_STATUS_SUCCESS;
 ////                    $this->merchant_postal_code = [
@@ -224,12 +219,13 @@ class EmvMerchant {
      * @param string $transaction_currency
      * @param string $country_code
      * @param string $merchant_name
+     * @param string $merchant_city
      * @param string $merchant_category_code (optional)
      * @param int|float $transaction_amount (optional)
      * @param string $tip_or_fee_indicator (optional)
      * @param int|float $fee_amount (optional)
      */
-    public function write($point_of_initiation_method, $transaction_currency, $country_code, $merchant_name, $merchant_category_code = null, $transaction_amount = null, $tip_or_fee_indicator = null, $fee_amount = 0)
+    public function write($point_of_initiation_method, $transaction_currency, $country_code, $merchant_name, $merchant_city, $merchant_category_code = null, $transaction_amount = null, $tip_or_fee_indicator = null, $fee_amount = 0)
     {
         // MODES
         $need_transaction_amount = null;
@@ -290,8 +286,25 @@ class EmvMerchant {
         }
         // 58 Country code, mandatory
         $this->country_code = (new EmvCountryCode())->generate($country_code, $this->transaction_currency);
+        if (empty($this->country_code))
+        {
+            $this->error = 'COUNTRY CODE IS INVALID';
+            return;
+        }
         // 59 Merchant name, mandatory
         $this->merchant_name = (new EmvMerchantName())->generate($merchant_name);
+        if (empty($this->merchant_name))
+        {
+            $this->error = 'MERCHANT NAME IS INVALID';
+            return;
+        }
+        // 60 Merchant city, mandatory
+        $this->merchant_city = (new EmvMerchantCity())->generate($merchant_city);
+        if (empty($this->merchant_city))
+        {
+            $this->error = 'MERCHANT CITY IS INVALID';
+            return;
+        }
 
         // VALIDATE AND APPEND /////////////////////////////////////////////////////////////////////////////////////////
         $this->qr_string = $this->payload_format_indicator; // 00
@@ -305,6 +318,7 @@ class EmvMerchant {
         $this->qr_string .= $this->value_of_convenience_fee_percentage; // 57
         $this->qr_string .= $this->country_code; // 58
         $this->qr_string .= $this->merchant_name; // 59
+        $this->qr_string .= $this->merchant_city; // 60
     }
 
 }
