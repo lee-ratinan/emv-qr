@@ -6,6 +6,7 @@ require_once 'EmvPayLoadFormatIndicator.php';
 require_once 'EmvPointOfInitiation.php';
 require_once 'EmvMerchantCategoryCode.php';
 require_once 'EmvTransactionCurrency.php';
+require_once 'EmvTransactionAmount.php';
 
 /**
  * Class EmvMerchant
@@ -57,7 +58,7 @@ class EmvMerchant {
      * ID 54
      * @var
      */
-    private $transaction_amount;
+    public $transaction_amount;
 
     /**
      * ID 55
@@ -147,9 +148,9 @@ class EmvMerchant {
                 case self::ID_TRANSACTION_CURRENCY:
                     $this->transaction_currency = new EmvTransactionCurrency($strValue);
                     break;
-//                case self::ID_TRANSACTION_AMOUNT:
-////                    $this->process_amount($strValue);
-//                    break;
+                case self::ID_TRANSACTION_AMOUNT:
+                    $this->transaction_amount = new EmvTransactionAmount($strValue);
+                    break;
 //                case self::ID_TIP_OR_CONVENIENCE_FEE_INDICATOR:
 ////                    $this->process_fee_indicator($strValue);
 //                    break;
@@ -210,13 +211,15 @@ class EmvMerchant {
      * @param string $point_of_initiation_method
      * @param string $merchant_category_code
      * @param string $transaction_currency
+     * @param int|float $transaction_amount
      */
-    public function write($point_of_initiation_method, $merchant_category_code, $transaction_currency)
+    public function write($point_of_initiation_method, $merchant_category_code, $transaction_currency, $transaction_amount)
     {
         $this->payload_format_indicator = (new EmvPayLoadFormatIndicator())->generate();
         $this->point_of_initiation_method = (new EmvPointOfInitiation())->generate($point_of_initiation_method);
         $this->merchant_category_code = (new EmvMerchantCategoryCode())->generate($merchant_category_code);
         $this->transaction_currency = (new EmvTransactionCurrency())->generate($transaction_currency);
+        $this->transaction_amount = (new EmvTransactionAmount())->generate($transaction_amount);
     }
 
 }
