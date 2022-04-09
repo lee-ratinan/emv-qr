@@ -8,6 +8,7 @@ require_once 'EmvMerchantCategoryCode.php';
 require_once 'EmvTransactionCurrency.php';
 require_once 'EmvTransactionAmount.php';
 require_once 'EmvTipFeeIndicator.php';
+require_once 'EmvConvenienceFee.php';
 
 /**
  * Class EmvMerchant
@@ -30,6 +31,18 @@ class EmvMerchant {
     const ID_ADDITIONAL_DATA_FIELD_TEMPLATE = '62';
     const ID_CRC = '63';
     const ID_MERCHANT_INFORMATION_LANGUAGE_TEMPLATE = '64';
+
+    /**
+     * Full QR String
+     * @var
+     */
+    public $qr_string;
+
+    /**
+     * Error message
+     * @var
+     */
+    public $error;
 
     /**
      * ID 00
@@ -128,6 +141,8 @@ class EmvMerchant {
     {
         // SOME CLEANING
         $string = str_replace("\u{c2a0}", ' ', $qr_string);
+        // KEEP INPUT
+        $this->qr_string = $string;
         // LOOP
         while ( ! empty($string))
         {
@@ -155,12 +170,12 @@ class EmvMerchant {
                 case self::ID_TIP_OR_CONVENIENCE_FEE_INDICATOR:
                     $this->tip_or_convenience_fee_indicator = new EmvTipFeeIndicator($strValue);
                     break;
-//                case self::ID_VALUE_OF_CONVENIENCE_FEE_FIXED:
-//                    $this->process_fee_value_fixed($strValue);
-//                    break;
-//                case self::ID_VALUE_OF_CONVENIENCE_FEE_PERCENTAGE:
-//                    $this->process_fee_value_percentage($strValue);
-//                    break;
+                case self::ID_VALUE_OF_CONVENIENCE_FEE_FIXED:
+                    $this->value_of_convenience_fee_fixed = new EmvConvenienceFee($strValue, self::ID_VALUE_OF_CONVENIENCE_FEE_FIXED);
+                    break;
+                case self::ID_VALUE_OF_CONVENIENCE_FEE_PERCENTAGE:
+                    $this->value_of_convenience_fee_percentage = new EmvConvenienceFee($strValue, self::ID_VALUE_OF_CONVENIENCE_FEE_PERCENTAGE);
+                    break;
 //                case self::ID_COUNTRY_CODE:
 ////                    $this->process_country_code($strValue);
 //                    break;
@@ -218,29 +233,73 @@ class EmvMerchant {
      */
     public function write($point_of_initiation_method, $transaction_currency, $merchant_category_code = null, $transaction_amount = null, $tip_or_fee_indicator = null, $fee_amount = 0)
     {
+        // MODES
+        $need_transaction_amount = null;
+
+        // 00 Payload format indicator, mandatory, always there
         $this->payload_format_indicator = (new EmvPayLoadFormatIndicator())->generate();
+        // 01 Point of initiation method, optional
         $this->point_of_initiation_method = (new EmvPointOfInitiation())->generate($point_of_initiation_method);
-        $this->transaction_currency = (new EmvTransactionCurrency())->generate($transaction_currency);
+        $need_transaction_amount = (EmvPointOfInitiation::TYPE_DYNAMIC == $point_of_initiation_method);
+        // 02-51
+        // 52 Merchant category code, mandatory, always there (default: 0000)
         if (empty($merchant_category_code))
         {
             $merchant_category_code = EmvMerchantCategoryCode::DEFAULT_CODE;
         }
         $this->merchant_category_code = (new EmvMerchantCategoryCode())->generate($merchant_category_code);
+        // 53 Transaction currency, mandatory
+        $this->transaction_currency = (new EmvTransactionCurrency())->generate($transaction_currency);
+        if (empty($this->transaction_currency))
+        {
+            $this->error = 'TRANSACTION CURRENCY IS INVALID';
+            return;
+        }
+        // 54 Transaction amount, conditional
         if ( ! empty($transaction_amount))
         {
             $this->transaction_amount = (new EmvTransactionAmount())->generate($transaction_amount);
         }
+        if (TRUE == $need_transaction_amount && empty($this->transaction_amount))
+        {
+            $this->error = 'TRANSACTION AMOUNT IS INVALID';
+            return;
+        }
+        // 55 Tip or Convenience Fee Indicator, optional
+        // 56-57 Convenience Fee, conditional
         if ( ! empty($tip_or_fee_indicator))
         {
             $this->tip_or_convenience_fee_indicator = (new EmvTipFeeIndicator())->generate($tip_or_fee_indicator);
             if (EmvTipFeeIndicator::TIP_FEE_FIXED == $tip_or_fee_indicator)
             {
-                $this->value_of_convenience_fee_fixed = '';
+                $value = floatval($fee_amount);
+                $this->value_of_convenience_fee_fixed = (new EmvConvenienceFee())->generate(EmvConvenienceFee::ID_FIXED, $value);
+                if (empty($this->value_of_convenience_fee_fixed))
+                {
+                    $this->error = 'VALUE OF CONVENIENCE FEE FIXED IS INVALID';
+                    return;
+                }
             } else if (EmvTipFeeIndicator::TIP_FEE_PERCENT == $tip_or_fee_indicator)
             {
-                $this->value_of_convenience_fee_fixed = '';
+                $value = floatval($fee_amount);
+                $this->value_of_convenience_fee_percentage = (new EmvConvenienceFee())->generate(EmvConvenienceFee::ID_PERCENTAGE, $value);
+                if (empty($this->value_of_convenience_fee_percentage))
+                {
+                    $this->error = 'VALUE OF CONVENIENCE FEE PERCENTAGE IS INVALID';
+                    return;
+                }
             }
         }
+        // VALIDATE AND APPEND /////////////////////////////////////////////////////////////////////////////////////////
+        $this->qr_string = $this->payload_format_indicator; // 00
+        $this->qr_string .= $this->point_of_initiation_method; // 01
+        // merchant accounts
+        $this->qr_string .= $this->merchant_category_code; // 52
+        $this->qr_string .= $this->transaction_currency; // 53
+        $this->qr_string .= $this->transaction_amount; // 54
+        $this->qr_string .= $this->tip_or_convenience_fee_indicator; // 55
+        $this->qr_string .= $this->value_of_convenience_fee_fixed; // 56
+        $this->qr_string .= $this->value_of_convenience_fee_percentage; // 57
     }
 
 }

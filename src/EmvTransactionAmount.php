@@ -21,7 +21,7 @@ class EmvTransactionAmount {
         if ( ! is_null($string))
         {
             $this->id = self::ID;
-            if (13 < strlen($string) && preg_match('/^(\d+|\d+\.|\d+\.\d+)$/', $string))
+            if (13 >= strlen($string) && preg_match('/^(\d+|\d+\.|\d+\.\d+)$/', $string))
             {
                 $this->value = $string;
                 $stringFloat = floatval($string);
