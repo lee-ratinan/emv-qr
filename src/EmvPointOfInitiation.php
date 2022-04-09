@@ -28,12 +28,14 @@ class EmvPointOfInitiation {
             {
                 $this->value = self::TYPE_STATIC;
                 $this->description = self::STATIC_DESCRIPTION;
+                $this->error = FALSE;
             } else
             {
                 if (self::TYPE_DYNAMIC == $string)
                 {
                     $this->value = self::TYPE_DYNAMIC;
                     $this->description = self::DYNAMIC_DESCRIPTION;
+                    $this->error = FALSE;
                 } else
                 {
                     $this->error = TRUE;
