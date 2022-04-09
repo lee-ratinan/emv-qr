@@ -25,7 +25,7 @@ class EmvConvenienceFee {
             {
                 $floatValue = floatval($value);
                 $this->value = $value;
-                $this->description = number_format($floatValue, 2, '.', ',');
+                $this->description = 'FIXED FEE: ' . number_format($floatValue, 2, '.', ',');
                 $this->error = FALSE;
             } else if (self::ID_PERCENTAGE == $id && preg_match('/^(\d+|\d+\.|\d+\.\d+)$/', $value))
             {
@@ -36,7 +36,7 @@ class EmvConvenienceFee {
                 } else
                 {
                     $this->value = $value;
-                    $this->description = number_format($floatValue, 2, '.', ',');
+                    $this->description = 'FEE: ' . number_format($floatValue, 2, '.', ',') . '%';
                     $this->error = FALSE;
                 }
             } else

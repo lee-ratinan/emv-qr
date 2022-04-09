@@ -396,7 +396,7 @@ class EmvMerchantCategoryCode {
             if (isset($this->merchant_category_codes[$code]))
             {
                 $this->value = $code;
-                $this->description = $this->merchant_category_codes[$code];
+                $this->description = 'MERCHANT CATEGORY: ' . strtoupper($this->merchant_category_codes[$code]);
                 $this->error = FALSE;
             } else
             {

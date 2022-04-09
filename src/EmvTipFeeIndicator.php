@@ -31,7 +31,7 @@ class EmvTipFeeIndicator {
             if (isset($this->indicators[$code]))
             {
                 $this->value = $code;
-                $this->description = $this->indicators[$code];
+                $this->description = strtoupper($this->indicators[$code]);
                 $this->error = FALSE;
             } else
             {

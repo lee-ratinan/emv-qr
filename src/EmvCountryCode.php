@@ -35,7 +35,7 @@ class EmvCountryCode {
             if (isset($this->countries[$code]))
             {
                 $this->value = $code;
-                $this->description = $this->countries[$code];
+                $this->description = 'MERCHANT COUNTRY: ' . $this->countries[$code];
                 $this->error = FALSE;
             } else
             {

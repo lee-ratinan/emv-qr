@@ -26,7 +26,7 @@ class EmvMerchantCity {
             if (preg_match('/^[\x20-\x7E]+$/', $city) && self::MAX_LENGTH >= $length)
             {
                 $this->value = $city;
-                $this->description = $city;
+                $this->description = 'MERCHANT CITY';
                 $this->error = FALSE;
             } else
             {

@@ -26,7 +26,7 @@ class EmvMerchantName {
             if (preg_match('/^[\x20-\x7E]+$/', $name) && self::MAX_LENGTH >= $length)
             {
                 $this->value = $name;
-                $this->description = $name;
+                $this->description = 'MERCHANT NAME';
                 $this->error = FALSE;
             } else
             {

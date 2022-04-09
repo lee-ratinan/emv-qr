@@ -25,7 +25,7 @@ class EmvTransactionAmount {
             {
                 $this->value = $string;
                 $stringFloat = floatval($string);
-                $this->description = number_format($stringFloat, 2, '.', ',');
+                $this->description = 'TRANSACTION AMOUNT: ' . number_format($stringFloat, 2, '.', ',');
                 $this->error = FALSE;
             } else
             {

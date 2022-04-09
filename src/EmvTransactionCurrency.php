@@ -31,7 +31,7 @@ class EmvTransactionCurrency {
             if (isset($this->currencies[$code]))
             {
                 $this->value = $code;
-                $this->description = $this->currencies[$code];
+                $this->description = 'TRANSACTION CURRENCY: ' . $this->currencies[$code];
                 $this->error = FALSE;
             } else
             {

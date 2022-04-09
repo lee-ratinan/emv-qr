@@ -12,6 +12,7 @@ require_once 'EmvConvenienceFee.php';
 require_once 'EmvCountryCode.php';
 require_once 'EmvMerchantName.php';
 require_once 'EmvMerchantCity.php';
+require_once 'EmvPostalCode.php';
 
 /**
  * Class EmvMerchant
@@ -117,7 +118,7 @@ class EmvMerchant {
      * ID 61
      * @var
      */
-    private $postal_code;
+    public $postal_code;
 
     /**
      * ID 62
@@ -188,15 +189,9 @@ class EmvMerchant {
                 case self::ID_MERCHANT_CITY:
                     $this->merchant_city = new EmvMerchantCity($strValue);
                     break;
-//                case self::ID_MERCHANT_POSTAL_CODE:
-////                    $this->process_status[self::MERCHANT_POSTAL_CODE_KEY] = self::PROCESS_STATUS_SUCCESS;
-////                    $this->merchant_postal_code = [
-////                        self::LABEL_ACCOUNT_ID          => self::ID_MERCHANT_POSTAL_CODE,
-////                        self::LABEL_ACCOUNT_KEY         => self::MERCHANT_POSTAL_CODE_KEY,
-////                        self::LABEL_ACCOUNT_VALUE       => $this->validate_ans_charset($strValue, self::MODE_SANITIZER),
-////                        self::LABEL_ACCOUNT_DESCRIPTION => self::EMPTY_STRING
-////                    ];
-//                    break;
+                case self::ID_POSTAL_CODE:
+                    $this->postal_code = new EmvPostalCode($strValue);
+                    break;
 //                case self::ID_ADDITIONAL_DATA_FIELDS:
 ////                    $this->process_additional_data($strValue);
 //                    break;
@@ -224,8 +219,9 @@ class EmvMerchant {
      * @param int|float $transaction_amount (optional)
      * @param string $tip_or_fee_indicator (optional)
      * @param int|float $fee_amount (optional)
+     * @param string $postal_code (optional)
      */
-    public function write($point_of_initiation_method, $transaction_currency, $country_code, $merchant_name, $merchant_city, $merchant_category_code = null, $transaction_amount = null, $tip_or_fee_indicator = null, $fee_amount = 0)
+    public function write($point_of_initiation_method, $transaction_currency, $country_code, $merchant_name, $merchant_city, $merchant_category_code = null, $transaction_amount = null, $tip_or_fee_indicator = null, $fee_amount = 0, $postal_code = null)
     {
         // MODES
         $need_transaction_amount = null;
@@ -305,6 +301,11 @@ class EmvMerchant {
             $this->error = 'MERCHANT CITY IS INVALID';
             return;
         }
+        // 61 Postal code, optional
+        if ( ! empty($postal_code))
+        {
+            $this->postal_code = (new EmvPostalCode())->generate($postal_code);
+        }
 
         // VALIDATE AND APPEND /////////////////////////////////////////////////////////////////////////////////////////
         $this->qr_string = $this->payload_format_indicator; // 00
@@ -319,6 +320,7 @@ class EmvMerchant {
         $this->qr_string .= $this->country_code; // 58
         $this->qr_string .= $this->merchant_name; // 59
         $this->qr_string .= $this->merchant_city; // 60
+        $this->qr_string .= $this->postal_code; // 61
     }
 
 }
