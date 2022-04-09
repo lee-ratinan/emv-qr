@@ -392,7 +392,7 @@ class EmvMerchantCategoryCode {
     {
         if ( ! is_null($code))
         {
-            $this->id = $this->id = self::ID;
+            $this->id = self::ID;
             if (isset($this->merchant_category_codes[$code]))
             {
                 $this->value = $code;

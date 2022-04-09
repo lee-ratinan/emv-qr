@@ -42,7 +42,7 @@ class EmvTransactionCurrency {
 
     /**
      * Generate the string for Transaction Currency
-     * @param string $code The QR code type must be one of the constants of this class: TYPE_STATIC or TYPE_DYNAMIC
+     * @param string $code The currency of the transaction in ISO4217 format, it could be either the 3-digit or the 3-character representation
      * @return string
      */
     public function generate($code)
