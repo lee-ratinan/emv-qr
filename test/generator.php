@@ -2,7 +2,7 @@
 use \EMVQR\EmvMerchant;
 require_once '../src/EmvMerchant.php';
 $emv = new EmvMerchant();
-$emv->write(\EMVQR\EmvPointOfInitiation::TYPE_DYNAMIC, 'SGD', '', 123.45);
+$emv->write(\EMVQR\EmvPointOfInitiation::TYPE_DYNAMIC, 'SGD', '', 123.45, '01', 5.5);
 $json = json_encode($emv, JSON_PRETTY_PRINT);
 ?>
 <html>
@@ -12,8 +12,8 @@ $json = json_encode($emv, JSON_PRETTY_PRINT);
         <meta name="description" content="emvco qr code">
         <meta name="author" content="Ratinan Lee">
         <title>TEST DECODER</title>
-        <!--<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet"
-              integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous"> -->
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet"
+              integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
     </head>
     <body>
         <?php include "_header.php"; ?>
