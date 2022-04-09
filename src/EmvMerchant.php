@@ -209,17 +209,24 @@ class EmvMerchant {
     /**
      * WRITE QR CODE
      * @param string $point_of_initiation_method
-     * @param string $merchant_category_code
      * @param string $transaction_currency
-     * @param int|float $transaction_amount
+     * @param string $merchant_category_code (optional)
+     * @param int|float $transaction_amount (optional)
      */
-    public function write($point_of_initiation_method, $merchant_category_code, $transaction_currency, $transaction_amount)
+    public function write($point_of_initiation_method, $transaction_currency, $merchant_category_code = null, $transaction_amount = null)
     {
         $this->payload_format_indicator = (new EmvPayLoadFormatIndicator())->generate();
         $this->point_of_initiation_method = (new EmvPointOfInitiation())->generate($point_of_initiation_method);
+        if (empty($merchant_category_code))
+        {
+            $merchant_category_code = EmvMerchantCategoryCode::DEFAULT_CODE;
+        }
         $this->merchant_category_code = (new EmvMerchantCategoryCode())->generate($merchant_category_code);
         $this->transaction_currency = (new EmvTransactionCurrency())->generate($transaction_currency);
-        $this->transaction_amount = (new EmvTransactionAmount())->generate($transaction_amount);
+        if ( ! empty($transaction_amount))
+        {
+            $this->transaction_amount = (new EmvTransactionAmount())->generate($transaction_amount);
+        }
     }
 
 }
