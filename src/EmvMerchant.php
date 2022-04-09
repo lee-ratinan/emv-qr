@@ -230,8 +230,9 @@ class EmvMerchant {
      * @param string $tip_or_fee_indicator (optional)
      * @param int|float $fee_amount (optional)
      * @param string $postal_code (optional)
+     * @param array $additional_data_fields (optional)
      */
-    public function write($point_of_initiation_method, $transaction_currency, $country_code, $merchant_name, $merchant_city, $merchant_category_code = null, $transaction_amount = null, $tip_or_fee_indicator = null, $fee_amount = 0, $postal_code = null)
+    public function write($point_of_initiation_method, $transaction_currency, $country_code, $merchant_name, $merchant_city, $merchant_category_code = null, $transaction_amount = null, $tip_or_fee_indicator = null, $fee_amount = 0, $postal_code = null, $additional_data_fields = [])
     {
         // MODES
         $need_transaction_amount = null;
@@ -315,7 +316,11 @@ class EmvMerchant {
         {
             $this->postal_code = (new EmvPostalCode())->generate($postal_code);
         }
-        // 62 > call before this function
+        // 62 Additional data fields, optional
+        if ( ! empty($additional_data_fields))
+        {
+            $this->additional_data_field_template = (new EmvAdditionalDataFields())->generate($additional_data_fields);
+        }
         // 64 > call before this function
         ////////////////////////////////////////////////////////////////////////////////////////////////////////////////
         //* VALIDATE AND APPEND *///////////////////////////////////////////////////////////////////////////////////////
@@ -336,10 +341,7 @@ class EmvMerchant {
         $this->qr_string .= $this->merchant_name; // 59
         $this->qr_string .= $this->merchant_city; // 60
         $this->qr_string .= $this->postal_code; // 61
-        foreach ($this->additional_data_field_template as $item) // 62
-        {
-            $this->qr_string .= $item;
-        }
+        $this->qr_string .= $this->additional_data_field_template; // 62
         foreach ($this->merchant_information_language_template as $item) // 64
         {
             $this->qr_string .= $item;

@@ -2,7 +2,23 @@
 use \EMVQR\EmvMerchant;
 require_once '../src/EmvMerchant.php';
 $emv = new EmvMerchant();
-$emv->write(\EMVQR\EmvPointOfInitiation::TYPE_DYNAMIC, 'SGD', 'SG', 'BIG DICK COMPANY', 'Singapore', '0000', 123.45, '03', 10.0, '828748');
+$emv->write(\EMVQR\EmvPointOfInitiation::TYPE_DYNAMIC, 'SGD', 'SG', 'BIG DICK COMPANY', 'Singapore', '0000', 123.45, '03', 10.0, '828748', [
+    'bill_number' => '123',
+    'mobile_number' => '97754577',
+    'store_label' => 'WWP',
+    'loyalty_number' => '321',
+    'reference_label' => 'dsfdfsdfda',
+    'customer_label' => 'nat',
+    'terminal_label' => 'a1',
+    'purpose_of_transaction' => 'fuck',
+    'merchant_tax_id' => 'S8987314B',
+    'additional_data_request' => [\EMVQR\EmvAdditionalDataFields::ADDITIONAL_DATA_REQUEST_MOBILE, 'EMAIL', 'ADDRESS'],
+    'merchant_channel' => [
+        'media' => 1,
+        'location' => 2,
+        'presence' => 1
+    ]
+]);
 $json = json_encode($emv, JSON_PRETTY_PRINT);
 ?>
 <html>
