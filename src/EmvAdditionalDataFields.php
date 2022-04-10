@@ -101,13 +101,13 @@ class EmvAdditionalDataFields {
                     $this->items[self::KEY_PURPOSE_OF_TRANSACTION] = $this->process_input($strValue, self::ID_PURPOSE_OF_TRANSACTION, self::KEY_PURPOSE_OF_TRANSACTION, 25);
                     break;
                 case self::ID_ADDITIONAL_DATA_REQUEST:
-                    $this->items[self::KEY_ADDITIONAL_DATA_REQUEST] = '';
+                    $this->items[self::KEY_ADDITIONAL_DATA_REQUEST] = $this->process_data_requests($strValue);
                     break;
                 case self::ID_MERCHANT_TAX_ID:
                     $this->items[self::KEY_MERCHANT_TAX_ID] = $this->process_input($strValue, self::ID_MERCHANT_TAX_ID, self::KEY_MERCHANT_TAX_ID, 20);
                     break;
                 case self::ID_MERCHANT_CHANNEL:
-                    $this->items[self::KEY_MERCHANT_CHANNEL] = '';
+                    $this->items[self::KEY_MERCHANT_CHANNEL] = $this->process_merchant_channels($strValue);
             }
             $string = substr($string, 4 + $intLength);
         }
@@ -132,9 +132,129 @@ class EmvAdditionalDataFields {
                 'error'       => FALSE
             ];
         }
+        $this->error = TRUE;
         return [
             'id'          => $id,
             'value'       => '',
+            'description' => '',
+            'error'       => TRUE
+        ];
+    }
+
+    /**
+     * @param $value
+     * @return array
+     */
+    private function process_data_requests($value)
+    {
+        $requested = [];
+        $caught_error = FALSE;
+        while ( ! empty($value))
+        {
+            $piece = substr($value, 0, 1);
+            if ('M' == $piece)
+            {
+                $requested [] = self::ADDITIONAL_DATA_REQUEST_MOBILE;
+            } else if ('E' == $piece)
+            {
+                $requested [] = self::ADDITIONAL_DATA_REQUEST_EMAIL;
+            } else if ('A' == $piece)
+            {
+                $requested [] = self::ADDITIONAL_DATA_REQUEST_ADDRESS;
+            } else
+            {
+                $caught_error = TRUE;
+            }
+            $value = substr($value, 1);
+        }
+        if (empty($value) && FALSE == $caught_error)
+        {
+            return [
+                'id'          => self::ID_ADDITIONAL_DATA_REQUEST,
+                'value'       => $requested,
+                'description' => self::KEY_ADDITIONAL_DATA_REQUEST,
+                'error'       => FALSE
+            ];
+        }
+        $this->error = TRUE;
+        return [
+            'id'          => self::ID_ADDITIONAL_DATA_REQUEST,
+            'value'       => [],
+            'description' => '',
+            'error'       => TRUE
+        ];
+    }
+
+    /**
+     * @param $value
+     * @return array
+     */
+    private function process_merchant_channels($value)
+    {
+        $media = substr($value, 0, 1);
+        $location = substr($value, 1, 1);
+        $presence = substr($value, 2, 1);
+        $caught_error = FALSE;
+        $values = [];
+        // MEDIA
+        $medias = [
+            '0' => 'Print - Merchant sticker',
+            '1' => 'Print - Bill/Invoice',
+            '2' => 'Print - Magazine/Poster',
+            '3' => 'Print - Other',
+            '4' => 'Screen/Electronic - Merchant POS/POI',
+            '5' => 'Screen/Electronic - Website',
+            '6' => 'Screen/Electronic - App',
+            '7' => 'Screen/Electronic - Other',
+        ];
+        if (isset($medias[$media]))
+        {
+            $values['media'] = $medias[$media];
+        } else
+        {
+            $caught_error = TRUE;
+        }
+        // LOCATION
+        $locations = [
+            '0' => 'At Merchant premises/registered address',
+            '1' => 'Not at Merchant premises/registered address',
+            '2' => 'Remote Commerce',
+            '3' => 'Other',
+        ];
+        if (isset($locations[$location]))
+        {
+            $values['location'] = $locations[$location];
+        } else
+        {
+            $caught_error = TRUE;
+        }
+        // PRESENCE
+        $presences = [
+            '0' => 'Attended POI',
+            '1' => 'Unattended',
+            '2' => 'Semi-attended (self-checkout)',
+            '3' => 'Other',
+        ];
+        if (isset($presences[$presence]))
+        {
+            $values['presence'] = $presences[$presence];
+        } else
+        {
+            $caught_error = TRUE;
+        }
+        if (FALSE == $caught_error)
+        {
+            return [
+                'id'          => self::ID_MERCHANT_CHANNEL,
+                'value'       => $values,
+                'description' => self::KEY_MERCHANT_CHANNEL,
+                'error'       => FALSE
+            ];
+        }
+        $this->error = TRUE;
+        return [
+            'id'          => self::ID_MERCHANT_CHANNEL,
+            'value'       => [],
             'description' => '',
             'error'       => TRUE
         ];
