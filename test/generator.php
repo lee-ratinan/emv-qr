@@ -18,7 +18,12 @@ $emv->write(\EMVQR\EmvPointOfInitiation::TYPE_DYNAMIC, 'SGD', 'SG', 'BIG DICK CO
         'location' => 2,
         'presence' => 1
     ]
-]);
+],
+    [
+        'language_code' => 'TH',
+        'merchant_name' => 'ควยใหญ่คาเฟ่',
+        'merchant_city' => 'กรุงเทพ'
+    ]);
 $json = json_encode($emv, JSON_PRETTY_PRINT);
 ?>
 <html>

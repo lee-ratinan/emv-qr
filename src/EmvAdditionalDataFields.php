@@ -54,6 +54,11 @@ class EmvAdditionalDataFields {
     const MERCHANT_CHANNEL_KEY_PRESENCE_SEMI_ATTENDED = 2;
     const MERCHANT_CHANNEL_KEY_PRESENCE_OTHER = 3;
 
+    /**
+     * Generate the string for Additional Info
+     * @param array $array
+     * @return string
+     */
     public function generate($array)
     {
         $final_array = [];
@@ -105,6 +110,13 @@ class EmvAdditionalDataFields {
         }
     }
 
+    /**
+     * Validate the input
+     * @param $value
+     * @param $id
+     * @param $max_length
+     * @return string
+     */
     private function validate_input($value, $id, $max_length)
     {
         $value = filter_var($value, FILTER_SANITIZE_STRING, FILTER_FLAG_STRIP_HIGH | FILTER_FLAG_STRIP_LOW);
@@ -117,6 +129,7 @@ class EmvAdditionalDataFields {
     }
 
     /**
+     * Generate Additional Data Request field
      * @param array $values
      * @return string
      */
@@ -151,6 +164,7 @@ class EmvAdditionalDataFields {
     }
 
     /**
+     * Generate Merchant Channel field
      * @param array $value Array of integer
      * @return string
      */

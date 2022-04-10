@@ -12,5 +12,8 @@
             "homepage": "https://lee.rongq.in",
             "role": "Developer"
         }
-    ]
+    ],
+  "require": {
+    "ext-mbstring": "*"
+  }
 }
