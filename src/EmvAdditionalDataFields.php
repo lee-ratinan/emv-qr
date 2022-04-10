@@ -54,6 +54,92 @@ class EmvAdditionalDataFields {
     const MERCHANT_CHANNEL_KEY_PRESENCE_SEMI_ATTENDED = 2;
     const MERCHANT_CHANNEL_KEY_PRESENCE_OTHER = 3;
 
+    private $qr_string;
+    public $id;
+    public $items;
+    public $error;
+
+    /**
+     * EmvAdditionalDataFields constructor.
+     * @param string $string String input of the Additional Data Fields
+     */
+    public function __construct($string)
+    {
+        // KEEP INPUT
+        $this->qr_string = $string;
+        $this->id = self::ID_ADDITIONAL_DATA;
+        // LOOP
+        while ( ! empty($string))
+        {
+            $strId = mb_substr($string, 0, 2);
+            $intLength = intval(mb_substr($string, 2, 2));
+            $strValue = mb_substr($string, 4, $intLength);
+            switch ($strId)
+            {
+                case self::ID_BILL_NUMBER:
+                    $this->items[self::KEY_BILL_NUMBER] = $this->process_input($strValue, self::ID_BILL_NUMBER, self::KEY_BILL_NUMBER, 25);
+                    break;
+                case self::ID_MOBILE_NUMBER:
+                    $this->items[self::KEY_MOBILE_NUMBER] = $this->process_input($strValue, self::ID_MOBILE_NUMBER, self::KEY_MOBILE_NUMBER, 25);
+                    break;
+                case self::ID_STORE_LABEL:
+                    $this->items[self::KEY_STORE_LABEL] = $this->process_input($strValue, self::ID_STORE_LABEL, self::KEY_STORE_LABEL, 25);
+                    break;
+                case self::ID_LOYALTY_NUMBER:
+                    $this->items[self::KEY_LOYALTY_NUMBER] = $this->process_input($strValue, self::ID_LOYALTY_NUMBER, self::KEY_LOYALTY_NUMBER, 25);
+                    break;
+                case self::ID_REFERENCE_LABEL:
+                    $this->items[self::KEY_REFERENCE_LABEL] = $this->process_input($strValue, self::ID_REFERENCE_LABEL, self::KEY_REFERENCE_LABEL, 25);
+                    break;
+                case self::ID_CUSTOMER_LABEL:
+                    $this->items[self::KEY_CUSTOMER_LABEL] = $this->process_input($strValue, self::ID_CUSTOMER_LABEL, self::KEY_CUSTOMER_LABEL, 25);
+                    break;
+                case self::ID_TERMINAL_LABEL:
+                    $this->items[self::KEY_TERMINAL_LABEL] = $this->process_input($strValue, self::ID_TERMINAL_LABEL, self::KEY_TERMINAL_LABEL, 25);
+                    break;
+                case self::ID_PURPOSE_OF_TRANSACTION:
+                    $this->items[self::KEY_PURPOSE_OF_TRANSACTION] = $this->process_input($strValue, self::ID_PURPOSE_OF_TRANSACTION, self::KEY_PURPOSE_OF_TRANSACTION, 25);
+                    break;
+                case self::ID_ADDITIONAL_DATA_REQUEST:
+                    $this->items[self::KEY_ADDITIONAL_DATA_REQUEST] = '';
+                    break;
+                case self::ID_MERCHANT_TAX_ID:
+                    $this->items[self::KEY_MERCHANT_TAX_ID] = $this->process_input($strValue, self::ID_MERCHANT_TAX_ID, self::KEY_MERCHANT_TAX_ID, 20);
+                    break;
+                case self::ID_MERCHANT_CHANNEL:
+                    $this->items[self::KEY_MERCHANT_CHANNEL] = '';
+            }
+            $string = substr($string, 4 + $intLength);
+        }
+    }
+
+    /**
+     * @param string $value
+     * @param string $id
+     * @param string $description
+     * @param int $max_length
+     * @return array
+     */
+    private function process_input($value, $id, $description, $max_length)
+    {
+        $length = mb_strlen($value);
+        if (preg_match('/^[\x20-\x7E]+$/', $value) && $max_length >= $length)
+        {
+            return [
+                'id'          => $id,
+                'value'       => $value,
+                'description' => $description,
+                'error'       => FALSE
+            ];
+        }
+        return [
+            'id'          => $id,
+            'value'       => '',
+            'description' => '',
+            'error'       => TRUE
+        ];
+    }
+
     /**
      * Generate the string for Additional Info
      * @param array $array

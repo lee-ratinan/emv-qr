@@ -161,7 +161,6 @@ class EmvMerchant {
         while ( ! empty($string))
         {
             $strId = mb_substr($string, 0, 2);
-            $intId = intval($strId);
             $intLength = intval(mb_substr($string, 2, 2));
             $strValue = mb_substr($string, 4, $intLength);
             switch ($strId)

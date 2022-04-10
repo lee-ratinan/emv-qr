@@ -12,6 +12,15 @@ class EmvLanguageTemplate {
     const ID_MERCHANT_CITY = '02';
     const KEY_MERCHANT_CITY = 'merchant_city';
     private $language_codes = ['TH', 'ZH', 'ID', 'MS'];
+
+    /**
+     * EmvLanguageTemplate constructor.
+     */
+    public function __construct($value)
+    {
+
+    }
+
     /**
      * Generate the string for Language Template
      * @param array $array
